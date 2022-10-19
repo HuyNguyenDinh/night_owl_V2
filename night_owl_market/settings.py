@@ -94,10 +94,10 @@ ASGI_APPLICATION = 'night_owl_market.asgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'night_owl',
-        'USER': 'postgres',
-        'PASSWORD': '0937461321Huy@',
-        'HOST': '127.0.0.1',
+        'NAME': 'dfglnbbpfqa2ns',
+        'USER': 'rrkvnzmcwyookw',
+        'PASSWORD': '6c3532e5de9c917f354d2de12d5576160e5fb697d128410bec33b3dc4460a3d0',
+        'HOST': 'ec2-63-32-248-14.eu-west-1.compute.amazonaws.com',
         'PORT': '5432',
     }
 }
