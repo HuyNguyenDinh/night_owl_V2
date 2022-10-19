@@ -1,0 +1,1 @@
+web: daphne -p $PORT -b 0.0.0.0 night_owl_market.asgi:application
