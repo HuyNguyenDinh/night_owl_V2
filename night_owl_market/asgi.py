@@ -12,13 +12,14 @@ import django
 from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
 from channels.security.websocket import AllowedHostsOriginValidator
-from .channels_middleware import JwtAuthMiddlewareStack
 import market.routing
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'night_owl_market.settings')
 django.setup()
 
 django_asgi_app = get_asgi_application()
+
+from .channels_middleware import JwtAuthMiddlewareStack
 
 application = ProtocolTypeRouter({
   'http': django_asgi_app,
