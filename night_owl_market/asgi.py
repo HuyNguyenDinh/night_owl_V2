@@ -9,10 +9,7 @@ https://docs.djangoproject.com/en/4.1/howto/deployment/asgi/
 
 import os
 import django
-from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
-from channels.security.websocket import AllowedHostsOriginValidator
-import market.routing
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'night_owl_market.settings')
 django.setup()
@@ -20,6 +17,9 @@ django.setup()
 django_asgi_app = get_asgi_application()
 
 from .channels_middleware import JwtAuthMiddlewareStack
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.security.websocket import AllowedHostsOriginValidator
+import market.routing
 
 application = ProtocolTypeRouter({
   'http': django_asgi_app,
