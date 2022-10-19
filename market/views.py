@@ -14,12 +14,17 @@ from rest_framework import filters
 from market.utils import *
 from .mongo_connect import *
 from multiprocessing import Process
+from threading import Thread
 from market.speedSMS import *
 from market.googleInfo import *
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
 from fcm_django.models import FCMDevice
 import firebase_admin.messaging
+import uuid
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+channel_layer = get_channel_layer()
 # Create your views here.
 
 
@@ -272,7 +277,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIVi
         if single_room:
             return Response(RoomSerializer(single_room).data, status=status.HTTP_200_OK)
         else:
-            single_room = Room.objects.create()
+            single_room = Room.objects.create(group_name=f'roomchat_{str(uuid.uuid4())}')
             single_room.user.add(*[user, chat_user])
             return Response(RoomSerializer(single_room).data, status=status.HTTP_201_CREATED)
 
@@ -721,7 +726,6 @@ class OrderViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retrie
                 orders = orders.filter(store=self.request.user.id)
         return orders
 
-
     def create(self, request, *args, **kwargs):
         address = Address.objects.filter(creator=request.user)
         if not address:
@@ -741,7 +745,7 @@ class OrderViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retrie
 
     @action(methods=['get'], detail=False, url_path='cancel_uncheckout_order')
     def cancel_uncheckout_order(self, request):
-        order = Order.objects.filter(customer = request.user.id, status=0)
+        order = Order.objects.filter(customer=request.user.id, status=0)
         if order:
             order.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -782,11 +786,23 @@ class OrderViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retrie
                 for i in result:
                     odds = i.orderdetail_set.values_list('cart_id__id', flat=True)
                     CartDetail.objects.filter(id__in=list(set(odds))).delete()
+                    #### WebSocket ####
+                    try:
+                        channel = i.store.client
+                        async_to_sync(channel_layer.send)(channel.channel_name, {
+                            "type": "system_message",
+                            "status": i.status,
+                            "order_id": i.id,
+                        })
+                    except:
+                        pass
+                    ########
                 if payment_type and payment_type == 1:
                     list_id = [x.id for x in result]
                     instance = import_signature(list_id)
                     return Response({"message": "Please pay with the link to complete checkout the order",
                                      "pay_url": instance.get("payUrl")}, status=status.HTTP_201_CREATED)
+
                 return Response(OrderSerializer(result, many=True).data, status=status.HTTP_202_ACCEPTED)
             return Response({'message': 'can not checkout the orders'}, status=status.HTTP_406_NOT_ACCEPTABLE)
         return Response({'message': 'can not found the orders uncheckout'}, status=status.HTTP_404_NOT_FOUND)
@@ -794,7 +810,7 @@ class OrderViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retrie
     @action(methods=['get'], detail=True, url_path='accept_order')
     def accept_order(self, request, pk):
         try:
-            order = Order.objects.get(pk=pk)
+            order = Order.objects.select_related().get(pk=pk)
         except Order.DoesNotExist:
             return Response({'message': 'order not found'}, status=status.HTTP_404_NOT_FOUND)
         try:
@@ -809,16 +825,29 @@ class OrderViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retrie
             content = """Đơn hàng {0} đang được vận chuyển bởi người bán, quý khách vui lòng chờ shipper giao hàng tới nhé.
                 Hoặc bạn có thể kiểm tra tình trạng đơn hàng với mã đơn hàng là {1} được vận chuyển bởi đơn vị Giaohangnhanh.
                 Night Owl ECommerce xin cảm ơn quý khách đã tin tưởng lựa chọn.""".format(order.id, order.shipping_code)
-            message = firebase_admin.messaging.Message(data={
-                "type": "1",
-                "state": "0",
-                "subject": subject,
-                "content": content
-            })
-            FCMDevice.objects.filter(user=order.customer).send_message(message)
-            x = Process(target=send_email, args=(order.customer.email, subject, content))
+            # message = firebase_admin.messaging.Message(data={
+            #     "type": "1",
+            #     "state": "0",
+            #     "subject": subject,
+            #     "content": content
+            # })
+            #### WebSocket ####
+            try:
+                channel = order.customer.client
+                async_to_sync(channel_layer.send)(channel.channel_name, {
+                    "type": "system_message",
+                    "status": order.status,
+                    "order_id": order.id,
+                    "subject": subject,
+                    "content": content
+                })
+            except:
+                pass
+            ########
+            # FCMDevice.objects.filter(user=order.customer).send_message(message)
+            x = Thread(target=send_email, args=(order.customer.email, subject, content))
             x.start()
-            # y = Process(target=send_sms, args=(order.customer.phone_number, content))
+            # y = Thread(target=send_sms, args=(order.customer.phone_number, content))
             # y.start()
             return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
         return Response({'message': 'failed to create shipping order'}, status=status.HTTP_400_BAD_REQUEST)
@@ -839,16 +868,29 @@ class OrderViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retrie
                 content = """Người bán đã hủy đơn hàng {0} của bạn, nếu bạn sử dụng phương thức thanh toán trực tuyến bạn vui lòng 
                 kiểm tra lại tài khoản đã thanh toán {1}vnđ xem đã được hệ thống hoàn tiền lại hay chưa.
                 Nếu chưa bạn vui lòng gửi report để được hỗ trợ sớm nhất.""".format(order.id, order.bill.value)
-                message = firebase_admin.messaging.Message(data={
-                    "type": "1",
-                    "state": "0",
-                    "subject": subject,
-                    "content": content
-                })
-                FCMDevice.objects.filter(user=order.customer).send_message(message)
-                x = Process(target=send_email, args=(order.customer.email, subject, content))
+                # message = firebase_admin.messaging.Message(data={
+                #     "type": "1",
+                #     "state": "0",
+                #     "subject": subject,
+                #     "content": content
+                # })
+                #### WebSocket ####
+                try:
+                    channel = order.customer.client
+                    async_to_sync(channel_layer.send)(channel.channel_name, {
+                        "type": "system_message",
+                        "status": order.status,
+                        "order_id": order.id,
+                        "subject": subject,
+                        "content": content
+                    })
+                except:
+                    pass
+                ########
+                # FCMDevice.objects.filter(user=order.customer).send_message(message)
+                x = Thread(target=send_email, args=(order.customer.email, subject, content))
                 x.start()
-                # y = Process(target=send_sms, args=(order.customer.phone_number, content))
+                # y = Thread(target=send_sms, args=(order.customer.phone_number, content))
                 # y.start()
                 return Response({"message": "order canceled", "order_id": order.id}, status=status.HTTP_200_OK)
             return Response({"message": "can not cancel order"}, status=status.HTTP_400_BAD_REQUEST)
@@ -869,16 +911,29 @@ class OrderViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retrie
                 content = """Người mua đã nhận được đơn hàng {0} giá trị {1}vnđ , bạn vui lòng kiểm tra tình trạng đơn hàng.
                 Nếu có sai sót bạn vui lòng gửi report cho dịch vụ hỗ trợ của Night Owl sớm nhất để được xử lý.
                 Xin cảm ơn bạn đã tin tưởng chọn Nigh Owl ECommerce làm đối tác bán hàng.""".format(order.id, order.bill.value)
-                message = firebase_admin.messaging.Message(data={
-                    "type": "1",
-                    "state": "1",
-                    "subject": subject,
-                    "content": content
-                })
-                FCMDevice.objects.filter(user=order.store).send_message(message)
-                x = Process(target=send_email, args=(order.store.email, subject, content))
+                # message = firebase_admin.messaging.Message(data={
+                #     "type": "1",
+                #     "state": "1",
+                #     "subject": subject,
+                #     "content": content
+                # })
+                #### WebSocket ####
+                try:
+                    channel = order.store.client
+                    async_to_sync(channel_layer.send)(channel.channel_name, {
+                        "type": "system_message",
+                        "status": order.status,
+                        "order_id": order.id,
+                        "subject": subject,
+                        "content": content
+                    })
+                except:
+                    pass
+                ########
+                # FCMDevice.objects.filter(user=order.store).send_message(message)
+                x = Thread(target=send_email, args=(order.store.email, subject, content))
                 x.start()
-                # y = Process(target=send_sms, args=(order.store.phone_number, content))
+                # y = Thread(target=send_sms, args=(order.store.phone_number, content))
                 # y.start()
                 return Response({'message': 'order completed'}, status=status.HTTP_200_OK)
             return Response({'message': 'something problem so we can not change the order status'}, status=status.HTTP_400_BAD_REQUEST)
@@ -1034,15 +1089,28 @@ class RoomViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
             serializer = self.get_serializer(data=request.data)
             if serializer.is_valid(raise_exception=True):
                 serializer.save(room=room, creator=user)
+                avatar = ""
+                if user.avatar:
+                    avatar = user.avatar.url
                 message = firebase_admin.messaging.Message(data={
                     "type": "0",
                     "chatroom_id": str(room.id),
                     "creator_firstname": user.first_name,
-                    "creator_avatar": user.avatar.url,
+                    "creator_avatar": avatar,
                     "content": serializer.data.get('content'),
                     "created_date": str(serializer.data.get('created_date'))
                 })
-                FCMDevice.objects.filter(user__in=room.user.all()).send_message(message)
+                # FCMDevice.objects.filter(user__in=room.user.all()).send_message(message)
+                #### WebSocket ####
+                async_to_sync(channel_layer.group_send)(room.group_name, {
+                    "type": "chat_message",
+                    "chatroom_id": str(room.id),
+                    "creator_firstname": user.first_name,
+                    "creator_avatar": avatar,
+                    "content": serializer.data.get('content'),
+                    "created_date": str(serializer.data.get('created_date'))
+                })
+                ########
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response({"message": "data not valid"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"message": "you do not have permission"}, status=status.HTTP_403_FORBIDDEN)

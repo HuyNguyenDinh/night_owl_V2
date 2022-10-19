@@ -94,11 +94,17 @@ ASGI_APPLICATION = 'night_owl_market.asgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'dfglnbbpfqa2ns',
-        'USER': 'rrkvnzmcwyookw',
-        'PASSWORD': '6c3532e5de9c917f354d2de12d5576160e5fb697d128410bec33b3dc4460a3d0',
-        'HOST': 'ec2-63-32-248-14.eu-west-1.compute.amazonaws.com',
+        'NAME': 'ddio6ticimcvn6',
+        'USER': 'bowiticrhecjoo',
+        'PASSWORD': '2fa7b1c6d657d8977bb7784ad14c90ebba9874b4a676abddf3f37ad367ef8ba0',
+        'HOST': 'ec2-54-170-90-26.eu-west-1.compute.amazonaws.com',
         'PORT': '5432',
+
+        # 'NAME': 'night_owl',
+        # 'USER': 'postgres',
+        # 'PASSWORD': '0937461321Huy@',
+        # 'HOST': '127.0.0.1',
+        # 'PORT': '5432',
     }
 }
 
@@ -107,6 +113,7 @@ CHANNEL_LAYERS = {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
             "hosts": ["redis://:bNmXoUwvHJxUOiAnLo6cdQElFvdGzOzX@redis-11635.c292.ap-southeast-1-1.ec2.cloud.redislabs.com:11635/0"],
+            #"hosts": [("127.0.0.1", 6379)],
         },
     },
 }

@@ -1,5 +1,8 @@
 from django.utils import timezone
 from psycopg2 import DatabaseError
+import django
+django.setup()
+
 from market.models import *
 from django.db.models import Sum, F, Max, Count
 from django.db import transaction
@@ -349,7 +352,7 @@ def update_shipping_code(order_id):
 
 @transaction.atomic
 def make_order_from_list_cart(list_cart_id, user_id, data):
-    carts = CartDetail.objects.filter(customer__id=user_id, id__in=list_cart_id)
+    carts = CartDetail.objects.select_related().filter(customer__id=user_id, id__in=list_cart_id)
     user = User.objects.get(pk=user_id)
     result = []
     if carts:

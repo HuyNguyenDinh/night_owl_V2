@@ -8,6 +8,7 @@ import cloudinary.uploader
 from django.db.models import Sum, F
 import decimal
 from drf_extra_fields.fields import Base64ImageField
+import uuid
 
 
 class AddressSerializer(ModelSerializer):
@@ -438,7 +439,7 @@ class RoomSerializer(ModelSerializer):
         user_ids = validated_data.pop('list_user_ids')
         user_id = self.context.get('user')
         user = User.objects.get(pk=user_id)
-        room = Room.objects.create(type=1)
+        room = Room.objects.create(type=1, group_name=f'roomchat_{str(uuid.uuid4())}')
         room.user.add(user)
         if user_ids:
             users = User.objects.filter(id__in=user_ids)

@@ -5,6 +5,7 @@ from channels.generic.websocket import WebsocketConsumer, AsyncJsonWebsocketCons
 from channels.db import database_sync_to_async
 from .models import *  # new import
 from .serializers import *
+from channels.exceptions import StopConsumer
 
 
 class UserInboxConsumer(WebsocketConsumer):
@@ -14,16 +15,19 @@ class UserInboxConsumer(WebsocketConsumer):
         self.chat_rooms = []
 
     def connect(self):
-        self.user = self.scope['user']
-        self.accept()
-        self.chat_rooms = self.user.room_set.all()
-        Client.objects.filter(user=self.user).delete()
-        Client.objects.create(channel_name=self.channel_name, user=self.user)
-        for room in self.chat_rooms:
-            async_to_sync(self.channel_layer.group_add)(
-                room.group_name,
-                self.channel_name
-            )
+        try:
+            self.user = self.scope['user']
+            self.accept()
+            self.chat_rooms = self.user.room_set.all()
+            Client.objects.filter(user=self.user).delete()
+            Client.objects.create(channel_name=self.channel_name, user=self.user)
+            for room in self.chat_rooms:
+                async_to_sync(self.channel_layer.group_add)(
+                    room.group_name,
+                    self.channel_name
+                )
+        except:
+            raise StopConsumer
 
     def disconnect(self, code):
         for room in self.chat_rooms:
@@ -32,6 +36,7 @@ class UserInboxConsumer(WebsocketConsumer):
                 self.channel_name
             )
         Client.objects.filter(channel_name=self.channel_name).delete()
+        raise StopConsumer
 
     def receive(self, text_data=None, bytes_data=None):
         data = json.loads(text_data)
@@ -40,11 +45,14 @@ class UserInboxConsumer(WebsocketConsumer):
             room_id = data.get('room_id')
             content = data.get('content')
             try:
-                room = Room.objects.get(pk=room_id)
+                room = Room.objects.get(pk=room_id, user=self.user.id)
             except:
                 pass
             else:
                 message = Message.objects.create(creator=self.user, room=room, content=content)
+                avatar = ""
+                if self.user.avatar:
+                    avatar = self.user.avatar.url
                 async_to_sync(self.channel_layer.group_send)(
                     room.group_name,
                     {
@@ -53,7 +61,7 @@ class UserInboxConsumer(WebsocketConsumer):
                         "content": message.content,
                         "creator_first_name": self.user.first_name,
                         "creator_last_name": self.user.last_name,
-                        "creator_avatar": self.user.avatar.url,
+                        "creator_avatar": avatar,
                         "creator_id": self.user.id,
                         "room_id": room.id,
                         "created_date": str(message.created_date)
@@ -66,7 +74,7 @@ class UserInboxConsumer(WebsocketConsumer):
         self.send(text_data=json.dumps(event, ensure_ascii=False))
 
     def system_message(self, event):
-        self.send(text_data=json.dumps(event, ensure_ascii=False))
+        self.chat_message(event)
 
 
 class ChatConsumer(AsyncJsonWebsocketConsumer):
@@ -109,7 +117,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
                         "creator_id": self.user.id,
                         "creator_first_name": self.user.first_name,
                         "creator_last_name": self.user.last_name,
-                        "creator_avatar": self.user.avatar.url,
+                        "creator_avatar": [self.user.avatar.url if self.user.avatar else ""],
                         "room_id": room.id,
                         "content": message.content
                     }
