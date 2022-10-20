@@ -9,6 +9,7 @@ from channels.auth import AuthMiddlewareStack
 from django.db import close_old_connections
 from jwt import decode as jwt_decode
 from django.conf import settings
+from urllib.parse import parse_qs
 
 
 @database_sync_to_async
@@ -31,10 +32,7 @@ class JwtAuthMiddleware(BaseMiddleware):
         close_old_connections()
 
         # Get the token
-        token = None
-        for i, j in scope['headers']:
-            if i.decode("utf8") == "authorization":
-                token = j
+        token = parse_qs(scope['query_string'].decode('utf8'))['token'][0]
         # Try to authenticate the user
         try:
             if not token:

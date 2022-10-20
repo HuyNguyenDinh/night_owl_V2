@@ -302,12 +302,12 @@ class AddressViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             try:
-                serializer.save(creator=request.user)
+                instance = serializer.save(creator=request.user)
             except:
                 return Response({"message": "can not add more address because you still have address"}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 headers = self.get_success_headers(serializer.data)
-                return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+                return Response(RoomSerializer(instance).data, status=status.HTTP_201_CREATED, headers=headers)
         return Response({'message': 'cannot add address to your account'}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -1072,11 +1072,24 @@ class RoomViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
         return RoomSerializer
 
     def create(self, request, *args, **kwargs):
+        print("In function")
         serializer = RoomSerializer(data=request.data, context={'user': request.user.id})
+        print("checked serializer")
         if serializer.is_valid(raise_exception=True):
+            print("serializer valid")
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response({"message": "can not create room"}, status=status.HTTP_400_BAD_REQUEST)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context={"user": request.user.id})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True, context={"user": request.user.id})
+        return Response(serializer.data)
 
     @action(methods=['post'], detail=True, url_path='send-message')
     def send_message_to_room(self, request, pk):
@@ -1092,14 +1105,14 @@ class RoomViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
                 avatar = ""
                 if user.avatar:
                     avatar = user.avatar.url
-                message = firebase_admin.messaging.Message(data={
-                    "type": "0",
-                    "chatroom_id": str(room.id),
-                    "creator_firstname": user.first_name,
-                    "creator_avatar": avatar,
-                    "content": serializer.data.get('content'),
-                    "created_date": str(serializer.data.get('created_date'))
-                })
+                # message = firebase_admin.messaging.Message(data={
+                #     "type": "0",
+                #     "chatroom_id": str(room.id),
+                #     "creator_firstname": user.first_name,
+                #     "creator_avatar": avatar,
+                #     "content": serializer.data.get('content'),
+                #     "created_date": str(serializer.data.get('created_date'))
+                # })
                 # FCMDevice.objects.filter(user__in=room.user.all()).send_message(message)
                 #### WebSocket ####
                 async_to_sync(channel_layer.group_send)(room.group_name, {

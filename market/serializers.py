@@ -424,16 +424,31 @@ class RoomSerializer(ModelSerializer):
     )
     user = UserLessInformationSerializer(many=True, read_only=True)
     last_message = SerializerMethodField(method_name='get_last_message', read_only=True)
+    room_name = SerializerMethodField(method_name='get_room_name', read_only=True)
 
     class Meta:
         model = Room
         fields = "__all__"
         extra_kwargs = {
-            "type": {"read_only": "true"}
+            "type": {"read_only": "true"},
+            "group_name": {"read_only": "true"}
         }
 
     def get_last_message(self, obj):
         return ChatRoomMessageSerialier(obj.message_set.order_by('created_date').last()).data
+
+    def get_room_name(self, obj):
+        user_id = self.context.get('user')
+        if obj.type == 0:
+            other_user = obj.user.exclude(pk=user_id).first()
+            return other_user.first_name + " " + other_user.last_name
+        room_name = ""
+        for user in obj.user.all():
+            if room_name != "":
+                room_name = room_name + ", " + user.first_name
+            else:
+                room_name = room_name + user.first_name
+        return room_name
 
     def create(self, validated_data):
         user_ids = validated_data.pop('list_user_ids')
