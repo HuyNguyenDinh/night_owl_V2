@@ -99,7 +99,7 @@ DATABASES = {
         'PASSWORD': '2fa7b1c6d657d8977bb7784ad14c90ebba9874b4a676abddf3f37ad367ef8ba0',
         'HOST': 'ec2-54-170-90-26.eu-west-1.compute.amazonaws.com',
         'PORT': '5432',
-
+        
         # 'NAME': 'night_owl',
         # 'USER': 'postgres',
         # 'PASSWORD': '0937461321Huy@',
@@ -233,7 +233,7 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
-CSRF_TRUSTED_ORIGINS = ['https://*.night-owl-market-ou.herokuapp.com', 'https://*.127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['https://*.night-owl-market-ou.herokuapp.com', 'https://*.127.0.0.1', 'https://*', 'http://*']
 FIREBASE_APP = initialize_app()
 
 FCM_DJANGO_SETTINGS = {
