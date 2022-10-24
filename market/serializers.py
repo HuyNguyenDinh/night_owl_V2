@@ -9,6 +9,7 @@ from django.db.models import Sum, F
 import decimal
 from drf_extra_fields.fields import Base64ImageField
 import uuid
+from .paginations import *
 
 
 class AddressSerializer(ModelSerializer):
@@ -193,7 +194,6 @@ class ProductSerializer(ModelSerializer):
 # show rating
 class RatingSerializer(ModelSerializer):
     creator = UserLessInformationSerializer(read_only=True)
-    product = ProductSerializer(read_only=True)
 
     class Meta:
         model = Rating
@@ -221,7 +221,6 @@ class ProductRetrieveSerializer(ModelSerializer):
     option_set = OptionSerializer(many=True)
     owner = UserLessInformationSerializer(read_only=True)
     categories = CategorySerializer(many=True)
-    rating_set = RatingSerializer(many=True)
 
     class Meta:
         model = Product

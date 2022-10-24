@@ -60,6 +60,8 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIVi
             return UserAvatarSerializer
         elif self.action == "get_user_id_with_email":
             return EmailSerializer
+        elif self.action == 'get_shop_vouchers_available':
+            return VoucherSerializer
         return UserSerializer
 
     @action(methods=['patch'], detail=False, url_path='change-avatar')
@@ -220,7 +222,6 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIVi
                 return Response({"message": "phone number verification successful"}, status=status.HTTP_200_OK)
         return Response({"message": "verification code was not correct"}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
-
     @action(methods=['get'], detail=False, url_path='current-user')
     def get_current_user(self, request):
         current_user = User.objects.get(pk=request.user.id)
@@ -281,11 +282,23 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIVi
             single_room.user.add(*[user, chat_user])
             return Response(RoomSerializer(single_room).data, status=status.HTTP_201_CREATED)
 
+    @action(methods=['get'], detail=True, url_path="vouchers-available")
+    def get_shop_vouchers_available(self, request, pk):
+        paginator = BasePagination()
+        queryset = Voucher.objects.filter(Q(start_date__lte=timezone.now()) & (Q(end_date__gt=timezone.now()) | Q(end_date__isnull=True)) & Q(creator=pk))
+        page = paginator.paginate_queryset(queryset=queryset, request=request)
+        if page:
+            serializer = self.get_serializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
     def get_permissions(self):
         if self.action in ['create', 'login_with_google', "send_reset_code_to_email", "get_user_id_with_email",\
-                           'product_of_user', 'get_token_by_user_id_and_reset_code']:
+                           'product_of_user', 'get_token_by_user_id_and_reset_code', 'get_shop_vouchers_available']:
             return [permissions.AllowAny(), ]
         return [permissions.IsAuthenticated(), ]
+
 
 class AddressViewSet(viewsets.ModelViewSet):
     permission_classes = [IsCreator]
@@ -295,6 +308,7 @@ class AddressViewSet(viewsets.ModelViewSet):
         if action == 'create':
             return [permissions.IsAuthenticated(), ]
         return [IsCreator(), ]
+
     def get_queryset(self):
         return Address.objects.filter(creator__id=self.request.user.id)
     
@@ -302,12 +316,13 @@ class AddressViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             try:
-                instance = serializer.save(creator=request.user)
+                serializer.save(creator=request.user)
+
             except:
                 return Response({"message": "can not add more address because you still have address"}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 headers = self.get_success_headers(serializer.data)
-                return Response(RoomSerializer(instance).data, status=status.HTTP_201_CREATED, headers=headers)
+                return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
         return Response({'message': 'cannot add address to your account'}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -387,8 +402,11 @@ class ProductViewSet(viewsets.ModelViewSet):
     def get_comments(self, request, pk):
         pd = Product.objects.get(pk=pk)
         comments = Rating.objects.filter(product=pd)
-        if comments:
-            return Response(RatingSerializer(comments, many=True).data, status=status.HTTP_200_OK)
+        paginator = CommentPagination()
+        page = paginator.paginate_queryset(comments, request)
+        if page:
+            serializer = RatingSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
         return Response({'message': 'This product had no comment'}, status=status.HTTP_404_NOT_FOUND)
 
     @action(methods=['post'], detail=True, url_path='add-comment')
@@ -418,7 +436,6 @@ class ProductViewSet(viewsets.ModelViewSet):
                 serializer.save(base_product=pd)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response({'message': "cannot add options to product"}, status=status.HTTP_400_BAD_REQUEST)
-        
 
     @action(methods=['get'], detail=True, url_path='options')
     def get_options(self, request, pk):
@@ -614,6 +631,11 @@ class ProductViewSet(viewsets.ModelViewSet):
                 return Response(VoucherSerializer(vouchers, many=True).data)
             return Response({"message": "voucher not found"}, status=status.HTTP_404_NOT_FOUND)
 
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, context={'request': request})
+        return Response(serializer.data)
+
     def destroy(self, request, *args, **kwargs):
         product = self.get_object()
         try:
@@ -635,6 +657,21 @@ class CategoryViewSet(viewsets.ViewSet, generics.ListAPIView):
     pagination_class = CategoryPagination
     permission_classes = [permissions.AllowAny, ]
 
+    def get_serializer_class(self):
+        if self.action == 'get_category_vouchers_available':
+            return VoucherSerializer
+        return CategorySerializer
+
+    @action(methods=['get'], detail=True, url_path="vouchers-available")
+    def get_category_vouchers_available(self, request, pk):
+        paginator = BasePagination()
+        queryset = Voucher.objects.filter(Q(start_date__lte=timezone.now()) & (Q(end_date__gt=timezone.now()) | Q(end_date__isnull=True)) & Q(products__categories=pk))
+        page = paginator.paginate_queryset(queryset, request)
+        if page:
+            serializer = self.get_serializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class OptionViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAPIView):
@@ -707,7 +744,7 @@ class OrderViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retrie
     def get_permissions(self):
         if self.action in ["accept_order", "delete", "cancel_order"]:
             return [StoreOwnerPermission(), ]
-        return [VerifiedUserPermission(),]
+        return [VerifiedUserPermission(), ]
         
     def get_serializer_class(self):
         if self.action in ["list"]:
@@ -1059,7 +1096,7 @@ class BillViewSet(viewsets.ViewSet, generics.ListAPIView):
 class RoomViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateAPIView):
     queryset = Room.objects.all().order_by('updated_date')
     serializer_class = RoomSerializer
-    pagination_class = OrderPagination
+    pagination_class = CommentPagination
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
@@ -1067,23 +1104,20 @@ class RoomViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
         return rooms
 
     def get_serializer_class(self):
-        if self.action == "send_message_to_room":
+        if self.action in ["send_message_to_room", "get_room_messages"]:
             return ChatRoomMessageSerialier
         return RoomSerializer
 
     def create(self, request, *args, **kwargs):
-        print("In function")
         serializer = RoomSerializer(data=request.data, context={'user': request.user.id})
-        print("checked serializer")
         if serializer.is_valid(raise_exception=True):
-            print("serializer valid")
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response({"message": "can not create room"}, status=status.HTTP_400_BAD_REQUEST)
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
+        page = self.paginate_queryset(queryset=queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True, context={"user": request.user.id})
             return self.get_paginated_response(serializer.data)
@@ -1137,7 +1171,6 @@ class RoomViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
         user = User.objects.get(pk=request.user.id)
         if user and room.user.filter(pk=user.id).exists():
             list_user_ids = request.data.get('list_user_ids')
-            print(list_user_ids)
             list_users = User.objects.filter(id__in=list_user_ids)
             if list_users:
                 room.user.add(*list_users)
@@ -1157,6 +1190,17 @@ class RoomViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
             return Response({"message": "room deleted for you"}, status=status.HTTP_204_NO_CONTENT)
         return Response({"message": "you do not have permission"}, status=status.HTTP_403_FORBIDDEN)
 
+    @action(methods=['get'], detail=True, url_path='messages')
+    def get_room_messages(self, request, pk):
+        queryset = Message.objects.filter(room__pk=pk).order_by('-created_date')
+        paginator = BasePagination()
+        page = paginator.paginate_queryset(queryset, request)
+        if page:
+            serializer = self.get_serializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
 
 class MessageViewSet(viewsets.ViewSet, generics.ListAPIView):
     queryset = Message.objects.all().order_by('-created_date')
@@ -1167,7 +1211,7 @@ class MessageViewSet(viewsets.ViewSet, generics.ListAPIView):
     filterset_fields = ['room__id']
 
     def get_queryset(self):
-        return Message.objects.filter(room__user__in=[self.request.user]).order_by('-created_date')
+        return Message.objects.filter(room__user=self.request.user).order_by('-created_date')
 
     def list(self, request, *args, **kwargs):
         room_id = request.query_params.get('room__id')
@@ -1180,6 +1224,11 @@ class VoucherViewSet(viewsets.ModelViewSet):
     queryset = Voucher.objects.all()
     serializer_class = VoucherSerializer
     pagination_class = BasePagination
+
+    def get_queryset(self):
+        if self.action == 'get_available_vouchers':
+            return Voucher.objects.filter(Q(start_date__lte=timezone.now()) & (Q(end_date__gt=timezone.now()) | Q(end_date__isnull=True)))
+        return Voucher.objects.all()
 
     def create(self, request, *args, **kwargs):
         can_add = False
@@ -1201,15 +1250,19 @@ class VoucherViewSet(viewsets.ModelViewSet):
         return Response({'message': 'can not add voucher to product that you are not the owner'},
                         status=status.HTTP_403_FORBIDDEN)
 
+    @action(methods=['get'], detail=False, url_path='available')
+    def get_available_vouchers(self, request):
+        return super().list(request)
+
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action in ['list', 'retrieve', 'get_available_vouchers']:
             return [permissions.AllowAny(), ]
         elif self.action == 'create':
             return [BusinessPermission(), ]
-        return [BusinessOwnerPermission(), ]
+        return [BusinessPermission(), IsCreator(), ]
 
 
-class ReportViewSet(viewsets.ModelViewSet):
+class ReportViewSet(viewsets.ViewSet, generics.ListCreateAPIView):
     queryset = Report.objects.all()
     serializer_class = ReportSerialier
     permission_classes = [permissions.IsAuthenticated, IsReporter]
@@ -1224,7 +1277,7 @@ class ReportViewSet(viewsets.ModelViewSet):
                         status=status.HTTP_400_BAD_REQUEST)
 
     def get_queryset(self):
-        reports = Report.objects.filter(reporter=self.request.user.id)
+        reports = Report.objects.prefetch_related('reply_set').filter(reporter=self.request.user.id)
         return reports
 
     def get_serializer_class(self):
