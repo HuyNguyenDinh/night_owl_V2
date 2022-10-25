@@ -823,6 +823,10 @@ class OrderViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retrie
                 for i in result:
                     odds = i.orderdetail_set.values_list('cart_id__id', flat=True)
                     CartDetail.objects.filter(id__in=list(set(odds))).delete()
+                    subject = "Bạn có 1 đơn hàng mới chờ xác nhận"
+                    content = f"Đơn hàng {i.id} giá trị {i.bill.value}vnđ đang chờ bạn xác nhận để được vận chuyển"
+                    x = Thread(target=send_email, args=(i.customer.email, subject, content))
+                    x.start()
                     #### WebSocket ####
                     try:
                         channel = i.store.client
