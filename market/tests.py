@@ -9,6 +9,7 @@ baseURL = 'http://127.0.0.1:8000/market/'
 
 
 class ProductTestCase(TestCase):
+
     def setUp(self):
         self.client = APIClient(enforce_csrf_checks=True)
         user = User(email='huyn27316@gmail.com', phone_number='0937461321', is_business=True, email_verified=True, phone_verified=True)
