@@ -429,7 +429,7 @@ class RoomSerializer(ModelSerializer):
         model = Room
         fields = "__all__"
         extra_kwargs = {
-            "type": {"read_only": "true"},
+            "room_type": {"read_only": "true"},
             "group_name": {"read_only": "true"}
         }
 
@@ -438,7 +438,7 @@ class RoomSerializer(ModelSerializer):
 
     def get_room_name(self, obj):
         user_id = self.context.get('user')
-        if obj.type == 0:
+        if obj.room_type == 0:
             other_user = obj.user.exclude(pk=user_id).first()
             return other_user.first_name + " " + other_user.last_name
         room_name = ""
@@ -453,7 +453,7 @@ class RoomSerializer(ModelSerializer):
         user_ids = validated_data.pop('list_user_ids')
         user_id = self.context.get('user')
         user = User.objects.get(pk=user_id)
-        room = Room.objects.create(type=1, group_name=f'roomchat_{str(uuid.uuid4())}')
+        room = Room.objects.create(room_type=1, group_name=f'roomchat_{str(uuid.uuid4())}')
         room.user.add(user)
         if user_ids:
             users = User.objects.filter(id__in=user_ids)

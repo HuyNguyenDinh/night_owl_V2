@@ -241,7 +241,7 @@ class Room(models.Model):
         (1, 'group')
     )
 
-    type = models.IntegerField(choices=ROOMCHAT_CHOICES, default=0)
+    room_type = models.IntegerField(choices=ROOMCHAT_CHOICES, default=0)
 
 
 class Message(models.Model):

@@ -274,7 +274,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIVi
             user = User.objects.get(pk=request.user.id)
         except:
             return Response({"message": "user not found"}, status=status.HTTP_403_FORBIDDEN)
-        single_room = Room.objects.filter(user=user, type=0).filter(user=chat_user).first()
+        single_room = Room.objects.filter(user=user, room_type=0).filter(user=chat_user).first()
         if single_room:
             return Response(RoomSerializer(single_room).data, status=status.HTTP_200_OK)
         else:
@@ -1169,7 +1169,7 @@ class RoomViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
     @action(methods=['patch'], detail=True, url_path='add-member')
     def add_member_to_chatroom(self, request, pk):
         try:
-            room = Room.objects.get(pk=pk, type=1)
+            room = Room.objects.get(pk=pk, room_type=1)
         except:
             return Response({"message": "room not found"}, status=status.HTTP_404_NOT_FOUND)
         user = User.objects.get(pk=request.user.id)
