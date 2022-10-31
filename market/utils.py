@@ -1,10 +1,10 @@
+import decimal
 from django.utils import timezone
 from psycopg2 import DatabaseError
 import django
 django.setup()
-
 from market.models import *
-from django.db.models import Sum, F, Max, Count
+from django.db.models import Sum, F, Max, Count, Q
 from django.db import transaction
 import requests
 import json
@@ -15,7 +15,7 @@ from django.core.mail import send_mail
 
 
 # Check voucher available at now
-def check_now_in_datetime_range(start_date, end_date):
+def check_now_in_datetime_range(start_date, end_date) -> bool:
     now = timezone.now()
     if end_date is not None:
         return now >= start_date and now <= end_date
@@ -24,7 +24,7 @@ def check_now_in_datetime_range(start_date, end_date):
 
 
 # Check voucher
-def check_voucher_available(option_id, voucher_id):
+def check_voucher_available(option_id: int, voucher_id: int) -> bool:
     voucher = Voucher.objects.get(pk=voucher_id)
     option = Option.objects.get(pk=option_id)
     if option and voucher:
@@ -34,20 +34,20 @@ def check_voucher_available(option_id, voucher_id):
 
 
 # Get order detail id match the voucher
-def check_discount_in_order(order_details, voucher_id):
+def check_discount_in_order(order_details: list[OrderDetail], voucher_id: int) -> [int, None]:
     for odd in order_details:
         if check_voucher_available(odd.product_option.id, voucher_id):
             return odd.id
     return None
 
 
-def calculate_order_value_with_voucher(voucher, value):
+def calculate_order_value_with_voucher(voucher: Voucher, value: decimal.Decimal) -> decimal.Decimal:
     if voucher.is_percentage:
         return value * (100-voucher.discount) / 100
     return value - voucher.discount
 
 
-def calculate_value(order_id, voucher_id=None):
+def calculate_value(order_id: int, voucher_id: int = None) -> decimal.Decimal:
     order = Order.objects.get(pk=order_id)
     value = 0
     if order:
@@ -55,9 +55,10 @@ def calculate_value(order_id, voucher_id=None):
         if voucher_id:
             voucher = Voucher.objects.get(pk=voucher_id)
             if voucher:
-                odd_exclude = order.orderdetail_set.filter(product_option__base_product__voucher__id=voucher_id,
-                                                           product_option__base_product__voucher__start_date__lte=timezone.now(),
-                                                           product_option__base_product__voucher__end_date__gt=timezone.now())
+                odd_exclude = order.orderdetail_set.filter(Q(product_option__base_product__voucher__id=voucher_id) &
+                                                           Q(product_option__base_product__voucher__start_date__lte=timezone.now()) &
+                                                           (Q(product_option__base_product__voucher__end_date__gt=timezone.now()) |
+                                                            Q(product_option__base_product__voucher__end_date__isnull=True)))
                 if odd_exclude.exists():
                     value = calculate_order_value_with_voucher(voucher, value)
         value = value + order.total_shipping_fee
@@ -66,7 +67,7 @@ def calculate_value(order_id, voucher_id=None):
 
 # decrease the unit in stock of option when checkout the order
 @transaction.atomic
-def decrease_option_unit_instock(orderdetail_id):
+def decrease_option_unit_instock(orderdetail_id: int) -> Option:
     odd = OrderDetail.objects.get(pk=orderdetail_id)
     option = Option.objects.select_for_update().get(orderdetail__id=orderdetail_id)
     option.unit_in_stock = option.unit_in_stock - odd.quantity
@@ -80,18 +81,18 @@ def decrease_option_unit_instock(orderdetail_id):
 
 
 # Calculate Max Width, Height, Length
-def calculate_max_lwh(order_id):
+def calculate_max_lwh(order_id: int) -> dict[str, int]:
     order = Order.objects.get(pk=order_id)
     max_lwh = order.orderdetail_set.all().aggregate(
-        max_width = Max('product_option__width'),
+        max_width=Max('product_option__width'),
         max_height=Max('product_option__height'), 
         max_length=Max('product_option__length'),
-        total_weight = Sum(F('product_option__weight')))
+        total_weight=Sum(F('product_option__weight')))
     return max_lwh
 
 
 # Get GHN Services
-def get_shipping_service(order_id):
+def get_shipping_service(order_id: int) -> str:
     order = Order.objects.get(pk=order_id)
     seller = order.store
     customer = order.customer
@@ -112,7 +113,7 @@ def get_shipping_service(order_id):
 
 
 # POST request to create shipping order
-def create_shipping_order(order_id):
+def create_shipping_order(order_id: int) -> str:
     order = Order.objects.get(pk=order_id)
     seller = order.store
     customer = order.customer
@@ -159,7 +160,7 @@ def create_shipping_order(order_id):
             "width": max_lwh.get('max_width'),
             "height": max_lwh.get('max_height'),
             "insurance_value": int(value),
-            "service_id" : service_id,
+            "service_id": service_id,
             "service_type_id": service_type_id,
             "coupon": None,
             "items": items
@@ -177,7 +178,7 @@ def create_shipping_order(order_id):
     return x.text
 
 
-def increase_unit_in_stock_when_cancel_order(order_id):
+def increase_unit_in_stock_when_cancel_order(order_id: int) -> int:
     order = Order.objects.get(pk=order_id)
     for odd in order.orderdetail_set.all():
         try:
@@ -195,7 +196,7 @@ def increase_unit_in_stock_when_cancel_order(order_id):
 
 
 @transaction.atomic
-def decrease_user_balance(user_id, value):
+def decrease_user_balance(user_id: int, value: decimal.Decimal) -> User:
     user = User.objects.select_for_update().get(pk=user_id)
     user.balance = user.balance - value
     user.full_clean()
@@ -204,14 +205,14 @@ def decrease_user_balance(user_id, value):
 
 
 @transaction.atomic
-def increase_user_balance(user_id, value):
+def increase_user_balance(user_id: int, value: decimal.Decimal) -> User:
     user = User.objects.select_for_update().get(pk=user_id)
     user.balance = user.balance + value
     user.save()
     return user
 
 
-def cancel_order(order_id):
+def cancel_order(order_id: int) -> bool:
     try:
         with transaction.atomic():
             order = Order.objects.select_for_update().get(pk=order_id, status=1)
@@ -226,7 +227,7 @@ def cancel_order(order_id):
         return True
 
 
-def receive_order(order_id):
+def receive_order(order_id: int) -> bool:
     try:
         with transaction.atomic():
             order = Order.objects.get(pk=order_id)
@@ -240,7 +241,7 @@ def receive_order(order_id):
         return True
 
 
-def checkout_order(order_id, voucher_code=None, payment_type=0, raw_status=1):
+def checkout_order(order_id: int, voucher_code: str = None, payment_type: int = 0, raw_status: int = 1) -> [Order, None]:
     try:
         value = 0
         payed = False
@@ -282,7 +283,7 @@ def checkout_order(order_id, voucher_code=None, payment_type=0, raw_status=1):
 
 
 @transaction.atomic
-def complete_checkout_orders_with_payment_gateway(order_ids):
+def complete_checkout_orders_with_payment_gateway(order_ids: list[int]) -> bool:
     try:
         with transaction.atomic():
             orders = Order.objects.select_for_update().filter(pk__in=order_ids)
@@ -299,20 +300,20 @@ def complete_checkout_orders_with_payment_gateway(order_ids):
 
 
 # Calculate shipping fee
-def calculate_shipping_fee(order_id):
+def calculate_shipping_fee(order_id: int) -> str:
     order = Order.objects.get(pk=order_id)
     store = order.store
     customer = order.customer
     max_lwh = calculate_max_lwh(order_id=order.id)
     data = {
-        "from_district_id":store.address.district_id,
-        "service_type_id":2,
-        "to_district_id":customer.address.district_id,
-        "to_ward_code":customer.address.ward_id,
-        "height":max_lwh['max_height'],
-        "length":max_lwh['max_length'],
-        "weight":max_lwh['total_weight'],
-        "width":max_lwh['max_width'],
+        "from_district_id": store.address.district_id,
+        "service_type_id": 2,
+        "to_district_id": customer.address.district_id,
+        "to_ward_code": customer.address.ward_id,
+        "height": max_lwh['max_height'],
+        "length": max_lwh['max_length'],
+        "weight": max_lwh['total_weight'],
+        "width": max_lwh['max_width'],
         "insurance_value": int(calculate_value(order_id=order.id)),
         "coupon": None
     }
@@ -329,7 +330,7 @@ def calculate_shipping_fee(order_id):
 
 
 # Create shipping code that match with order
-def update_shipping_code(order_id):
+def update_shipping_code(order_id: int) -> bool:
     try:
         with transaction.atomic():
             order = Order.objects.select_for_update().get(pk=order_id)
@@ -351,7 +352,7 @@ def update_shipping_code(order_id):
 
 
 @transaction.atomic
-def make_order_from_list_cart(list_cart_id, user_id, data):
+def make_order_from_list_cart(list_cart_id: list[int], user_id: int, data: dict[str, [list[int]]]) -> list[Order]:
     carts = CartDetail.objects.select_related().filter(customer__id=user_id, id__in=list_cart_id)
     user = User.objects.get(pk=user_id)
     result = []
@@ -380,7 +381,7 @@ def make_order_from_list_cart(list_cart_id, user_id, data):
     return result
 
 
-def send_email(reciever, subject, content):
+def send_email(reciever: str, subject: str, content: str) -> None:
     to = [reciever]
     send_subject = subject
     send_content = content

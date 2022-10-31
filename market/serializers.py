@@ -291,7 +291,7 @@ class OrderSerializer(ModelSerializer):
         extra_kwargs = {
             'status': {'read_only':'true'},
             'can_destroy': {'read_only': 'true'},
-            'store' : {'read_only': 'true'},
+            'store': {'read_only': 'true'},
             'customer': {'read_only': 'true'},
             'payment_type': {'read_only': 'true'}
         }

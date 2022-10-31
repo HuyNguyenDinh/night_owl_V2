@@ -107,7 +107,7 @@ class ChatAsyncConsumer(AsyncJsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
         self.user = None
-        self.chat_rooms = None
+        self.chat_rooms = []
 
     async def connect(self):
 
