@@ -1,0 +1,1 @@
+docker run --env-file docker/.env --publish 8000:8000 --name night-owl-v1 -it huy2408/night_owl

@@ -1,0 +1,19 @@
+services:
+  app:
+    image: huy2408/night_owl:latest
+    restart: always
+    ports:
+      - 8000:8000
+    environment:
+      - DB_HOST=ec2-54-170-90-26.eu-west-1.compute.amazonaws.com
+      - DB_NAME=ddio6ticimcvn6
+      - DB_PASSWORD=2fa7b1c6d657d8977bb7784ad14c90ebba9874b4a676abddf3f37ad367ef8ba0
+      - DB_USER=bowiticrhecjoo
+      - DJANGO_SETTINGS_MODULE=night_owl_market.settings
+      - EMAIL_HOST_PASSWORD=tlyeqpwaysyetzis
+      - EMAIL_HOST_USER=nightowl.emarket@gmail.com
+      - PYTHONUNBUFFERED=1
+      - SECRET_KEY="django-insecure-vt&#4&s!80tvp(!3^37u5@m_%\=$e)8+k$dgblizxt4(90ji9)&"
+      - CLOUD_NAME=drepaddzn
+      - CLOUD_API_KEY=982793164226828
+      - CLOUD_API_SECRET=gBuCH4KP-IMvrTY3-sCAo3t5JJI

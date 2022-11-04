@@ -1,10 +1,10 @@
+import os
 from django.test import TestCase
 from .models import *
 from django.utils import timezone
 from .utils import *
-from django.core.files.uploadedfile import SimpleUploadedFile
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.test import Client
+from unittest.mock import patch
+import json
 
 
 class check_now_in_datetime_range_test(TestCase):
@@ -38,8 +38,8 @@ class Product_Order_Option_test(TestCase):
                                                    creator=self.users[1], street="67/13 Hoàng Minh Chánh",
                                                    full_address="67/13 Hoàng Minh Chánh, phường Hóa An, TP Biên Hòa, Đồng Nai"))
         self.products = []
-        self.products.append(Product.objects.create(name='IPhone 14 Pro Max 512GB', owner=self.users[0]))
-        self.products.append(Product.objects.create(name='IPhone 14 Pro Max 256GB', owner=self.users[0]))
+        self.products.append(Product.objects.create(name='IPhone 14 Pro Max 512GB', owner=self.users[0], sold_amount=10))
+        self.products.append(Product.objects.create(name='IPhone 14 Pro Max 256GB', owner=self.users[0], sold_amount=10))
         for product in self.products:
             product.categories.add(self.categories[0])
         self.options = []
@@ -72,6 +72,10 @@ class Product_Order_Option_test(TestCase):
         self.order_details.append(OrderDetail(quantity=2, order=self.orders[1], product_option=self.options[3],
                                               unit_price=self.options[3].price))
         OrderDetail.objects.bulk_create(self.order_details)
+        self.bills = []
+        self.bills.append(Bill(value=calculate_value(self.orders[0].id), payed=True, order_payed=self.orders[0]))
+        self.bills.append(Bill(value=calculate_value(self.orders[1].id), payed=True, order_payed=self.orders[1]))
+        Bill.objects.bulk_create(self.bills)
 
     def test_check_voucher_available(self):
         for option in self.options:
@@ -80,7 +84,20 @@ class Product_Order_Option_test(TestCase):
             else:
                 self.assertEqual(check_voucher_available(option.id, self.vouchers[0].id), False)
 
-    def test_make_order_from_list_cart(self):
+    @patch('market.utils.calculate_shipping_fee')
+    def test_make_order_from_list_cart(self, cal_ship_mock):
+        cal_ship_mock.return_value = json.dumps({
+                        "code": 200,
+                        "message": "Success",
+                        "data": {
+                            "total": 36300,
+                            "service_fee": 36300,
+                            "insurance_fee": 0,
+                            "pick_station_fee": 0,
+                            "coupon_value": 0,
+                            "r2s_fee": 0
+                        }
+        })
         actual = make_order_from_list_cart(list_cart_id=[self.carts[0].id, self.carts[1].id], user_id=self.users[1].id,
                                            data={"list_cart": [self.carts[0].id, self.carts[1].id]})
         expected = list(Order.objects.all()[2:])
@@ -88,7 +105,6 @@ class Product_Order_Option_test(TestCase):
 
     def test_check_discount_in_order(self):
         actual = check_discount_in_order(self.order_details, self.vouchers[0].id)
-        print(actual)
         expected = self.order_details[2].id
         self.assertNotEqual(actual, expected)
 
@@ -106,8 +122,8 @@ class Product_Order_Option_test(TestCase):
         self.assertEqual(actual_without_voucher, expected_without_voucher)
 
     def test_decrease_option_unit_instock(self):
-        actual = decrease_option_unit_instock(self.order_details[0].id).unit_in_stock
-        expected = 48
+        actual: int = decrease_option_unit_instock(self.order_details[0].id).unit_in_stock
+        expected: int = 48
         self.assertEqual(actual, expected)
 
     def test_calculate_max_lwh(self):
@@ -116,7 +132,40 @@ class Product_Order_Option_test(TestCase):
         self.assertEqual(actual, expected)
 
     def test_increase_unit_in_stock_when_cancel_order(self):
-        runner = increase_unit_in_stock_when_cancel_order(self.orders[0].id)
-        actual = (self.options[0].unit_in_stock, self.options[3].unit_in_stock)
-        expected = (52, 52)
+        increase_unit_in_stock_when_cancel_order(self.orders[1].id)
+        self.options[3].refresh_from_db()
+        actual = self.options[3].unit_in_stock
+        expected = 52
         self.assertEqual(actual, expected)
+
+    @patch('market.utils.create_shipping_order')
+    def test_update_shipping_code(self, utils_mock):
+        utils_mock.return_value = json.dumps(
+            {
+                "code": 200,
+                "message": "Success",
+                "data":
+                {
+                    "order_code": "FFFNL9HH",
+                    "sort_code": "19-60-06",
+                    "trans_type": "truck",
+                    "ward_encode": "",
+                    "district_encode": "",
+                    "fee": {
+                        "main_service": 22000,
+                        "insurance": 11000,
+                        "station_do": 0,
+                        "station_pu": 0,
+                        "return": 0,
+                        "r2s": 0,
+                        "coupon": 0
+                    },
+                    "total_fee": "33000",
+                    "expected_delivery_time": "2020-06-03T16:00:00Z",
+                },
+                "message_display": "Tạo đơn hàng thành công. Mã đơn hàng: FFFNL9HH"
+            })
+        self.assertEqual(update_shipping_code(self.orders[0].id), True)
+
+
+
