@@ -10,6 +10,7 @@ import decimal
 from drf_extra_fields.fields import Base64ImageField
 import uuid
 from .paginations import *
+from chat.models import *
 
 
 class AddressSerializer(ModelSerializer):

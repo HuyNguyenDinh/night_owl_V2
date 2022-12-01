@@ -22,10 +22,11 @@ COPY --chown=web:web ./requirements.txt requirements.txt
 # Switch to the root user temporary, to grant execution permissions.
 USER root
 # Install python packages at system level
-RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m pip install --no-cache-dir -r requirements.txt
 # Copy entrypoint script which waits for the db to be ready
 COPY --chown=web:web ./docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
+COPY --chown=web:web ./docker/start-celery-worker.sh /usr/local/bin/start-celery-worker.sh
 USER web
 # This script will run before every command executed in the container
 ENTRYPOINT ["entrypoint.sh"]
@@ -47,7 +48,7 @@ FROM base as prod
 # Install extra packages required in production
 USER root
 COPY --chown=web:web ./requirements.txt requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m pip install --no-cache-dir -r requirements.txt
 # Copy the script that starts the production application server (gunicorn)
 COPY --chown=web:web ./docker/start-prod-server.sh /usr/local/bin/start-prod-server.sh
 RUN chmod +x /usr/local/bin/start-prod-server.sh

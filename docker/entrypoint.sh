@@ -3,12 +3,12 @@
 # docker-compose "depends_on: - db" checks the container started, but is not enough to check that the database is ready to take connections
 # This script also accepts a command to be executed after the DB is ready (i.e. migrate, runserver or a script..)
 function postgres_ready(){
-python << END
+python3 << END
 import sys
 import psycopg2
 try:
-    print("Trying to connect to database ${DB_NAME} on host ${DB_HOST}..")
-    conn = psycopg2.connect(dbname="${DB_NAME}", user="${DB_USER}", password="${DB_PASSWORD}", host="${DB_HOST}")
+    print("Trying to connect to database '$DB_NAME' on host '$DB_HOST'..")
+    conn = psycopg2.connect(dbname="$DB_NAME", user="$DB_USER", password="$DB_PASSWORD", host="$DB_HOST")
 except psycopg2.OperationalError as e:
     print(e)
     sys.exit(-1)

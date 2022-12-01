@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-statefulset
+  labels:
+    app: postgres
+spec:
+  serviceName: "postgres"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:latest
+          envFrom:
+            - configMapRef:
+                name: postgres-configuration
+          ports:
+            - containerPort: 5432
+              name: postgresdb
+          volumeMounts:
+            - name: pg-pv-data
+              mountPath: /var/lib/postgresql/data
+            - name: pg-init
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: pg-pv-data
+          persistentVolumeClaim:
+            claimName: postgres-pv-claim
+        - name: pg-init
+          configMap:
+            name: pg-initdb-config

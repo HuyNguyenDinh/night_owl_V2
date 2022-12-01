@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: night-owl-config
+  labels:
+    app: night_owl
+data:
+  DB_HOST: postgres-service
+  DB_USER: postgres
+  DB_PORT: "5432"
+  BROKER: redis-service
+  REDIS_A: redis-service
+  REDIS_B: redis-service
+  REDIS_C: redis-service

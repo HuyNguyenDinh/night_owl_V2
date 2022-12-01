@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-worker-group
+  labels:
+    name: celery-worker-group
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      name: celery-worker-group
+  template:
+    metadata:
+      labels:
+        name: celery-worker-group
+    spec:
+      containers:
+        - name: celery-worker-group
+          image: huy2408/night_owl_v2
+          command:
+            - "bash"
+            - "-c"
+            - "celery -A night_owl_market worker --pool=prefork -l INFO -Q msg_to_group --concurrency=16"
+          envFrom:
+            - configMapRef:
+                name: night-owl-config
+            - secretRef:
+                name: night-owl-secret
+

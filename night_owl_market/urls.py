@@ -23,6 +23,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenBlacklistView,
 )
+from oauthlib.oauth2 import OAuth2Token
 
 schema_view = get_schema_view(
    openapi.Info(

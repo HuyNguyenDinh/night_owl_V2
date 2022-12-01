@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: night-owl
+  labels:
+    app: night_owl
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: night_owl
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 3
+  template:
+    metadata:
+      labels:
+        app: night_owl
+    spec:
+      containers:
+        - name: night-owl
+          image: huy2408/night_owl_v2
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: night-owl-config
+            - secretRef:
+                name: night-owl-secret

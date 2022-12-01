@@ -1,4 +1,3 @@
-import firebase_admin.messaging
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, JSONParser
 from rest_framework.decorators import action
@@ -13,16 +12,17 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from market.utils import *
 from .mongo_connect import *
-from multiprocessing import Process
 from threading import Thread
 from market.speedSMS import *
 from market.googleInfo import *
 from rest_framework_simplejwt.tokens import RefreshToken
+from chat.models import *
 from django.utils import timezone
-from fcm_django.models import FCMDevice
-import firebase_admin.messaging
 import uuid
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 from asgiref.sync import async_to_sync
+from .tasks import *
 from channels.layers import get_channel_layer
 channel_layer = get_channel_layer()
 # Create your views here.
@@ -126,7 +126,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIVi
             code = add_reset_code(user.id)
             subject = "Xác nhận reset mật khẩu của {0} Night Owl ECommerce".format(user.first_name)
             content = """Mã xác minh để reset mật khẩu Night Owl ECommerce của {0} là {1}""".format(user.first_name, code)
-            send_email(user.email, subject, content)
+            send_email_task.delay(user.email, subject, content)
             return Response({"message": "reset code has been sent to your email"}, status=status.HTTP_200_OK)
 
     @action(methods=['post'], detail=False, url_path='get-token-by-user-id-and-reset-code')
@@ -174,7 +174,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIVi
             subject = "Xác nhận email đăng ký tài khoản tại Night Owl"
             content = """Xin chào {0}, mã xác minh email đăng ký tài khoản tại Night Owl của bạn là {1}.
             Lưu ý: Mã xác minh chỉ có hiệu lực trong vòng 15 phút.""".format(user.first_name, code)
-            send_email(user.email, subject, content)
+            send_email_task.delay(user.email, subject, content)
             return Response({"message": "verification code has been sent, please check your email to get the code"})
         return Response({'message': "user not found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -276,11 +276,11 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIVi
             return Response({"message": "user not found"}, status=status.HTTP_403_FORBIDDEN)
         single_room = Room.objects.filter(user=user, room_type=0).filter(user=chat_user).first()
         if single_room:
-            return Response(RoomSerializer(single_room).data, status=status.HTTP_200_OK)
+            return Response(RoomSerializer(single_room, context={"user": request.user.id}).data, status=status.HTTP_200_OK)
         else:
             single_room = Room.objects.create(group_name=f'roomchat_{str(uuid.uuid4())}')
             single_room.user.add(*[user, chat_user])
-            return Response(RoomSerializer(single_room).data, status=status.HTTP_201_CREATED)
+            return Response(RoomSerializer(single_room, context={"user": request.user.id}).data, status=status.HTTP_201_CREATED)
 
     @action(methods=['get'], detail=True, url_path="vouchers-available")
     def get_shop_vouchers_available(self, request, pk):
@@ -445,6 +445,7 @@ class ProductViewSet(viewsets.ModelViewSet):
             return Response(OptionSerializer(options, many=True).data, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_404_NOT_FOUND)
 
+    @method_decorator(cache_page(60 * 60 * 2))
     @action(methods=['get'], detail=False, url_path='products-statistic-count-in-year')
     def products_statistic_in_year(self, request):
         try:
@@ -483,6 +484,7 @@ class ProductViewSet(viewsets.ModelViewSet):
                 }, status=status.HTTP_200_OK)
             return Response({"message": "order details not found"}, status=status.HTTP_404_NOT_FOUND)
 
+    @method_decorator(cache_page(60 * 60 * 2))
     @action(methods=['get'], detail=False, url_path='products-statistic-count-in-month')
     def monthly_statistic_products_count(self, request):
         try:
@@ -529,6 +531,7 @@ class ProductViewSet(viewsets.ModelViewSet):
                 }, status=status.HTTP_200_OK)
             return Response({"message": "order details not found"}, status=status.HTTP_404_NOT_FOUND)
 
+    @method_decorator(cache_page(60 * 60 * 2))
     @action(methods=['get'], detail=True, url_path='product-statistic-in-month')
     def product_statistic_in_month(self, request, pk):
         try:
@@ -579,6 +582,7 @@ class ProductViewSet(viewsets.ModelViewSet):
                     }, status=status.HTTP_200_OK)
                 return Response({"message": "order details not found"}, status=status.HTTP_404_NOT_FOUND)
 
+    @method_decorator(cache_page(60 * 60 * 2))
     @action(methods=['get'], detail=True, url_path='product-statistic-in-year')
     def product_statistic_in_year(self, request, pk):
         try:
@@ -820,25 +824,25 @@ class OrderViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retrie
             except:
                 return Response({'message': 'some product options has out of stock or your balance not enough to pay'}, status=status.HTTP_400_BAD_REQUEST)
             if success:
-                for i in result:
-                    odds = i.orderdetail_set.values_list('cart_id__id', flat=True)
-                    CartDetail.objects.filter(id__in=list(set(odds))).delete()
-                    subject = "Bạn có 1 đơn hàng mới chờ xác nhận"
-                    content = f"Đơn hàng {i.id} giá trị {i.bill.value}vnđ đang chờ bạn xác nhận để được vận chuyển"
-                    x = Thread(target=send_email, args=(i.customer.email, subject, content))
-                    x.start()
-                    #### WebSocket ####
-                    try:
-                        channel = i.store.client
-                        async_to_sync(channel_layer.send)(channel.channel_name, {
-                            "type": "system_message",
-                            "status": i.status,
-                            "order_id": i.id,
-                        })
-                    except:
-                        pass
-                    ########
-                if payment_type and payment_type == 1:
+                if not payment_type or (payment_type and payment_type != 1):
+                    for i in result:
+                        odds = i.orderdetail_set.values_list('cart_id__id', flat=True)
+                        CartDetail.objects.filter(id__in=list(set(odds))).delete()
+                        subject = "Bạn có 1 đơn hàng mới chờ xác nhận"
+                        content = f"Đơn hàng {i.id} giá trị {i.bill.value}vnđ đang chờ bạn xác nhận để được vận chuyển"
+                        send_email_task.delay(i.customer.email, subject, content)
+                        #### WebSocket ####
+                        try:
+                            channel = i.store.client
+                            message = {
+                                "status": i.status,
+                                "order_id": i.id
+                            }
+                            send_message_to_channel.delay(channel_name=channel.channel_name, message=message)
+                        except:
+                            pass
+                        ########
+                elif payment_type and payment_type == 1:
                     list_id = [x.id for x in result]
                     instance = import_signature(list_id)
                     return Response({"message": "Please pay with the link to complete checkout the order",
@@ -866,28 +870,20 @@ class OrderViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retrie
             content = """Đơn hàng {0} đang được vận chuyển bởi người bán, quý khách vui lòng chờ shipper giao hàng tới nhé.
                 Hoặc bạn có thể kiểm tra tình trạng đơn hàng với mã đơn hàng là {1} được vận chuyển bởi đơn vị Giaohangnhanh.
                 Night Owl ECommerce xin cảm ơn quý khách đã tin tưởng lựa chọn.""".format(order.id, order.shipping_code)
-            # message = firebase_admin.messaging.Message(data={
-            #     "type": "1",
-            #     "state": "0",
-            #     "subject": subject,
-            #     "content": content
-            # })
             #### WebSocket ####
             try:
                 channel = order.customer.client
-                async_to_sync(channel_layer.send)(channel.channel_name, {
-                    "type": "system_message",
+                message = {
                     "status": order.status,
                     "order_id": order.id,
                     "subject": subject,
                     "content": content
-                })
+                }
+                send_message_to_channel.delay(channel_name=channel.channel_name, message=message)
             except:
                 pass
             ########
-            # FCMDevice.objects.filter(user=order.customer).send_message(message)
-            x = Thread(target=send_email, args=(order.customer.email, subject, content))
-            x.start()
+            send_email_task.delay(order.customer.email, subject, content)
             # y = Thread(target=send_sms, args=(order.customer.phone_number, content))
             # y.start()
             return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
@@ -909,28 +905,20 @@ class OrderViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retrie
                 content = """Người bán đã hủy đơn hàng {0} của bạn, nếu bạn sử dụng phương thức thanh toán trực tuyến bạn vui lòng 
                 kiểm tra lại tài khoản đã thanh toán {1}vnđ xem đã được hệ thống hoàn tiền lại hay chưa.
                 Nếu chưa bạn vui lòng gửi report để được hỗ trợ sớm nhất.""".format(order.id, order.bill.value)
-                # message = firebase_admin.messaging.Message(data={
-                #     "type": "1",
-                #     "state": "0",
-                #     "subject": subject,
-                #     "content": content
-                # })
                 #### WebSocket ####
                 try:
                     channel = order.customer.client
-                    async_to_sync(channel_layer.send)(channel.channel_name, {
-                        "type": "system_message",
+                    message = {
                         "status": order.status,
                         "order_id": order.id,
                         "subject": subject,
                         "content": content
-                    })
+                    }
+                    send_message_to_channel.delay(channel_name=channel.channel_name, message=message)
                 except:
                     pass
                 ########
-                # FCMDevice.objects.filter(user=order.customer).send_message(message)
-                x = Thread(target=send_email, args=(order.customer.email, subject, content))
-                x.start()
+                send_email_task.delay(order.customer.email, subject, content)
                 # y = Thread(target=send_sms, args=(order.customer.phone_number, content))
                 # y.start()
                 return Response({"message": "order canceled", "order_id": order.id}, status=status.HTTP_200_OK)
@@ -952,28 +940,20 @@ class OrderViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retrie
                 content = """Người mua đã nhận được đơn hàng {0} giá trị {1}vnđ , bạn vui lòng kiểm tra tình trạng đơn hàng.
                 Nếu có sai sót bạn vui lòng gửi report cho dịch vụ hỗ trợ của Night Owl sớm nhất để được xử lý.
                 Xin cảm ơn bạn đã tin tưởng chọn Nigh Owl ECommerce làm đối tác bán hàng.""".format(order.id, order.bill.value)
-                # message = firebase_admin.messaging.Message(data={
-                #     "type": "1",
-                #     "state": "1",
-                #     "subject": subject,
-                #     "content": content
-                # })
                 #### WebSocket ####
                 try:
                     channel = order.store.client
-                    async_to_sync(channel_layer.send)(channel.channel_name, {
-                        "type": "system_message",
+                    message = {
                         "status": order.status,
                         "order_id": order.id,
                         "subject": subject,
                         "content": content
-                    })
+                    }
+                    send_message_to_channel.delay(channel_name=channel.channel_name, message=message)
                 except:
                     pass
                 ########
-                # FCMDevice.objects.filter(user=order.store).send_message(message)
-                x = Thread(target=send_email, args=(order.store.email, subject, content))
-                x.start()
+                send_email_task.delay(order.store.email, subject, content)
                 # y = Thread(target=send_sms, args=(order.store.phone_number, content))
                 # y.start()
                 return Response({'message': 'order completed'}, status=status.HTTP_200_OK)
@@ -1017,6 +997,7 @@ class BillViewSet(viewsets.ViewSet, generics.ListAPIView):
             return [BusinessPermission(),]
         return super().get_permissions()
 
+    @method_decorator(cache_page(60 * 60 * 2))
     @action(methods=['get'], detail=False, url_path='yearly-value-statistic')
     def yearly_statistic(self, request):
         try:
@@ -1052,6 +1033,7 @@ class BillViewSet(viewsets.ViewSet, generics.ListAPIView):
                 }, status=status.HTTP_200_OK)
             return Response({"message": "orders not found"}, status=status.HTTP_404_NOT_FOUND)
 
+    @method_decorator(cache_page(60 * 60 * 2))
     @action(methods=['get'], detail=False, url_path='monthly-value-statistic')
     def monthly_statistic(self, request):
         try:
@@ -1129,43 +1111,6 @@ class RoomViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
         serializer = self.get_serializer(queryset, many=True, context={"user": request.user.id})
         return Response(serializer.data)
 
-    @action(methods=['post'], detail=True, url_path='send-message')
-    def send_message_to_room(self, request, pk):
-        try:
-            room = Room.objects.get(pk=pk)
-        except:
-            return Response({"message": "room not found"}, status=status.HTTP_404_NOT_FOUND)
-        user = User.objects.get(pk=request.user.id)
-        if user and room.user.filter(pk=user.id).exists():
-            serializer = self.get_serializer(data=request.data)
-            if serializer.is_valid(raise_exception=True):
-                serializer.save(room=room, creator=user)
-                avatar = ""
-                if user.avatar:
-                    avatar = user.avatar.url
-                # message = firebase_admin.messaging.Message(data={
-                #     "type": "0",
-                #     "chatroom_id": str(room.id),
-                #     "creator_firstname": user.first_name,
-                #     "creator_avatar": avatar,
-                #     "content": serializer.data.get('content'),
-                #     "created_date": str(serializer.data.get('created_date'))
-                # })
-                # FCMDevice.objects.filter(user__in=room.user.all()).send_message(message)
-                #### WebSocket ####
-                async_to_sync(channel_layer.group_send)(room.group_name, {
-                    "type": "chat_message",
-                    "chatroom_id": str(room.id),
-                    "creator_firstname": user.first_name,
-                    "creator_avatar": avatar,
-                    "content": serializer.data.get('content'),
-                    "created_date": str(serializer.data.get('created_date'))
-                })
-                ########
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response({"message": "data not valid"}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({"message": "you do not have permission"}, status=status.HTTP_403_FORBIDDEN)
-
     @action(methods=['patch'], detail=True, url_path='add-member')
     def add_member_to_chatroom(self, request, pk):
         try:
@@ -1194,6 +1139,7 @@ class RoomViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
             return Response({"message": "room deleted for you"}, status=status.HTTP_204_NO_CONTENT)
         return Response({"message": "you do not have permission"}, status=status.HTTP_403_FORBIDDEN)
 
+    @method_decorator(cache_page(60 * 60 * 2))
     @action(methods=['get'], detail=True, url_path='messages')
     def get_room_messages(self, request, pk):
         queryset = Message.objects.filter(room__pk=pk).order_by('-created_date')

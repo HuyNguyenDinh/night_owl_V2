@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-statefulset
+  labels:
+    app: redis
+spec:
+  serviceName: "redis"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:latest
+          envFrom:
+            - configMapRef:
+                name: redis-config
+          ports:
+            - containerPort: 6379
+              name: redis
+          volumeMounts:
+            - name: redis-pv-data
+              mountPath: /var/lib/redis/data
+      volumes:
+        - name: redis-pv-data
+          persistentVolumeClaim:
+            claimName: redis-pv-claim

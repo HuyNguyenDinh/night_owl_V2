@@ -1,19 +1,117 @@
+version: '3.5'
+
 services:
-  app:
-    image: huy2408/night_owl:latest
+  db:
+    image: 'postgres:latest'
     restart: always
+    # Optional: Map the container port to a host port to be able to connect with a local db client
     ports:
-      - 8000:8000
+      - "5432:5432"
     environment:
-      - DB_HOST=ec2-54-170-90-26.eu-west-1.compute.amazonaws.com
-      - DB_NAME=ddio6ticimcvn6
-      - DB_PASSWORD=2fa7b1c6d657d8977bb7784ad14c90ebba9874b4a676abddf3f37ad367ef8ba0
-      - DB_USER=bowiticrhecjoo
-      - DJANGO_SETTINGS_MODULE=night_owl_market.settings
-      - EMAIL_HOST_PASSWORD=tlyeqpwaysyetzis
-      - EMAIL_HOST_USER=nightowl.emarket@gmail.com
-      - PYTHONUNBUFFERED=1
-      - SECRET_KEY="django-insecure-vt&#4&s!80tvp(!3^37u5@m_%\=$e)8+k$dgblizxt4(90ji9)&"
-      - CLOUD_NAME=drepaddzn
-      - CLOUD_API_KEY=982793164226828
-      - CLOUD_API_SECRET=gBuCH4KP-IMvrTY3-sCAo3t5JJI
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=default
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - ./sql/psql-init:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data/
+  redis_a: &default_redis
+    image: redis:latest
+    ports:
+      - "6379:6379"
+  redis_b:
+    <<: *default_redis
+    ports:
+      - "6380:6379"
+  redis_c:
+    << : *default_redis
+    ports:
+      - "6381:6379"
+  app_a: &default-app
+    build:
+      context: ../
+      dockerfile: docker/app/Dockerfile
+      target: prod
+    container_name: app_A
+    restart: always
+    depends_on:
+      - db
+      - redis_a
+      - redis_b
+      - redis_c
+    ports:
+      - "8003:8000"
+    env_file:
+      - .env
+    environment: &app_environ
+      - DB_HOST=db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_PORT=5432
+      - BROKER=redis_a
+      - REDIS_A=redis_a
+      - REDIS_B=redis_b
+      - REDIS_C=redis_c
+    volumes:
+      - ../:/home/web/code
+  app_b:
+    <<: *default-app
+    container_name: app_B
+    ports:
+      - "8001:8000"
+  app_c:
+    <<: *default-app
+    container_name: app_C
+    ports:
+      - "8002:8000"
+  celery_worker_a: &default_worker
+    build:
+      context: ../
+      dockerfile: docker/app/Dockerfile
+      target: prod
+    container_name: celery_worker_a
+    volumes:
+      - ../:/home/web/code
+    depends_on:
+      - db
+      - redis_a
+      - app_a
+      - app_b
+      - app_c
+    env_file:
+      - .env
+    environment: *app_environ
+    command: celery -A night_owl_market worker --pool=threads -l INFO -Q msg_to_db -n worker --concurrency=16
+  celery_worker_b:
+    <<: *default_worker
+    container_name: celery_worker_b
+    command: celery -A night_owl_market worker --pool=prefork -l INFO -Q msg_to_group -n worker_b --concurrency=16
+  celery_worker_a1:
+    <<: *default_worker
+    container_name: celery_worker_a1
+    command: celery -A night_owl_market worker --pool=threads -l INFO -Q msg_to_db -n worker_a1 --concurrency=16
+  celery_worker_b1:
+    <<: *default_worker
+    container_name: celery_worker_b1
+    command: celery -A night_owl_market worker --pool=prefork -l INFO -Q msg_to_group -n worker_b1 --concurrency=16
+  haproxy:
+    build:
+      context: ..
+      dockerfile: docker/haproxy/Dockerfile
+    container_name: haproxy
+    ports:
+      - "80:80"
+    environment:
+      - APP_SCALE_A=app_a
+      - APP_SCALE_B=app_b
+      - APP_SCALE_C=app_c
+    depends_on:
+      - app_a
+      - app_b
+      - app_c
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+volumes:
+  postgres_data:

@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from pathlib import Path
 import os
 from datetime import timedelta
-from firebase_admin import initialize_app
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -49,8 +48,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'django_filters',
     'rest_framework_simplejwt.token_blacklist',
-    'fcm_django',
     'channels',
+    'chat',
 ]
 
 MIDDLEWARE = [
@@ -94,20 +93,37 @@ ASGI_APPLICATION = 'night_owl_market.asgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': '5432',
+        'NAME': os.getenv('DB_NAME', 'night_owl'),
+        'USER': os.getenv('DB_USER', 'postgres'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
+        'HOST': os.getenv('DB_HOST', "127.0.0.1"),
+        'PORT': os.getenv('DB_PORT', 5432),
+    }
+}
+
+broker = os.getenv("BROKER", "127.0.0.1")
+redis_a = os.getenv("REDIS_A", "127.0.0.1")
+redis_b = os.getenv("REDIS_B", "127.0.0.1")
+redis_c = os.getenv("REDIS_C", "127.0.0.1")
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': f'redis://{broker}:6379',
     }
 }
 
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'BACKEND': 'channels_redis.pubsub.RedisPubSubChannelLayer',
         'CONFIG': {
-            "hosts": ["redis://:bNmXoUwvHJxUOiAnLo6cdQElFvdGzOzX@redis-11635.c292.ap-southeast-1-1.ec2.cloud.redislabs.com:11635/0"],
-            #"hosts": [("127.0.0.1", 6379)],
+            #"hosts": ["redis://:bNmXoUwvHJxUOiAnLo6cdQElFvdGzOzX@redis-11635.c292.ap-southeast-1-1.ec2.cloud.redislabs.com:11635/0"],
+            #"hosts": [(redis_b, 6380), (redis_c, 6381), (redis_a, 6379)],
+            "hosts": [
+                f'redis://{redis_c}:6379',
+                f'redis://{redis_b}:6379',
+                f'redis://{redis_a}:6379',
+            ]
         },
     },
 }
@@ -230,21 +246,11 @@ SIMPLE_JWT = {
 CSRF_TRUSTED_ORIGINS = [
     'https://*.night-owl-market-ou.herokuapp.com',
     'https://*.127.0.0.1',
-    'https://*',
-    'http://*']
+    'https://*.0.0.0.0',
+    'http://*',
+    'https://*.ondigitalocean.app']
 
-FIREBASE_APP = initialize_app()
-
-FCM_DJANGO_SETTINGS = {
-     # true if you want to have only one active device per registered user at a time
-     # default: False
-    "ONE_DEVICE_PER_USER": True,
-     # devices to which notifications cannot be sent,
-     # are deleted upon receiving error response from FCM
-     # default: False
-    "DELETE_INACTIVE_DEVICES": True,
-    # Transform create of an existing Device (based on registration id) into
-                # an update. See the section
-    # "Update of device with duplicate registration ID" for more details.
-    "UPDATE_ON_DUPLICATE_REG_ID": True,
+CELERY_ROUTES = {
+    'market.tasks.send_email_task': 'send_mail',
+    'chat.tasks.create_message': 'messaging'
 }
