@@ -90,14 +90,24 @@ ASGI_APPLICATION = 'night_owl_market.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': os.getenv('DB_NAME', 'night_owl'),
+#         'USER': os.getenv('DB_USER', 'postgres'),
+#         'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
+#         'HOST': os.getenv('DB_HOST', "127.0.0.1"),
+#         'PORT': os.getenv('DB_PORT', 5432),
+#     }
+# }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': os.getenv('DB_NAME', 'night_owl'),
-        'USER': os.getenv('DB_USER', 'postgres'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
+        'USER': os.getenv('DB_USER', 'huy'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'huy'),
         'HOST': os.getenv('DB_HOST', "127.0.0.1"),
-        'PORT': os.getenv('DB_PORT', 5432),
+        'PORT': os.getenv('DB_PORT', 3306),
     }
 }
 
@@ -121,8 +131,8 @@ CHANNEL_LAYERS = {
             #"hosts": [(redis_b, 6380), (redis_c, 6381), (redis_a, 6379)],
             "hosts": [
                 f'redis://{redis_c}:6379',
-                f'redis://{redis_b}:6379',
-                f'redis://{redis_a}:6379',
+                #f'redis://{redis_b}:6379',
+                #f'redis://{redis_a}:6379',
             ]
         },
     },
@@ -248,9 +258,33 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.127.0.0.1',
     'https://*.0.0.0.0',
     'http://*',
-    'https://*.ondigitalocean.app']
+    'https://*.ondigitalocean.app'
+]
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
 CELERY_ROUTES = {
     'market.tasks.send_email_task': 'send_mail',
     'chat.tasks.create_message': 'messaging'
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+    },
 }

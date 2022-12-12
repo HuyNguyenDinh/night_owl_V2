@@ -23,8 +23,7 @@ from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 from asgiref.sync import async_to_sync
 from .tasks import *
-from channels.layers import get_channel_layer
-channel_layer = get_channel_layer()
+from django.core.exceptions import ValidationError
 # Create your views here.
 
 
@@ -419,7 +418,10 @@ class ProductViewSet(viewsets.ModelViewSet):
         else:
             serializer = CreateRatingSerializer(data=request.data)
             if serializer.is_valid():
-                serializer.save(creator=request.user, product=pd)
+                try:
+                    serializer.save(creator=request.user, product=pd)
+                except ValidationError as e:
+                    return Response({'message': str(e)}, status=status.HTTP_406_NOT_ACCEPTABLE)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response({'message': 'not valid comment'}, status=status.HTTP_400_BAD_REQUEST)
     

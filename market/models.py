@@ -1,9 +1,10 @@
 import decimal
-
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.contrib.auth.base_user import BaseUserManager 
+from django.contrib.auth.base_user import BaseUserManager
+from django.core.exceptions import ValidationError
+from ckeditor.fields import RichTextField
 # Create your models here.
 
 
@@ -66,7 +67,7 @@ class Address(models.Model):
     ward_id = models.CharField(max_length=255, blank=False, null=False)
     street = models.CharField(max_length=255)
     full_address = models.TextField(default="ABC")
-    note = models.TextField(null=True, blank=True)
+    note = RichTextField()
     creator = models.OneToOneField(User, on_delete=models.CASCADE)
     
     def __str__(self) -> str:
@@ -75,8 +76,8 @@ class Address(models.Model):
 
 class Report(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
-    subject = models.TextField(blank=False, null=False)
-    content = models.TextField(blank=False, null=False)
+    subject = models.TextField()
+    content = RichTextField()
 
     STATUS_CHOICE = (
         (0, 'pending'),
@@ -93,7 +94,7 @@ class Report(models.Model):
 
 
 class Reply(models.Model):
-    content = models.TextField()
+    content = RichTextField()
     created_date = models.DateTimeField(auto_now_add=True)
     report = models.ForeignKey(Report, on_delete=models.CASCADE)
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -112,7 +113,7 @@ class Product(models.Model):
     categories = models.ManyToManyField(Category)
     sold_amount = models.BigIntegerField(default=0, validators=[MinValueValidator(0)])
     picture = models.ImageField(upload_to='night_owl/product', null=True, blank=True)
-    description = models.TextField(blank=True, null=True)
+    description = RichTextField()
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
@@ -123,13 +124,19 @@ class Product(models.Model):
         return Option.objects.filter(base_product=self).aggregate(models.Min('price')).get('price__min')
 
 
+    def save(self, *args, **kwargs):
+        if not self.owner.is_business:
+            raise ValidationError('owner is not business')
+        super().save(*args, **kwargs)
+
+
 class Order(models.Model):
     order_date = models.DateTimeField(auto_now_add=True)
     can_destroy = models.BooleanField(default=True)
     completed_date = models.DateField(null=True)
     shipping_code = models.CharField(max_length=255, blank=True, null=True)
     total_shipping_fee = models.DecimalField(max_digits=20, decimal_places=2, default=0)
-    note = models.TextField(null=True, blank=True)
+    note = models.TextField()
     customer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='customer_order')
     store = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='store_order')
     voucher_apply = models.ForeignKey('Voucher', on_delete=models.SET_NULL, null=True)
@@ -150,12 +157,18 @@ class Order(models.Model):
     )
     payment_type = models.IntegerField(choices=SHIPPING_CHOICES, default=0)
 
+    def save(self, *args, **kwargs):
+        if self.store.id == self.customer.id:
+            raise ValidationError(message="Store cannot buy their product")
+        else:
+            super().save(*args, **kwargs)
+
 
 class Option(models.Model):
     unit = models.CharField(max_length=255, blank=False, null=False)
     unit_in_stock = models.PositiveBigIntegerField(default=1, null=False, blank=False)
     price = models.DecimalField(max_digits=20, decimal_places=2)
-    weight = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
+    weight = models.PositiveIntegerField(default=1)
     height = models.PositiveIntegerField(default=1)
     width = models.PositiveIntegerField(default=1)
     length = models.PositiveIntegerField(default=1)
@@ -164,6 +177,18 @@ class Option(models.Model):
 
     def __str__(self) -> str:
         return self.base_product.name + " " + self.unit
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                name='min_option_price_constraint',
+                check=models.Q(price__gte=decimal.Decimal(1))
+            ),
+            models.CheckConstraint(
+                name='min_dimension_and_weight_option_constraint',
+                check=models.Q(weight__gte=1, height__gte=1, length__gte=1, width__gte=1)
+            )
+        ]
 
 
 class Picture(models.Model):
@@ -178,9 +203,26 @@ class OrderDetail(models.Model):
     product_option = models.ForeignKey(Option, on_delete=models.SET_NULL, null=True)
     cart_id = models.ForeignKey('CartDetail', on_delete=models.SET_NULL, null=True, blank=True)
 
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                name='min_order_detail_unit_price',
+                check=models.Q(unit_price__gte=decimal.Decimal(1))
+            ),
+            models.CheckConstraint(
+                name='min_order_detail_quantity',
+                check=models.Q(quantity__gte=decimal.Decimal(1))
+            )
+        ]
+
+    def save(self, *args, **kwargs):
+        if self.quantity > self.product_option.unit_in_stock:
+            raise ValidationError('not enough unit in stock')
+        super().save(*args, **kwargs)
+
 
 class Bill(models.Model):
-    value = models.DecimalField(max_digits=20, decimal_places=2,validators=[MinValueValidator(0)], null=False, blank=False)
+    value = models.DecimalField(max_digits=20, decimal_places=2, null=False, blank=False)
     date = models.DateTimeField(auto_now_add=True, blank=False, null=False)
     payed = models.BooleanField(default=False, null=False, blank=False)
     order_payed = models.OneToOneField(Order, on_delete=models.CASCADE, default=False)
@@ -189,34 +231,78 @@ class Bill(models.Model):
     def __str__(self):
         return "Order Id: " +  str(self.order_payed.id)
 
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                name='bill_min_value_constraint',
+                check=models.Q(value__gte=decimal.Decimal(0))
+            )
+        ]
+
 
 class CartDetail(models.Model):
-    quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    quantity = models.PositiveIntegerField()
     customer = models.ForeignKey(User, on_delete=models.CASCADE)
     product_option = models.ForeignKey(Option, on_delete=models.CASCADE)
 
     class Meta:
         unique_together = [['customer', 'product_option']]
+        constraints = [
+            models.CheckConstraint(
+                name='cart_quantity_constr',
+                check=models.Q(quantity__gte=1)
+            ),
+        ]
+
+    def save(self, *args, **kwargs):
+        if self.customer.id == self.product_option.base_product.owner_id:
+            raise ValidationError(message="store cannot add their product to their cart")
+        else:
+            super().save(*args, **kwargs)
 
 
 class Rating(models.Model):
-    rate = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
-    comment = models.TextField(null=True, blank=True)
+    rate = models.PositiveIntegerField()
+    comment = RichTextField()
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.creator.first_name + " rated " + self.product.name + "\t" + str(self.rate)
 
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                name='rate_range_constraint',
+                check=models.Q(rate__lte=5, rate__gte=0)
+            )
+        ]
+
+    def save(self, *args, **kwargs):
+        if not Order.objects.filter(customer=self.creator, orderdetail__product_option__base_product=self.product).exists():
+            raise ValidationError(message='Customer must buy product before rating')
+        super().save(*args, **kwargs)
 
 class Voucher(models.Model):
-    discount = models.DecimalField(max_digits=20, decimal_places=2, validators=[MinValueValidator(0)], null=False, blank=False)
+    discount = models.DecimalField(max_digits=20, decimal_places=2, null=False, blank=False)
     start_date = models.DateTimeField(auto_now_add=True)
     end_date = models.DateTimeField(null=True, blank=True)
-    code = models.TextField(default='nightowl', unique=True)
+    code = models.CharField(default='nightowl', unique=True, max_length=24)
     is_percentage = models.BooleanField(default=False)
     products = models.ManyToManyField(Product)
     creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return self.code
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                name='percentage_voucher_constraint',
+                check=models.Q(is_percentage=True) & models.Q(discount__lte=decimal.Decimal(100))
+            ),
+            models.CheckConstraint(
+                name='min_discount_constraint',
+                check=models.Q(discount__gte=decimal.Decimal(0.01))
+            )
+        ]

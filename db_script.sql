@@ -1,0 +1,3 @@
+DROP DATABASE night_owl;
+CREATE DATABASE night_owl;
+GRANT ALL PRIVILEGES ON *.* TO 'huy'@'%';

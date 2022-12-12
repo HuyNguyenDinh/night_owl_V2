@@ -9,6 +9,7 @@ broker = os.getenv("BROKER", "127.0.0.1")
 app = Celery('night_owl_market',
              broker=f'redis://{broker}:6379/1',
              backend=f'redis://{broker}:6379/2')
+
 app.conf.update(
     result_expires=3600,
 )

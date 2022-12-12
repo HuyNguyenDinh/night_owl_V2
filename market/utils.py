@@ -13,14 +13,10 @@ from threading import Thread
 from night_owl_market import settings
 from django.core.mail import send_mail
 
-
 # Check voucher available at now
 def check_now_in_datetime_range(start_date, end_date) -> bool:
     now = timezone.now()
-    if end_date is not None:
-        return now >= start_date and now <= end_date
-    else:
-        return now >= start_date
+    return now >= start_date and (end_date is None or now < end_date)
 
 
 # Check voucher
