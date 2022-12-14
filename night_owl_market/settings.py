@@ -90,26 +90,26 @@ ASGI_APPLICATION = 'night_owl_market.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': os.getenv('DB_NAME', 'night_owl'),
-#         'USER': os.getenv('DB_USER', 'postgres'),
-#         'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
-#         'HOST': os.getenv('DB_HOST', "127.0.0.1"),
-#         'PORT': os.getenv('DB_PORT', 5432),
-#     }
-# }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': os.getenv('DB_NAME', 'night_owl'),
-        'USER': os.getenv('DB_USER', 'huy'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'huy'),
+        'USER': os.getenv('DB_USER', 'postgres'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
         'HOST': os.getenv('DB_HOST', "127.0.0.1"),
-        'PORT': os.getenv('DB_PORT', 3306),
+        'PORT': os.getenv('DB_PORT', 5432),
     }
 }
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': os.getenv('DB_NAME', 'night_owl'),
+#         'USER': os.getenv('DB_USER', 'night_owl'),
+#         'PASSWORD': os.getenv('DB_PASSWORD', 'nightowl'),
+#         'HOST': os.getenv('DB_HOST', "127.0.0.1"),
+#         'PORT': os.getenv('DB_PORT', 3306),
+#     }
+# }
 
 broker = os.getenv("BROKER", "127.0.0.1")
 redis_a = os.getenv("REDIS_A", "127.0.0.1")

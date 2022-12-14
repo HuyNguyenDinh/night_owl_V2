@@ -13,6 +13,8 @@ from market.baker_recipes import *
 import numpy as np
 from market.serializers import *
 from market.paginations import *
+from django.conf import settings
+import os
 
 
 cloudinary_sameple_response = {
@@ -155,7 +157,7 @@ class ProductViewSetTest(APITestCase):
         self.client.force_authenticate(user=self.users[0])
 
         ### Make a base64 string from an image
-        with open("/home/dinhhuy2005/Downloads/test_img.jpeg", "rb") as image_file:
+        with open(os.path.abspath(f'%s/tests/test_img.jpeg' % settings.BASE_DIR), "rb") as image_file:
             encoded_string = base64.b64encode(image_file.read()).decode()
 
             ### make data dict as request payload
@@ -179,7 +181,7 @@ class ProductViewSetTest(APITestCase):
     def test_put_product(self, post_cloudinary_mock):
         post_cloudinary_mock.return_value = cloudinary_sameple_response
         self.client.force_authenticate(user=self.users[0])
-        with open("/home/dinhhuy2005/Downloads/test_img.jpeg", "rb") as image_file:
+        with open(os.path.abspath(f'%s/tests/test_img.jpeg' % settings.BASE_DIR), "rb") as image_file:
             encoded_string = base64.b64encode(image_file.read()).decode()
             data = {
                 "name": "IPhone 11 Pro Max",
@@ -224,7 +226,7 @@ class ProductViewSetTest(APITestCase):
     def test_add_option(self, post_cloudinary_mock):
         post_cloudinary_mock.return_value = cloudinary_sameple_response
         self.client.force_authenticate(user=self.users[0])
-        with open("/home/dinhhuy2005/Downloads/test_img.jpeg", "rb") as image_file:
+        with open(os.path.abspath(f'%s/tests/test_img.jpeg' % settings.BASE_DIR), "rb") as image_file:
             encoded_string = base64.b64encode(image_file.read()).decode()
             data = {
                 "unit": "Blue",

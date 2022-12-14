@@ -23,7 +23,7 @@ product_option = Recipe(Option, unit_in_stock=50)
 
 order = Recipe(Order, total_shipping_fee=25000, shipping_code='LLXHKE', note='abc')
 
-order_detail = Recipe(OrderDetail, quantity=2)
+order_detail = Recipe(OrderDetail, quantity=2, unit_price=1)
 
 bill = Recipe(Bill, value=200025000)
 

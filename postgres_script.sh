@@ -1,0 +1,1 @@
+sudo -h 127.0.0.1 -u postgres psql < postgres_db.sql

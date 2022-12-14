@@ -111,10 +111,18 @@ class Product(models.Model):
     name = models.CharField(max_length=255, blank=False, null=False)
     is_available = models.BooleanField(default=True)
     categories = models.ManyToManyField(Category)
-    sold_amount = models.BigIntegerField(default=0, validators=[MinValueValidator(0)])
+    sold_amount = models.BigIntegerField(default=0)
     picture = models.ImageField(upload_to='night_owl/product', null=True, blank=True)
     description = RichTextField()
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                name='sold_amount_positive',
+                check=models.Q(sold_amount__gte=0)
+            )
+        ]
 
     def __str__(self) -> str:
         return self.name
@@ -157,8 +165,16 @@ class Order(models.Model):
     )
     payment_type = models.IntegerField(choices=SHIPPING_CHOICES, default=0)
 
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                name='positive_total_shipping_fee',
+                check=models.Q(total_shipping_fee__gte=0)
+            )
+        ]
+
     def save(self, *args, **kwargs):
-        if self.store.id == self.customer.id:
+        if self.store and self.customer and self.store.id == self.customer.id:
             raise ValidationError(message="Store cannot buy their product")
         else:
             super().save(*args, **kwargs)
@@ -198,7 +214,7 @@ class Picture(models.Model):
 
 class OrderDetail(models.Model):
     quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
-    unit_price = models.DecimalField(max_digits=20, decimal_places=2, validators=[MinValueValidator(1)], default=1)
+    unit_price = models.DecimalField(max_digits=20, decimal_places=2)
     order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
     product_option = models.ForeignKey(Option, on_delete=models.SET_NULL, null=True)
     cart_id = models.ForeignKey('CartDetail', on_delete=models.SET_NULL, null=True, blank=True)
@@ -207,11 +223,11 @@ class OrderDetail(models.Model):
         constraints = [
             models.CheckConstraint(
                 name='min_order_detail_unit_price',
-                check=models.Q(unit_price__gte=decimal.Decimal(1))
+                check=models.Q(unit_price__gte=1)
             ),
             models.CheckConstraint(
                 name='min_order_detail_quantity',
-                check=models.Q(quantity__gte=decimal.Decimal(1))
+                check=models.Q(quantity__gte=1)
             )
         ]
 
@@ -274,7 +290,7 @@ class Rating(models.Model):
         constraints = [
             models.CheckConstraint(
                 name='rate_range_constraint',
-                check=models.Q(rate__lte=5, rate__gte=0)
+                check=models.Q(rate__lte=5, rate__gte=1)
             )
         ]
 
@@ -304,5 +320,9 @@ class Voucher(models.Model):
             models.CheckConstraint(
                 name='min_discount_constraint',
                 check=models.Q(discount__gte=decimal.Decimal(0.01))
+            ),
+            models.CheckConstraint(
+                name='voucher_end_date_gte_start_date_constraint',
+                check=models.Q(end_date__isnull=True) | models.Q(end_date__gt=models.F('start_date'))
             )
         ]
