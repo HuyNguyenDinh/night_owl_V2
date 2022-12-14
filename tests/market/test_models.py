@@ -2,7 +2,7 @@ from market.models import *
 from model_bakery import baker
 from django.test import TestCase
 from market.baker_recipes import *
-from django.db.utils import IntegrityError
+from django.db.utils import IntegrityError, DataError
 
 
 class UserModelTest(TestCase):
@@ -47,18 +47,18 @@ class CartDetailModelTest(TestCase):
         self.assertRaises(ValidationError, baker.make, _model=CartDetail, customer=self.user_huy, product_option=self.product_option)
 
     def test_add_product_valid(self):
-        cart_detail = cart.make(customer=user_normal.make())
+        cart_detail = cart.make(customer=user_normal.make(), product_option=self.product_option)
         self.assertEqual(cart_detail, CartDetail.objects.last())
 
     def test_add_negative_quantity(self):
-        self.assertRaises(IntegrityError, baker.make, _model=CartDetail, quantity=-2)
+        self.assertRaises(DataError, baker.make, _model=CartDetail, quantity=-2, product_option=self.product_option)
 
 
 class ReportModelTest(TestCase):
 
     def setUp(self) -> None:
         self.user = user_huy.make()
-        self.report = baker.make(Report, _quantity=5, reporter=self.user)
+        self.report = baker.make(Report, _quantity=5, reporter=self.user, content="abc")
 
     def test_report_created(self) -> None:
         self.assertEqual(self.report, list(Report.objects.all()))
@@ -66,8 +66,8 @@ class ReportModelTest(TestCase):
 
 class ReplyModelTest(TestCase):
     def setUp(self) -> None:
-        self.report = baker.make(Report)
-        self.reply = baker.make(Reply, report=self.report)
+        self.report = baker.make(Report, content='abc')
+        self.reply = baker.make(Reply, report=self.report, content='abc')
 
     def test_reply_created(self) -> None:
         self.assertEqual(self.reply, Reply.objects.first())

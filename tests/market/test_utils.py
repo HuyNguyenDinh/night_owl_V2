@@ -56,13 +56,13 @@ class ProductOrderOptionTest(TestCase):
         categories = ['Smartphone', 'Laptop', 'Clothes', 'Watch', 'Sneaker']
         self.categories = baker.make(Category, _quantity=5, name=cycle(categories))
         self.users = [baker.make_recipe('market.user_huy'), baker.make_recipe('market.user_normal')]
-        self.address = [huy_address.make(creator=self.users[0]), user_normal_address.make(creator=self.users[1])]
-        self.product = product.make(owner=self.users[0], categories=self.categories)
+        self.address = [huy_address.make(creator=self.users[0], note='abc'), user_normal_address.make(creator=self.users[1], note='abc')]
+        self.product = product.make(owner=self.users[0], categories=self.categories, description='abc')
         unit = ['rose', 'gold', 'red']
         price = [30000000, 33000000, 31000000]
         self.product_options = product_option.make(_quantity=3, unit=cycle(unit), price=cycle(price), base_product=self.product)
         self.voucher = voucher.make(creator=self.users[0], products=[self.product])
-        self.cart = cart.make(customer=self.users[1])
+        self.cart = cart.make(customer=self.users[1], product_option=self.product_options[0])
         self.order = baker.make(Order, customer=self.users[1], store=self.users[0], total_shipping_fee=25000)
         self.order_details = order_detail.make(_quantity=3, product_option=cycle(self.product_options),
                                                unit_price=cycle(price), order=self.order)

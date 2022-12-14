@@ -102,7 +102,8 @@ class ProductViewSetTest(APITestCase):
         "owner" (Foreign key)
         """
         product_name = ["IPhone", "Macbook"]
-        self.products: list[Product] = product.make(_quantity=2, name=cycle(product_name), categories=self.categories, owner=self.users[0])
+        self.products: list[Product] = product.make(_quantity=2, name=cycle(product_name), categories=self.categories,
+                                                    owner=self.users[0], description='abc')
 
         """
         List unit and price of product option as zip() function

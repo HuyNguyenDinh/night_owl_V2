@@ -136,7 +136,7 @@ class Order(models.Model):
     completed_date = models.DateField(null=True)
     shipping_code = models.CharField(max_length=255, blank=True, null=True)
     total_shipping_fee = models.DecimalField(max_digits=20, decimal_places=2, default=0)
-    note = models.TextField()
+    note = models.TextField(blank=True, null=True)
     customer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='customer_order')
     store = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='store_order')
     voucher_apply = models.ForeignKey('Voucher', on_delete=models.SET_NULL, null=True)
