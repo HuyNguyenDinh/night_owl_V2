@@ -22,5 +22,6 @@ until postgres_ready; do
 done
 
 >&2 echo "Postgres is up - continuing..."
+
 # Here the received command is executed
 exec "$@"

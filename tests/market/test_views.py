@@ -5,8 +5,6 @@ from market.models import *
 import base64
 import json
 from unittest.mock import patch
-from PIL import Image
-from django.core.files import File
 from model_bakery import baker
 from itertools import cycle
 from market.baker_recipes import *
@@ -15,7 +13,7 @@ from market.serializers import *
 from market.paginations import *
 from django.conf import settings
 import os
-
+from market.market_recipes.orders import *
 
 cloudinary_sameple_response = {
     "asset_id": "b5e6d2b39ba3e0869d67141ba7dba6cf",
@@ -70,6 +68,9 @@ class CategoryViewSetTest(APITestCase):
 
 
 class UserViewSet(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = user_huy.make()
     def test_create_user(self):
         data = {
           "first_name": "Business",
@@ -80,6 +81,11 @@ class UserViewSet(APITestCase):
         }
         response = self.client.post(path=f'/market/users/', data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_get_current_user(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(path=f'/market/users/current-user/', format='json')
+        self.assertEqual(response.data, UserSerializer(self.user).data)
 
 
 class ProductViewSetTest(APITestCase):
@@ -104,8 +110,8 @@ class ProductViewSetTest(APITestCase):
         "owner" (Foreign key)
         """
         product_name = ["IPhone", "Macbook"]
-        self.products: list[Product] = product.make(_quantity=2, name=cycle(product_name), categories=self.categories,
-                                                    owner=self.users[0], description='abc')
+        self.products: list[Product] = product_ip_14_pro_max.make(_quantity=2, name=cycle(product_name), categories=self.categories,
+                                                                  owner=self.users[0], description='abc')
 
         """
         List unit and price of product option as zip() function
@@ -266,3 +272,14 @@ class ProductViewSetTest(APITestCase):
         self.client.force_authenticate(user=self.users[0])
         response = self.client.get(f'/market/products/{self.products[0].id}/vouchers-available/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+class OrderViewSetTest(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.order_details = order_detail_product_option_recipe.make()
+
+    def test_get_order(self):
+        self.assertEqual(self.order_details[0].order, Order.objects.last())
+
+    def test_get_customer_order(self):
+        self.assertEqual(self.order_details.order.store, User.objects.get(phone_number="0937461321"))

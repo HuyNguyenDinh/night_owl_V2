@@ -213,7 +213,7 @@ class Picture(models.Model):
 
 
 class OrderDetail(models.Model):
-    quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    quantity = models.PositiveIntegerField()
     unit_price = models.DecimalField(max_digits=20, decimal_places=2)
     order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
     product_option = models.ForeignKey(Option, on_delete=models.SET_NULL, null=True)

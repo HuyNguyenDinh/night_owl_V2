@@ -18,14 +18,14 @@ tzinfo = pytz.UTC
 
 class EmailTest(TestCase):
     @parameterized.expand([
-        ('huyn27316@gmail.com', 'Subject a', 'Test a'),
-        ('huyn27317@gmail.com', 'Subject b', 'Test b'),
-        ('huyn27318@gmail.com', 'Subject c', 'Test c'),
-        ('huyn27319@gmail.com', 'Subject d', 'Test d')
+        ('huyn27316@gmail.com', 'Subject a', 'Test a', 1),
+        ('huyn27317@gmail.com', 'Subject b', 'Test b', 1),
+        ('huyn27318@gmail.com', 'Subject c', 'Test c', 1),
+        ('huyn27319@gmail.com', 'Subject d', 'Test d', 1)
     ])
-    def test_send_email(self, receiver, subject, content):
+    def test_send_email(self, receiver, subject, content, expected):
         send_email(receiver, subject, content)
-        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox), expected)
         self.assertEqual(mail.outbox[0].subject, subject)
 
 
@@ -57,7 +57,7 @@ class ProductOrderOptionTest(TestCase):
         self.categories = baker.make(Category, _quantity=5, name=cycle(categories))
         self.users = [baker.make_recipe('market.user_huy'), baker.make_recipe('market.user_normal')]
         self.address = [huy_address.make(creator=self.users[0], note='abc'), user_normal_address.make(creator=self.users[1], note='abc')]
-        self.product = product.make(owner=self.users[0], categories=self.categories, description='abc')
+        self.product = product_ip_14_pro_max.make(owner=self.users[0], categories=self.categories, description='abc')
         unit = ['rose', 'gold', 'red']
         price = [30000000, 33000000, 31000000]
         self.product_options = product_option.make(_quantity=3, unit=cycle(unit), price=cycle(price), base_product=self.product)

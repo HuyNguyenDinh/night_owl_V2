@@ -10,10 +10,7 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=default
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=night_owl
     volumes:
       - ./sql/psql-init:/docker-entrypoint-initdb.d
       - postgres_data:/var/lib/postgresql/data/
@@ -33,7 +30,6 @@ services:
     build:
       context: ../
       dockerfile: docker/app/Dockerfile
-      target: prod
     container_name: app_A
     restart: always
     depends_on:
@@ -47,6 +43,7 @@ services:
       - .env
     environment: &app_environ
       - DB_HOST=db
+      - DB_NAME=night_owl
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - DB_PORT=5432
@@ -56,6 +53,8 @@ services:
       - REDIS_C=redis_c
     volumes:
       - ../:/home/web/code
+      - static_volume:/home/web/code/staticfiles
+    command: bash -c "python manage.py migrate && python -m daphne -b 0.0.0.0 -p 8000 night_owl_market.asgi:application"
   app_b:
     <<: *default-app
     container_name: app_B
@@ -70,7 +69,6 @@ services:
     build:
       context: ../
       dockerfile: docker/app/Dockerfile
-      target: prod
     container_name: celery_worker_a
     volumes:
       - ../:/home/web/code
@@ -115,3 +113,4 @@ services:
       - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
 volumes:
   postgres_data:
+  static_volume:

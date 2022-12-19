@@ -1,4 +1,4 @@
-FROM python:3.10 as base
+FROM python:3.10
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 # Create a user to avoid running containers as root in production
@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y -q --no-install-recommends \
   libpq-dev \
   # cleaning up unused files to reduce the image size
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
-  && rm -rf /var/lib/apt/lists/* \
+  && rm -rf /var/lib/apt/lists/*
 # Switch to the non-root user
 USER web
 # Create a directory for the source code and use it as base path
@@ -30,30 +30,3 @@ COPY --chown=web:web ./docker/start-celery-worker.sh /usr/local/bin/start-celery
 USER web
 # This script will run before every command executed in the container
 ENTRYPOINT ["entrypoint.sh"]
-
-
-# Define an image for local development. Inherits common packages from the base stage.
-FROM base as dev
-# Copy the scripts that starts the development application server (runserver)
-COPY --chown=web:web ./docker/start-dev-server.sh /usr/local/bin/start-dev-server.sh
-USER root
-RUN chmod +x /usr/local/bin/start-dev-server.sh
-USER web
-# The development server starts by default when the container starts
-CMD ["start-dev-server.sh"]
-
-
-# Define an image for production. Inherits common packages from the base stage.
-FROM base as prod
-# Install extra packages required in production
-USER root
-COPY --chown=web:web ./requirements.txt requirements.txt
-RUN python -m pip install --no-cache-dir -r requirements.txt
-# Copy the script that starts the production application server (gunicorn)
-COPY --chown=web:web ./docker/start-prod-server.sh /usr/local/bin/start-prod-server.sh
-RUN chmod +x /usr/local/bin/start-prod-server.sh
-USER web
-# Copy the source code of our django app to the working directoy
-COPY --chown=web:web . ./
-# The production server starts by default when the container starts
-CMD ["start-prod-server.sh"]

@@ -17,7 +17,7 @@ huy_address = Recipe(Address, province_id=202, district_id=1449, ward_id="20709"
 user_normal_address = Recipe(Address, province_id=204, district_id=1536, ward_id="480126", street="67/13 Hoàng Minh Chánh",
                              full_address="67/13 Hoàng Minh Chánh, phường Hóa An, TP Biên Hòa, Đồng Nai", note='abc')
 
-product = Recipe(Product, name='IPhone 14 Pro Max 512GB', sold_amount=10, description='abc')
+product_ip_14_pro_max = Recipe(Product, name='IPhone 14 Pro Max 512GB', sold_amount=10, description='abc')
 
 product_option = Recipe(Option, unit_in_stock=50)
 

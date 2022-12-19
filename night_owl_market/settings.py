@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'channels',
     'chat',
+    'ckeditor',
 ]
 
 MIDDLEWARE = [
@@ -131,8 +132,8 @@ CHANNEL_LAYERS = {
             #"hosts": [(redis_b, 6380), (redis_c, 6381), (redis_a, 6379)],
             "hosts": [
                 f'redis://{redis_c}:6379',
-                #f'redis://{redis_b}:6379',
-                #f'redis://{redis_a}:6379',
+                f'redis://{redis_b}:6379',
+                f'redis://{redis_a}:6379',
             ]
         },
     },

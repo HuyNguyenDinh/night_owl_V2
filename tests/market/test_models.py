@@ -5,6 +5,14 @@ from market.baker_recipes import *
 from django.db.utils import IntegrityError, DataError
 from django.utils import timezone
 
+class UserProductOrderData(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user_huy = user_huy.make()
+        cls.user_normal = user_normal.make()
+        cls.product = product_ip_14_pro_max.make(owner=cls.user_huy)
+        cls.product_option = product_option.make(base_product=cls.product)
+        cls.order = order.make(store=cls.user_huy, customer=cls.user_normal)
 
 class UserModelTest(TestCase):
 
@@ -12,7 +20,7 @@ class UserModelTest(TestCase):
         self.user = baker.make_recipe('market.user_huy')
 
     def test_user_created(self) -> None:
-        self.assertEqual(self.user, User.objects.first())
+        self.assertEqual(self.user, User.objects.last())
 
     def test_create_user_with_email_exist(self) -> None:
         self.assertRaises(IntegrityError, baker.make, _model=User, email=self.user.email)
@@ -32,22 +40,22 @@ class AddressModelTest(TestCase):
 class ProductModelTest(TestCase):
     def setUp(self) -> None:
         self.user_huy = user_huy.make()
-        self.product = product.make(owner=self.user_huy)
+        self.product = product_ip_14_pro_max.make(owner=self.user_huy)
 
     def test_product_created(self) -> None:
         self.assertEqual(self.product, Product.objects.last())
 
     def test_add_product_by_customer(self) -> None:
         user_normal_temp = user_normal.make()
-        self.assertRaises(ValidationError, product.make, owner=user_normal_temp)
+        self.assertRaises(ValidationError, product_ip_14_pro_max.make, owner=user_normal_temp)
 
     def test_negative_sold_amount(self) -> None:
-        self.assertRaises(IntegrityError, product.make, owner=self.user_huy, sold_amount=-1)
+        self.assertRaises(IntegrityError, product_ip_14_pro_max.make, owner=self.user_huy, sold_amount=-1)
 
 class OptionModelTest(TestCase):
     def setUp(self) -> None:
         self.user_huy = user_huy.make()
-        self.product = product.make(owner=self.user_huy)
+        self.product = product_ip_14_pro_max.make(owner=self.user_huy)
 
     def test_add_option_with_negative_price(self) -> None:
         self.assertRaises(IntegrityError, product_option.make, base_product=self.product, price=-9)
@@ -68,7 +76,7 @@ class OptionModelTest(TestCase):
 class CartDetailModelTest(TestCase):
     def setUp(self) -> None:
         self.user_huy = user_huy.make()
-        self.product = product.make(owner=self.user_huy)
+        self.product = product_ip_14_pro_max.make(owner=self.user_huy)
         self.product_option = product_option.make(base_product=self.product, unit="a", price=20000)
 
     def test_add_store_product_to_store_cart(self):
@@ -132,7 +140,7 @@ class OrderModelTest(TestCase):
 class VoucherModelTest(TestCase):
     def setUp(self) -> None:
         self.user_huy = user_huy.make()
-        self.product = product.make(owner=self.user_huy)
+        self.product = product_ip_14_pro_max.make(owner=self.user_huy)
 
     def test_create_valid_voucher(self) -> None:
         voucher_temp = voucher.make()
@@ -145,13 +153,8 @@ class VoucherModelTest(TestCase):
         self.assertRaises(IntegrityError, voucher.make, _quantity=2, code='ABCXYZ')
 
 
-class RatingModelTest(TestCase):
+class RatingModelTest(UserProductOrderData):
     def setUp(self) -> None:
-        self.user_huy = user_huy.make()
-        self.user_normal = user_normal.make()
-        self.product = product.make(owner=self.user_huy)
-        self.product_option = product_option.make(base_product=self.product)
-        self.order = order.make(store=self.user_huy, customer=self.user_normal)
         self.order_detail = order_detail.make(product_option=self.product_option, order=self.order)
 
     def test_create_valid_rating(self) -> None:
@@ -165,16 +168,9 @@ class RatingModelTest(TestCase):
         self.assertRaises(IntegrityError, rating.make, creator=self.user_normal, product=self.product, rate=-1)
 
     def test_create_rating_without_bought(self) -> None:
-        self.assertRaises(ValidationError, rating.make, creator=self.user_normal, product=product.make(owner=self.user_huy))
+        self.assertRaises(ValidationError, rating.make, creator=self.user_normal, product=product_ip_14_pro_max.make(owner=self.user_huy))
 
-class OrderDetailModelTest(TestCase):
-    def setUp(self) -> None:
-        self.user_huy = user_huy.make()
-        self.user_normal = user_normal.make()
-        self.product = product.make(owner=self.user_huy)
-        self.product_option = product_option.make(base_product=self.product)
-        self.order = order.make(store=self.user_huy, customer=self.user_normal)
-
+class OrderDetailModelTest(UserProductOrderData):
     def test_create_valid_order_detail(self) -> None:
         orderdetail = order_detail.make(order=self.order, product_option=self.product_option)
         self.assertEqual(orderdetail, OrderDetail.objects.last())
@@ -192,13 +188,7 @@ class OrderDetailModelTest(TestCase):
         self.assertRaises(IntegrityError, order_detail.make, order=self.order, unit_price=-1, product_option=self.product_option)
 
 
-class BillModelTest(TestCase):
-    def setUp(self) -> None:
-        self.user_huy = user_huy.make()
-        self.user_normal = user_normal.make()
-        self.product = product.make(owner=self.user_huy)
-        self.product_option = product_option.make(base_product=self.product)
-        self.order = order.make(store=self.user_huy, customer=self.user_normal)
+class BillModelTest(UserProductOrderData):
 
     def test_create_valid_bill(self) -> None:
         bill_temp = bill.make(order_payed=self.order, customer=self.user_normal)
