@@ -282,4 +282,4 @@ class OrderViewSetTest(APITestCase):
         self.assertEqual(self.order_details[0].order, Order.objects.last())
 
     def test_get_customer_order(self):
-        self.assertEqual(self.order_details.order.store, User.objects.get(phone_number="0937461321"))
+        self.assertEqual(self.order_details[0].order.store, User.objects.get(phone_number="0937461321"))
