@@ -67,7 +67,7 @@ class Address(models.Model):
     ward_id = models.CharField(max_length=255, blank=False, null=False)
     street = models.CharField(max_length=255)
     full_address = models.TextField(default="ABC")
-    note = RichTextField()
+    note = RichTextField(blank=True, null=True)
     creator = models.OneToOneField(User, on_delete=models.CASCADE)
     
     def __str__(self) -> str:
@@ -279,7 +279,7 @@ class CartDetail(models.Model):
 
 class Rating(models.Model):
     rate = models.PositiveIntegerField()
-    comment = RichTextField()
+    comment = RichTextField(blank=True, null=True)
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
 
@@ -315,7 +315,7 @@ class Voucher(models.Model):
         constraints = [
             models.CheckConstraint(
                 name='percentage_voucher_constraint',
-                check=models.Q(is_percentage=True) & models.Q(discount__lte=decimal.Decimal(100))
+                check=models.Q(is_percentage=False) | (models.Q(is_percentage=True) & models.Q(discount__lte=decimal.Decimal(100)))
             ),
             models.CheckConstraint(
                 name='min_discount_constraint',

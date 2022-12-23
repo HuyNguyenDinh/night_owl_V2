@@ -299,6 +299,7 @@ def complete_checkout_orders_with_payment_gateway(order_ids: list[int]) -> bool:
 def calculate_shipping_fee(order_id: int) -> str:
     order = Order.objects.get(pk=order_id)
     store = order.store
+    print(store)
     customer = order.customer
     max_lwh = calculate_max_lwh(order_id=order.id)
     data = {
