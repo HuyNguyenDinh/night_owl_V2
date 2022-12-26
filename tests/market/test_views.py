@@ -13,7 +13,6 @@
 # from market.serializers import *
 # from django.conf import settings
 # import os
-# from market.recipes.orders import *
 # from abc import ABC, abstractmethod
 #
 # cloudinary_sameple_response = {

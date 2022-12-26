@@ -1,2 +1,2 @@
-from tests.market.fixtures.models.base_recipes import general_cart_detail
+from market.baker_recipes import general_cart_detail
 from tests.market.fixtures.recipe_setups import set_recipe_relationship

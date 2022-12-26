@@ -4,8 +4,7 @@
 # from django.db.utils import IntegrityError
 # from django.utils import timezone
 # from tests.market.fixtures.models.base_recipes import *
-# from tests.market.fixtures.entities.business import *
-#
+# from tests.market.fixtures.entities.users import *
 #
 # class UserProductOrderData(TestCase):
 #     @classmethod
@@ -71,17 +70,6 @@
 #
 #     def test_add_option_with_zero_weight(self) -> None:
 #         self.assertRaises(IntegrityError, product_option.make, base_product=self.product, weight=0)
-#
-# class CartDetailModelTest(TestCase):
-#     def test_create_cart(self) -> None:
-#         temp_cart = general_cart_detail.extend(
-#             product_option=foreign_key(business_product_option.extend(
-#                 base_product=foreign_key(business_product.extend(name="Test change"))
-#             ))
-#         )
-#         temp_cart = temp_cart.make()
-#         self.assertEqual(CartDetail.objects.last(), temp_cart)
-#         self.assertEqual(CartDetail.objects.last().product_option.base_product.name, "Test change")
 #
 # class ReportModelTest(TestCase):
 #
