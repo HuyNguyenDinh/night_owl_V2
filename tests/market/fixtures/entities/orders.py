@@ -1,4 +1,28 @@
 from market.baker_recipes import general_order
+from model_bakery.recipe import Recipe
+from market.models import *
+from typing import List
+
+# def order_instance(_order_detail_recipe: Recipe,
+#                           _order_recipe: Recipe,
+#                           _customer: User,
+#                           _cart_id: CartDetail,
+#                           **kwargs) -> Order:
+#     return _order_detail_recipe.make(
+#         order=_order_recipe.make(
+#             customer=_customer,
+#             store=_cart_id.product_option.base_product.owner
+#         ),
+#         product_option=_cart_id.product_option,
+#         unit_price=_cart_id.product_option.price,
+#         **kwargs
+#     ).order
+
+def order_instance(_order_recipe: Recipe,
+                   _customer: User,
+                   _store: User,
+                   **kwargs) -> Order:
+    return _order_recipe.make(customer=_customer, store=_store, **kwargs)
 
 uncheckout_order = general_order.extend(status=0)
 

@@ -1,15 +1,9 @@
-from tests.market.fixtures.entities.valid_logic import *
-from tests.market.fixtures.entities.users import *
-from tests.market.fixtures.usecases.recipes import *
 from tests.market.test_models_new import ITestCase
-from django.test.testcases import TransactionTestCase
-from django.test import override_settings
+from django.test.testcases import TestCase
+from tests.market.fixtures.usecases.recipes import *
 from rest_framework.test import APIClient
 from rest_framework import status
 from market.models import *
-from market.baker_recipes import *
-from unittest.mock import patch
-import os
 
 cloudinary_sameple_response = {
     "asset_id": "b5e6d2b39ba3e0869d67141ba7dba6cf",
@@ -49,34 +43,23 @@ class IAPITestCase(ITestCase):
     api_client: APIClient
 
 class IOrderViewSetTest(IAPITestCase):
-    @override_settings(DATABASES={
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': os.getenv('DB_NAME', 'test_night_owl'),
-            'USER': os.getenv('DB_USER', 'postgres'),
-            'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
-            'HOST': os.getenv('DB_HOST', "127.0.0.1"),
-            'PORT': os.getenv('DB_PORT', 5432),
-        }
-    })
+    cart: CartDetail
     def create(self) -> None:
-        self.api_client.force_authenticate(user=self.users.get('customer'))
+        self.api_client.force_authenticate(user=self.cart.customer)
         data = {
             "list_cart": [
-                add_to_cart.cart_detail.id
+                self.cart.id
             ]
         }
         response = self.api_client.post(f"/market/orders/", data=data,format='json')
         print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-class OrderViewSetTest(IOrderViewSetTest, TransactionTestCase):
-    def setUp(self) -> None:
-        self.users = {
-            'customer': buying.customer_has_address,
-            'business': selling.business_has_address,
-        }
-        self.api_client = APIClient()
+class OrderViewSetTest(IOrderViewSetTest, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.cart = add_to_cart.valid_cart_detail()
+        cls.api_client = APIClient()
 
     def test_create(self) -> None:
         self.create()
