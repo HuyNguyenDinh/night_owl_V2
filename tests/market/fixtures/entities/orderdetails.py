@@ -7,5 +7,5 @@ from itertools import cycle
 def order_detail_instance(_order_detail_recipe: Recipe,
                           _order: Order,
                           _product_option: Option,
-                          **kwargs) -> OrderDetail:
+                          **kwargs) -> OrderDetail | List[OrderDetail]:
     return _order_detail_recipe.make(order=_order, product_option=_product_option, **kwargs)

@@ -14,5 +14,5 @@ business = general_user.extend(email_verified=True, phone_verified=True, is_busi
 
 def user_has_address_instance(_address_recipe: Recipe,
                               _customer_recipe: Recipe,
-                              **kwargs) -> User | List[User]:
+                              **kwargs) -> User:
     return _address_recipe.make(creator=_customer_recipe.make(**kwargs)).creator

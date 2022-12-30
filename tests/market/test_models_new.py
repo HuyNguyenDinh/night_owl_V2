@@ -1,6 +1,6 @@
 from django.test.testcases import TestCase
 from tests.market.fixtures.entities.users import *
-from tests.market.fixtures.usecases.recipes import *
+from tests.market.fixtures.usecases.instance_results import *
 from market.baker_recipes import *
 from tests.market.fixtures.entities.valid_logic import *
 from market.models import *

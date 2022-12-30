@@ -21,7 +21,7 @@ from typing import List
 def order_instance(_order_recipe: Recipe,
                    _customer: User,
                    _store: User,
-                   **kwargs) -> Order:
+                   **kwargs) -> Order | List[Order]:
     return _order_recipe.make(customer=_customer, store=_store, **kwargs)
 
 uncheckout_order = general_order.extend(status=0)

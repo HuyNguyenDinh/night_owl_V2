@@ -1,4 +1,4 @@
-from tests.market.fixtures.usecases.recipes.add_to_cart import *
+from tests.market.fixtures.usecases.instance_results.add_to_cart import *
 from tests.market.fixtures.entities.orders import *
 from tests.market.fixtures.entities.cartdetail import *
 from tests.market.fixtures.entities.users import *

@@ -4,11 +4,8 @@ from model_bakery.recipe import Recipe
 from market.models import *
 from typing import List
 
-def product_option_instance(_product_option_recipe: Recipe, _product: Product, **kwargs) -> Option:
+def product_option_instance(_product_option_recipe: Recipe, _product: Product, **kwargs) -> Option | List[Option]:
     return _product_option_recipe.make(base_product=_product, **kwargs)
-
-def product_option_instances(_product_option_recipe: Recipe, _product: Product, _quantity: int, **kwargs) -> List[Option]:
-    return _product_option_recipe.make(_quantity=_quantity, base_product=_product, **kwargs)
 
 product_option_empty = general_product_option.extend(unit_in_stock=0)
 product_option_full = general_product_option.extend(unit_in_stock=BigIntegerField.MAX_BIGINT)

@@ -1,4 +1,4 @@
-from tests.market.fixtures.usecases.recipes.selling import business_has_address
+from tests.market.fixtures.usecases.instance_results.selling import business_has_address
 from market.baker_recipes import *
 from tests.market.fixtures.entities.products import *
 from typing import List

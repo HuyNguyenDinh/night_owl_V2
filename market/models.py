@@ -5,7 +5,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.auth.base_user import BaseUserManager
 from django.core.exceptions import ValidationError
 from ckeditor.fields import RichTextField
-# Create your models here.
+from model_bakery.recipe import Recipe
 
 
 class CustomUserManager(BaseUserManager):
@@ -58,6 +58,17 @@ class User(AbstractUser):
     def __str__(self) -> str:
         return self.first_name + ' ' + self.last_name + " - " + str(self.id)
 
+    @classmethod
+    def recipe(cls, **kwargs):
+        return Recipe(User, **kwargs)
+
+    @classmethod
+    def verified_user(cls, **kwargs) -> Recipe:
+        return cls.recipe(**kwargs).extend(email_verified=True, phone_verified=True)
+
+    @classmethod
+    def business(cls, **kwargs):
+        return cls.verified_user(**kwargs).extend(is_business=True)
 
 class Address(models.Model):
     # Using GHN API Address for province_id, district_id, ward_id
@@ -72,6 +83,10 @@ class Address(models.Model):
     
     def __str__(self) -> str:
         return self.full_address
+
+    @classmethod
+    def recipe(cls, **kwargs) -> Recipe:
+        return Recipe(Address, **kwargs)
 
 
 class Report(models.Model):
@@ -92,6 +107,10 @@ class Report(models.Model):
     def __str__(self) -> str:
         return self.subject
 
+    @classmethod
+    def recipe(cls, **kwargs) -> Recipe:
+        return Recipe(Report, content='abc', **kwargs)
+
 
 class Reply(models.Model):
     content = RichTextField()
@@ -99,12 +118,20 @@ class Reply(models.Model):
     report = models.ForeignKey(Report, on_delete=models.CASCADE)
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    @classmethod
+    def recipe(cls, **kwargs) -> Recipe:
+        return Recipe(Reply, content='abc', **kwargs)
+
 
 class Category(models.Model):
     name = models.CharField(max_length=255, unique=True, blank=False, null=False)
 
     def __str__(self) -> str:
         return self.name
+
+    @classmethod
+    def recipe(cls, **kwargs) -> Recipe:
+        return Recipe(Category, **kwargs)
 
 
 class Product(models.Model):
@@ -130,6 +157,10 @@ class Product(models.Model):
     @property
     def min_price(self):
         return Option.objects.filter(base_product=self).aggregate(models.Min('price')).get('price__min')
+
+    @classmethod
+    def recipe(cls, **kwargs) -> Recipe:
+        return Recipe(Product, description='abc', **kwargs)
 
 
     def save(self, *args, **kwargs):
@@ -179,6 +210,9 @@ class Order(models.Model):
         else:
             super().save(*args, **kwargs)
 
+    @classmethod
+    def recipe(cls, **kwargs) -> Recipe:
+        return Recipe(Order, note='abc', **kwargs)
 
 class Option(models.Model):
     unit = models.CharField(max_length=255, blank=False, null=False)
@@ -206,11 +240,18 @@ class Option(models.Model):
             )
         ]
 
+    @classmethod
+    def recipe(cls, **kwargs) -> Recipe:
+        return Recipe(Option, **kwargs)
+
 
 class Picture(models.Model):
     image = models.ImageField(upload_to='night_owl/product')
     product_option = models.ForeignKey(Option, on_delete=models.CASCADE)
 
+    @classmethod
+    def recipe(cls, **kwargs) -> Recipe:
+        return Recipe(Picture, **kwargs)
 
 class OrderDetail(models.Model):
     quantity = models.PositiveIntegerField()
@@ -236,6 +277,9 @@ class OrderDetail(models.Model):
             raise ValidationError('not enough unit in stock')
         super().save(*args, **kwargs)
 
+    @classmethod
+    def recipe(cls, **kwargs) -> Recipe:
+        return Recipe(OrderDetail, **kwargs)
 
 class Bill(models.Model):
     value = models.DecimalField(max_digits=20, decimal_places=2, null=False, blank=False)
@@ -255,6 +299,9 @@ class Bill(models.Model):
             )
         ]
 
+    @classmethod
+    def recipe(cls, **kwargs) -> Recipe:
+        return Recipe(Bill, **kwargs)
 
 class CartDetail(models.Model):
     quantity = models.PositiveIntegerField()
@@ -269,6 +316,10 @@ class CartDetail(models.Model):
                 check=models.Q(quantity__gte=1)
             ),
         ]
+
+    @classmethod
+    def recipe(cls, **kwargs) -> Recipe:
+        return Recipe(CartDetail, **kwargs)
 
     def save(self, *args, **kwargs):
         if self.customer.id == self.product_option.base_product.owner_id:
@@ -299,6 +350,10 @@ class Rating(models.Model):
             raise ValidationError(message='Customer must buy product before rating')
         super().save(*args, **kwargs)
 
+    @classmethod
+    def recipe(cls, **kwargs) -> Recipe:
+        return Recipe(Rating, comment='abc', **kwargs)
+
 class Voucher(models.Model):
     discount = models.DecimalField(max_digits=20, decimal_places=2, null=False, blank=False)
     start_date = models.DateTimeField(auto_now_add=True)
@@ -326,3 +381,7 @@ class Voucher(models.Model):
                 check=models.Q(end_date__isnull=True) | models.Q(end_date__gt=models.F('start_date'))
             )
         ]
+
+    @classmethod
+    def recipe(cls, **kwargs) -> Recipe:
+        return Recipe(Voucher, **kwargs)

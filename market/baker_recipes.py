@@ -54,24 +54,3 @@ general_reply = Recipe(Reply, content='abc')
 general_category = Recipe(Category)
 general_voucher = Recipe(Voucher)
 general_product_option_picture = Recipe(Picture)
-
-__recipe__ = [
-    general_user,
-    general_address,
-    general_product,
-    general_product_option,
-    general_order,
-    general_order_detail,
-    general_bill,
-    general_cart_detail,
-    general_rating,
-    general_report,
-    general_reply,
-    general_category,
-    general_voucher,
-    general_product_option_picture,
-    user_huy,
-    user_normal,
-    huy_address,
-    user_normal_address
-]

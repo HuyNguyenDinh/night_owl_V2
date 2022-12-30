@@ -1,7 +1,7 @@
 from market.baker_recipes import *
 from tests.market.fixtures.recipe_setups import *
 from tests.market.fixtures.entities.options import *
-from tests.market.fixtures.usecases.recipes.add_options import *
+from tests.market.fixtures.usecases.instance_results.add_options import *
 from tests.market.fixtures.entities.option_pictures import *
 
 def empty_option_picture_video(**kwargs):
