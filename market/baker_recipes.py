@@ -17,18 +17,40 @@ huy_address = Recipe(Address, province_id=202, district_id=1449, ward_id="20709"
 user_normal_address = Recipe(Address, province_id=204, district_id=1536, ward_id="480126", street="67/13 Hoàng Minh Chánh",
                              full_address="67/13 Hoàng Minh Chánh, phường Hóa An, TP Biên Hòa, Đồng Nai", note='abc')
 
-product_ip_14_pro_max = Recipe(Product, name='IPhone 14 Pro Max 512GB', sold_amount=10, description='abc')
+#################################################################################
 
-product_option = Recipe(Option, unit_in_stock=50)
+__all__ = [
+    "general_user",
+    "general_address",
+    "general_product",
+    "general_product_option",
+    "general_order",
+    "general_order_detail",
+    "general_bill",
+    "general_cart_detail",
+    "general_rating",
+    "general_report",
+    "general_reply",
+    "general_category",
+    "general_voucher",
+    "general_product_option_picture",
+    "user_huy",
+    "user_normal",
+    "huy_address",
+    "user_normal_address"
+]
 
-order = Recipe(Order, total_shipping_fee=25000, shipping_code='LLXHKE', note='abc')
-
-order_detail = Recipe(OrderDetail, quantity=2, unit_price=1)
-
-bill = Recipe(Bill, value=200025000)
-
-voucher = Recipe(Voucher, discount=decimal.Decimal(10), is_percentage=True)
-
-cart = Recipe(CartDetail, quantity=2)
-
-rating = Recipe(Rating, rate=4, comment='Test')
+general_user = Recipe(User)
+general_address = Recipe(Address, note='abc')
+general_product = Recipe(Product, description='abc')
+general_product_option = Recipe(Option, unit_in_stock=100)
+general_cart_detail = Recipe(CartDetail)
+general_order = Recipe(Order, note='abc')
+general_order_detail = Recipe(OrderDetail, quantity=1, unit_price=1)
+general_bill = Recipe(Bill)
+general_rating= Recipe(Rating, comment='abc')
+general_report = Recipe(Report, content='abc')
+general_reply = Recipe(Reply, content='abc')
+general_category = Recipe(Category)
+general_voucher = Recipe(Voucher)
+general_product_option_picture = Recipe(Picture)

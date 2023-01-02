@@ -1,0 +1,177 @@
+[
+{
+  "model": "market.user",
+  "pk": 1,
+  "fields": {
+    "password": "LxDoOMLBzsbcEUxJQJeVJDOkNIoQFqyrOfnBxDnZIQgEzavtlJOKnxlHoGCKZWJkJpxZNPrZkRJXymuYdJHOSDlWJwUrNMpzPfAiwIXqGISlydkJxcbsTHIIOOpafOfP",
+    "last_login": null,
+    "is_superuser": false,
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2022-12-28T03:21:21.501Z",
+    "email": "veFlbbfRbH@example.com",
+    "phone_number": "NjLTdMbiYcdzOjrMLXspCTNOdaCbFriaPssWvsxHjNQLzOoFhw",
+    "avatar": "",
+    "email_verified": true,
+    "phone_verified": true,
+    "balance": "0.01",
+    "is_business": false,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "market.user",
+  "pk": 2,
+  "fields": {
+    "password": "jnWnzXOtVWFLmeKMucUBLIfukkXsWCdnydGwnLmQVsnRDHlcRLzJJnXilKVQeqpZsVGnNSxDNpTUZXGeSPYNYdTnOjZKISFRMyadpUkaKkQFRtrfhcSbqrecCEMMPJDj",
+    "last_login": null,
+    "is_superuser": false,
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2022-12-28T03:21:21.503Z",
+    "email": "QNhWAqhZft@example.com",
+    "phone_number": "caywtmgjgLEPNvxiypKxGQuaKexpDjqOpbEZHEIkJpSqxVDUwt",
+    "avatar": "",
+    "email_verified": true,
+    "phone_verified": true,
+    "balance": "0.01",
+    "is_business": true,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "market.user",
+  "pk": 3,
+  "fields": {
+    "password": "HKLAefWaCmZcLtrtzQSDXikgfEmeYRvWErttifSARmEyyAXIPFJSeeKqmVvLmhogXVZaypmWbTiycXQnBHrMGKtWKHBrtwsrpLAbHBRDZqEAiVvbikwCTjoHoMjLNkFA",
+    "last_login": null,
+    "is_superuser": false,
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2022-12-28T03:21:21.506Z",
+    "email": "tSAHKQwoRO@example.com",
+    "phone_number": "NoruECkgtfzxDnpLOXJyzvJTzhYVHfcaTXsYLlHKKikRqKycQN",
+    "avatar": "",
+    "email_verified": true,
+    "phone_verified": true,
+    "balance": "0.01",
+    "is_business": false,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "market.address",
+  "pk": 1,
+  "fields": {
+    "country": "Viet Nam",
+    "province_id": 204,
+    "district_id": 1536,
+    "ward_id": "480126",
+    "street": "67/13 Hoàng Minh Chánh",
+    "full_address": "67/13 Hoàng Minh Chánh, phường Hóa An, TP Biên Hòa, Đồng Nai",
+    "note": "abc",
+    "creator": 1
+  }
+},
+{
+  "model": "market.address",
+  "pk": 2,
+  "fields": {
+    "country": "Viet Nam",
+    "province_id": 202,
+    "district_id": 1449,
+    "ward_id": "20709",
+    "street": "Bùi Văn Ba",
+    "full_address": "Bùi Văn Ba, Phường Tân Thuận Đông, Quận 7, Hồ Chí Minh",
+    "note": "abc",
+    "creator": 2
+  }
+},
+{
+  "model": "market.address",
+  "pk": 3,
+  "fields": {
+    "country": "Viet Nam",
+    "province_id": 204,
+    "district_id": 1536,
+    "ward_id": "480126",
+    "street": "67/13 Hoàng Minh Chánh",
+    "full_address": "67/13 Hoàng Minh Chánh, phường Hóa An, TP Biên Hòa, Đồng Nai",
+    "note": "abc",
+    "creator": 3
+  }
+},
+{
+  "model": "market.product",
+  "pk": 1,
+  "fields": {
+    "name": "rXCMORCQdzMYntnhuGJjnwfrIDXyjHPDKnguIDHAAchmtvPXRBymTSFoybkvnWMLFktlcczEctXEVFughMxZpRokzkAbeqSarMNBhnspUZENuiWIFLznqZwqhgxzxbJEWGEkqYTvQXRXkKdnAOfWRCEIrDIYiLfUItcbcdqLfuSkzonpZsvTInueriqwffJlZnPOufiqVLpjkFrXMFCELWsdEgLhSMGHOIbyWwgyXpJRCJhEhnwofUlzBEhHaDh",
+    "is_available": true,
+    "sold_amount": 0,
+    "picture": "",
+    "description": "abc",
+    "owner": 2,
+    "categories": []
+  }
+},
+{
+  "model": "market.order",
+  "pk": 1,
+  "fields": {
+    "order_date": "2022-12-28T03:21:21.541Z",
+    "can_destroy": true,
+    "completed_date": null,
+    "shipping_code": null,
+    "total_shipping_fee": "0.00",
+    "note": null,
+    "customer": 3,
+    "store": 2,
+    "voucher_apply": null,
+    "status": 0,
+    "payment_type": 0
+  }
+},
+{
+  "model": "market.option",
+  "pk": 1,
+  "fields": {
+    "unit": "HzrIoRWfjGYHpZzwJRtSyZwpkZiivuxiCHkIxYsPEwFJdrFsrbOjTOZkRXUrGpbOfQHynQxiuJPjjmMWsInpmsztkGcmWKvWJNSwJriXNHaGbKPrJRAGzmNiBqMLexXZAInDvenynOfoVzODBeXOrcCFrohotPQnKzIOZegcNTSjGhTDeTzyFJhqXNvzDGoQvHEeGzgMVIcpucDabDodyvCspCFivURAWDFqFXZPbiTrQgeHByaTGNjOYlmvRIO",
+    "unit_in_stock": 9223372036854775807,
+    "price": "17076447394079038.23",
+    "weight": 1,
+    "height": 1,
+    "width": 1,
+    "length": 1,
+    "base_product": 1
+  }
+},
+{
+  "model": "market.orderdetail",
+  "pk": 1,
+  "fields": {
+    "quantity": 1744595668,
+    "unit_price": "17076447394079038.23",
+    "order": 1,
+    "product_option": 1,
+    "cart_id": 1
+  }
+},
+{
+  "model": "market.cartdetail",
+  "pk": 1,
+  "fields": {
+    "quantity": 1744595668,
+    "customer": 3,
+    "product_option": 1
+  }
+}
+]
