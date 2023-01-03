@@ -1,7 +1,7 @@
 import decimal
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MinValueValidator
 from django.contrib.auth.base_user import BaseUserManager
 from django.core.exceptions import ValidationError
 from ckeditor.fields import RichTextField
@@ -47,13 +47,21 @@ class User(AbstractUser):
     avatar = models.ImageField(upload_to='upload/%Y/%m', null=True, blank=True)
     email_verified = models.BooleanField(default=False)
     phone_verified = models.BooleanField(default=False)
-    balance = models.DecimalField(decimal_places=2, max_digits=20, validators=[MinValueValidator(decimal.Decimal('0.01'))], default=0.01)
+    balance = models.DecimalField(decimal_places=2, max_digits=20, default=0.01)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
     objects = CustomUserManager()
     is_business = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                name='min_user_balance',
+                check=models.Q(balance__gte=0)
+            )
+        ]
 
     def __str__(self) -> str:
         return self.first_name + ' ' + self.last_name + " - " + str(self.id)

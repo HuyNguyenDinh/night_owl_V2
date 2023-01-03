@@ -1,24 +1,41 @@
-from tests.market.fixtures.usecases.instance_results.add_products import *
 from tests.market.fixtures.entities.vouchers import *
+from tests.market.fixtures.usecases.scenarios.ver1 import *
+from model_bakery.recipe import seq
+import random, string
 
-def valid_percentage_voucher_of_product(**kwargs) -> Voucher:
-    return voucher_instance(_voucher_recipe=percentage_voucher,
-                            _products=[product_valid()],
-                            **kwargs)
+def random_code(n: int = 24) -> str:
+    return ''.join(random.choices(string.ascii_letters, k=n))
 
-def valid_percentage_voucher_of_products(_product_quantity: int = 3, **kwargs) -> Voucher:
-    list_temp_products = [product_valid() for _ in range(_product_quantity)]
-    return voucher_instance(_voucher_recipe=percentage_voucher,
-                            _products=list_temp_products,
-                            **kwargs)
+percentage_voucher_fixture = Fixture(
+    _instance=percentage_voucher,
+    _recipe_params={
+        'code': random_code()
+    }
+)
 
-def valid_not_percentage_voucher_of_product(**kwargs) -> Voucher:
-    return voucher_instance(_voucher_recipe=not_percentage_voucher,
-                            _products=[product_valid()],
-                            **kwargs)
+percentage_vouchers_fixture = percentage_voucher_fixture.fixture_extend(
+    _recipe_params={
+        'code': seq('voucher'),
+        '_quantity': 3
+    }
+)
 
-def valid_not_percentage_voucher_of_products(_product_quantity: int = 3, **kwargs) -> Voucher:
-    list_temp_products = [product_valid() for _ in range(_product_quantity)]
-    return voucher_instance(_voucher_recipe=not_percentage_voucher,
-                            _products=list_temp_products,
-                            **kwargs)
+not_percentage_voucher_fixture = percentage_voucher_fixture.fixture_extend(
+    _instance=not_percentage_voucher
+)
+
+percentage_voucher_bridge = Bridge(
+    _previous=None,
+    _current=percentage_voucher_fixture
+)
+
+percentage_vouchers_bridge = Bridge(
+    _previous=None,
+    _current=percentage_vouchers_fixture
+)
+
+not_percentage_voucher_bridge= Bridge(
+    _previous=None,
+    _current=not_percentage_voucher_fixture
+)
+

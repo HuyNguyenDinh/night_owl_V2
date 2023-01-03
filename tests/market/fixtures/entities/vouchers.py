@@ -6,5 +6,5 @@ from typing import List
 def voucher_instance(_voucher_recipe: Recipe, _creator: User, _products: List[Product], **kwargs) -> Voucher | List[Voucher]:
     return _voucher_recipe.make(creator=_creator, products=_products, make_m2m=True, **kwargs)
 
-percentage_voucher = general_voucher.extend(is_percentage=True)
+percentage_voucher = general_voucher.extend(is_percentage=True, discount=20)
 not_percentage_voucher = general_voucher.extend(is_percentage=False)
