@@ -148,7 +148,7 @@ class Product(models.Model):
     categories = models.ManyToManyField(Category)
     sold_amount = models.BigIntegerField(default=0)
     picture = models.ImageField(upload_to='night_owl/product', null=True, blank=True)
-    description = RichTextField()
+    description = RichTextField(default='<h1>Product Descriptions<h1>')
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:

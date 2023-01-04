@@ -329,3 +329,34 @@
 #
 #     def test_get_vouchers_available_of_product(self):
 #         self.get_vouchers_available_of_product()
+
+from tests.market.fixtures.usecases.scenarios.ver1 import *
+from rest_framework.test import APITestCase
+from tests.market.fixtures.usecases.instance_results import *
+from market.models import *
+
+class TestFTBuying(buying.BuyingFT, APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.get_bridge()
+    def test_bridge(self):
+        print(User.objects.all())
+        self.assertEqual(User.objects.all().count(), 1)
+
+class TestFTSelling(selling.SellingFT, APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.get_bridge()
+    def test_bridge(self):
+        print(User.objects.all())
+        self.assertEqual(User.objects.all().count(), 1)
+
+class TestFTAddProduct(add_products.AddProductFT, APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.get_bridge()
+
+    def test_bridge(self):
+        print(User.objects.all())
+        self.assertEqual(User.objects.all().count(), 1)
+        self.assertEqual(Product.objects.all().count(), 1)

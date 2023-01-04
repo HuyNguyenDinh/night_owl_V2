@@ -61,7 +61,7 @@ class OrderViewSetTest(IOrderViewSetTest, APITestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.user = customer_has_address()
+        cls.user = customer_has_address.bridge_extend().get_fixture()
     def setUp(self):
         super().setUp()
         print('setting up')

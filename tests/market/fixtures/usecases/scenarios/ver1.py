@@ -1,15 +1,8 @@
-from abc import ABC, abstractmethod
 from typing import TypeVar, List, Union, Dict, Tuple, Any
 from model_bakery.recipe import Recipe
 from django.db.models import Model
-from tests.market.fixtures.entities.users import user_has_address_instance
-from tests.market.fixtures.entities.products import product_instance
-from tests.market.fixtures.entities.options import product_option_instance
-from tests.market.fixtures.entities.option_pictures import option_with_picture_instance
-
 
 M = TypeVar("M", bound=Model)
-
 
 class Fixture:
     def __init__(self,
@@ -20,15 +13,15 @@ class Fixture:
                  _recipe_params: Union[Dict[str, Any], None] = None):
         """
             _relationship_recipe: {
-                key[relationship_field]: value[Recipe of Model],
+                relationship_field: Recipe of Model,
                 ...
             },
             _relationship: {
-                key[relationship_field]: value[Instance of Model],
+                relationship_field: Instance of Model,
                 ...
             }
             _reverse_relationship_recipe: {
-                key[reverse relationship]: Tuple(key[relationship field in reverse object]: value[Recipe of Model]),
+                reverse relationship: Tuple('relationship field in reverse object', Recipe of Model),
                 ...
             },
             _recipe_params: {
@@ -90,7 +83,20 @@ class Fixture:
                         **kwargs
                     )
         else:
-            self._instance = self._instance.make(**kwargs)
+            if self.recipe_params:
+                if self.relationship_recipe:
+                    self._instance = self._instance.make(
+                        **self.relationship_recipe,
+                        **self.recipe_params,
+                        **kwargs
+                    )
+                else:
+                    self._instance = self._instance.make(
+                        **self.recipe_params,
+                        **kwargs
+                    )
+            else:
+                self._instance = self._instance.make(**kwargs)
         self.isInstance = True
 
     def fixture_extend(self,
@@ -121,6 +127,10 @@ class Fixture:
                     v = getattr(self, '_instance')
                     attribute[key] = v
         return Fixture(**attribute)
+
+    def set_instance(self, _instance: M | List[M]):
+        self._instance = _instance
+        self.isInstance = True
 
     def make_instance(self, **kwargs) -> M | List[M]:
         """
@@ -188,3 +198,22 @@ class Bridge:
         if not self._isMake:
             self._make_fixtures(**kwargs)
         return self._current.make_instance()
+
+class Piece:
+    def __init__(self):
+        self.fixtures: Dict[str, Fixture] = {}
+        self.bridges: Dict[str, Bridge] = {}
+    def prepare_fixtures(self):
+        print('fixture - 1')
+        pass
+    def prepare_bridges(self):
+        print('bridge - 1')
+        pass
+    def get_bridge(self):
+        pass
+
+class OnePiece(Piece):
+    def prepare(self):
+        self.prepare_fixtures()
+        self.prepare_bridges()
+        self.get_bridge()
