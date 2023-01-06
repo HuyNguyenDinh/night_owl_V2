@@ -335,26 +335,26 @@ from rest_framework.test import APITestCase
 from tests.market.fixtures.usecases.instance_results import *
 from market.models import *
 
-class TestFTBuying(buying.BuyingFT, APITestCase):
+class TestFTBuying(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.get_bridge()
+        cls.data = buying.BuyingFT().prepare()
     def test_bridge(self):
         print(User.objects.all())
         self.assertEqual(User.objects.all().count(), 1)
 
-class TestFTSelling(selling.SellingFT, APITestCase):
+class TestFTSelling(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.get_bridge()
+        cls.data = selling.SellingFT().prepare()
     def test_bridge(self):
         print(User.objects.all())
         self.assertEqual(User.objects.all().count(), 1)
 
-class TestFTAddProduct(add_products.AddProductFT, APITestCase):
+class TestFTAddProduct(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.get_bridge()
+        cls.data = add_products.AddProductFT().prepare()
 
     def test_bridge(self):
         print(User.objects.all())

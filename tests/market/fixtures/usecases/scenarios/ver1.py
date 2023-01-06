@@ -200,7 +200,7 @@ class Bridge:
         return self._current.make_instance()
 
 class Piece:
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         self.fixtures: Dict[str, Fixture] = {}
         self.bridges: Dict[str, Bridge] = {}
     def prepare_fixtures(self):
