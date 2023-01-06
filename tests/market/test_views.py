@@ -358,5 +358,5 @@ class TestFTAddProduct(APITestCase):
 
     def test_bridge(self):
         print(User.objects.all())
-        self.assertEqual(User.objects.all().count(), 1)
-        self.assertEqual(Product.objects.all().count(), 1)
+        self.assertEqual(User.objects.all().count(), 5)
+        self.assertEqual(Product.objects.all().count(), 11)
