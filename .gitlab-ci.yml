@@ -33,7 +33,7 @@ migrations:
     - apt-get update && apt-get install -y -q --no-install-recommends build-essential libpq-dev
     - pip install virtualenv
     - python -m venv venv
-    - source venv/Script/activate
+    - source venv/bin/activate
     - pip install -r requirements.txt
   script:
     - python manage.py makemigrations
