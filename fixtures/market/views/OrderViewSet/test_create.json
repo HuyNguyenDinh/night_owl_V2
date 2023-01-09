@@ -1,18 +1,18 @@
 [
 {
   "model": "market.user",
-  "pk": 1,
+  "pk": 2,
   "fields": {
-    "password": "LxDoOMLBzsbcEUxJQJeVJDOkNIoQFqyrOfnBxDnZIQgEzavtlJOKnxlHoGCKZWJkJpxZNPrZkRJXymuYdJHOSDlWJwUrNMpzPfAiwIXqGISlydkJxcbsTHIIOOpafOfP",
+    "password": "LWnJBENXHXGKkeedkdotshhtQvCOEKXdCboRGUKrSFKGWGAvTjbXTKrHKazzOZFsFXqPVPVLeEOysnDVXgNunyxfNBoxupXRfqmAeFmmMUMuElnOumdtVZTlseCFSXiy",
     "last_login": null,
     "is_superuser": false,
     "first_name": "",
     "last_name": "",
     "is_staff": false,
     "is_active": true,
-    "date_joined": "2022-12-28T03:21:21.501Z",
-    "email": "veFlbbfRbH@example.com",
-    "phone_number": "NjLTdMbiYcdzOjrMLXspCTNOdaCbFriaPssWvsxHjNQLzOoFhw",
+    "date_joined": "2023-01-09T04:14:50.740Z",
+    "email": "IueUFNbgOW@example.com",
+    "phone_number": "XatHkEWfjaBUVWHwQCcAokVVIUDwJiukuzYnkeEgiRYzpBIkCT",
     "avatar": "",
     "email_verified": true,
     "phone_verified": true,
@@ -24,18 +24,18 @@
 },
 {
   "model": "market.user",
-  "pk": 2,
+  "pk": 3,
   "fields": {
-    "password": "jnWnzXOtVWFLmeKMucUBLIfukkXsWCdnydGwnLmQVsnRDHlcRLzJJnXilKVQeqpZsVGnNSxDNpTUZXGeSPYNYdTnOjZKISFRMyadpUkaKkQFRtrfhcSbqrecCEMMPJDj",
+    "password": "XCyxyAVvIipwyfwKXiYquyLNuESXrKTfEESOriFSQtPtoHXRyoUTHZZItCawGxSbzNtEDrvrkJrVNnAUPrpWObZKBWUDzFbgUvvcYKBLmfDQOauKpoaGYFxwlhvzPDXW",
     "last_login": null,
     "is_superuser": false,
     "first_name": "",
     "last_name": "",
     "is_staff": false,
     "is_active": true,
-    "date_joined": "2022-12-28T03:21:21.503Z",
-    "email": "QNhWAqhZft@example.com",
-    "phone_number": "caywtmgjgLEPNvxiypKxGQuaKexpDjqOpbEZHEIkJpSqxVDUwt",
+    "date_joined": "2023-01-09T04:14:50.744Z",
+    "email": "oDvtmSjrpf@example.com",
+    "phone_number": "tpySYVaPcMcBEsbHuZHGosAcvMCLEEJQKGRJpGIquffiTBHhBX",
     "avatar": "",
     "email_verified": true,
     "phone_verified": true,
@@ -47,18 +47,18 @@
 },
 {
   "model": "market.user",
-  "pk": 3,
+  "pk": 4,
   "fields": {
-    "password": "HKLAefWaCmZcLtrtzQSDXikgfEmeYRvWErttifSARmEyyAXIPFJSeeKqmVvLmhogXVZaypmWbTiycXQnBHrMGKtWKHBrtwsrpLAbHBRDZqEAiVvbikwCTjoHoMjLNkFA",
+    "password": "OsycpKGroGAKBdpMeszIFlFFRNlgoQPwDnhIJHudpxaJTPLgZdYYpATtadfObrNnHuiyvYPSLrMZdUxiMdXSDJrCbACXZjhlITBiDFzqsdPEmzcSOTWRzoOuYuFkFUAT",
     "last_login": null,
     "is_superuser": false,
     "first_name": "",
     "last_name": "",
     "is_staff": false,
     "is_active": true,
-    "date_joined": "2022-12-28T03:21:21.506Z",
-    "email": "tSAHKQwoRO@example.com",
-    "phone_number": "NoruECkgtfzxDnpLOXJyzvJTzhYVHfcaTXsYLlHKKikRqKycQN",
+    "date_joined": "2023-01-09T04:14:50.749Z",
+    "email": "aHVbhRBLJt@example.com",
+    "phone_number": "hzAhlhuiiSpbZZuJlmiXoDjsjgrciqQkairFtUGlmMsLwixQkQ",
     "avatar": "",
     "email_verified": true,
     "phone_verified": true,
@@ -70,7 +70,7 @@
 },
 {
   "model": "market.address",
-  "pk": 1,
+  "pk": 2,
   "fields": {
     "country": "Viet Nam",
     "province_id": 204,
@@ -78,20 +78,6 @@
     "ward_id": "480126",
     "street": "67/13 Hoàng Minh Chánh",
     "full_address": "67/13 Hoàng Minh Chánh, phường Hóa An, TP Biên Hòa, Đồng Nai",
-    "note": "abc",
-    "creator": 1
-  }
-},
-{
-  "model": "market.address",
-  "pk": 2,
-  "fields": {
-    "country": "Viet Nam",
-    "province_id": 202,
-    "district_id": 1449,
-    "ward_id": "20709",
-    "street": "Bùi Văn Ba",
-    "full_address": "Bùi Văn Ba, Phường Tân Thuận Đông, Quận 7, Hồ Chí Minh",
     "note": "abc",
     "creator": 2
   }
@@ -101,25 +87,39 @@
   "pk": 3,
   "fields": {
     "country": "Viet Nam",
+    "province_id": 202,
+    "district_id": 1449,
+    "ward_id": "20709",
+    "street": "Bùi Văn Ba",
+    "full_address": "Bùi Văn Ba, Phường Tân Thuận Đông, Quận 7, Hồ Chí Minh",
+    "note": "abc",
+    "creator": 3
+  }
+},
+{
+  "model": "market.address",
+  "pk": 4,
+  "fields": {
+    "country": "Viet Nam",
     "province_id": 204,
     "district_id": 1536,
     "ward_id": "480126",
     "street": "67/13 Hoàng Minh Chánh",
     "full_address": "67/13 Hoàng Minh Chánh, phường Hóa An, TP Biên Hòa, Đồng Nai",
     "note": "abc",
-    "creator": 3
+    "creator": 4
   }
 },
 {
   "model": "market.product",
   "pk": 1,
   "fields": {
-    "name": "rXCMORCQdzMYntnhuGJjnwfrIDXyjHPDKnguIDHAAchmtvPXRBymTSFoybkvnWMLFktlcczEctXEVFughMxZpRokzkAbeqSarMNBhnspUZENuiWIFLznqZwqhgxzxbJEWGEkqYTvQXRXkKdnAOfWRCEIrDIYiLfUItcbcdqLfuSkzonpZsvTInueriqwffJlZnPOufiqVLpjkFrXMFCELWsdEgLhSMGHOIbyWwgyXpJRCJhEhnwofUlzBEhHaDh",
+    "name": "IZTwriKnAqMOSezpyFjMvVDHCeVitEFljUtIPFFNGttVeyfYYkVFinGeEGsCyqBrgDaiLodkKFZVPuMvJSnqqgVDJpVOVzxXYHlHkgxuTHfnxLfZqjOzxnBpHNpToNKGjSBzNxJNQNpzpeMMEmKHiOqENayHCkSJJxHbzCrIwASfEzzoGGqwCRgSuVmGCUfCxmHqyELBnKUFhzZKFXpGjUtBrsRBkQrqyvCCmnjitbrYdvQXpOhIjdckyUVKEss",
     "is_available": true,
     "sold_amount": 0,
     "picture": "",
     "description": "abc",
-    "owner": 2,
+    "owner": 3,
     "categories": []
   }
 },
@@ -127,14 +127,14 @@
   "model": "market.order",
   "pk": 1,
   "fields": {
-    "order_date": "2022-12-28T03:21:21.541Z",
+    "order_date": "2023-01-09T04:14:50.811Z",
     "can_destroy": true,
     "completed_date": null,
     "shipping_code": null,
     "total_shipping_fee": "0.00",
     "note": null,
-    "customer": 3,
-    "store": 2,
+    "customer": 4,
+    "store": 3,
     "voucher_apply": null,
     "status": 0,
     "payment_type": 0
@@ -144,9 +144,9 @@
   "model": "market.option",
   "pk": 1,
   "fields": {
-    "unit": "HzrIoRWfjGYHpZzwJRtSyZwpkZiivuxiCHkIxYsPEwFJdrFsrbOjTOZkRXUrGpbOfQHynQxiuJPjjmMWsInpmsztkGcmWKvWJNSwJriXNHaGbKPrJRAGzmNiBqMLexXZAInDvenynOfoVzODBeXOrcCFrohotPQnKzIOZegcNTSjGhTDeTzyFJhqXNvzDGoQvHEeGzgMVIcpucDabDodyvCspCFivURAWDFqFXZPbiTrQgeHByaTGNjOYlmvRIO",
+    "unit": "cNESdTfsNdlXTqRlAXXfuEOexGfeZWjsADQWxMGyLJZbTvaAGKtVEclqReesAFVPVswgolMkkrxOYqHdwvIVtnHJtBpoJwfTlIUXTkisiGobVTIYgYDeVReDbcznmEKEVOSsVaRvJvTGPMhRmcfyXkufOAStzFTvzJAHhWiyseOUxsCNdPaoQUbXrEHkcnohagTcOrXEvegohWUxfdmIQSsRSPraSPZQadXUcBqMRKcSJyuZeyywLRzvYuPtrKa",
     "unit_in_stock": 9223372036854775807,
-    "price": "17076447394079038.23",
+    "price": "3976592349974185.42",
     "weight": 1,
     "height": 1,
     "width": 1,
@@ -158,8 +158,8 @@
   "model": "market.orderdetail",
   "pk": 1,
   "fields": {
-    "quantity": 1744595668,
-    "unit_price": "17076447394079038.23",
+    "quantity": 1925800929,
+    "unit_price": "3976592349974185.42",
     "order": 1,
     "product_option": 1,
     "cart_id": 1
@@ -169,8 +169,8 @@
   "model": "market.cartdetail",
   "pk": 1,
   "fields": {
-    "quantity": 1744595668,
-    "customer": 3,
+    "quantity": 1925800929,
+    "customer": 4,
     "product_option": 1
   }
 }
