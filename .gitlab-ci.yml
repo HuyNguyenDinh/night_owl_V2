@@ -20,12 +20,18 @@ variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache"
   GIT_CLEAN_FLAGS: -x -f -e public/**
 
+cache:
+  untracked: true
+  paths:
+    - .cache/
+    - venv/
+
 migrations:
   stage: build
   before_script:
     - python -V
     - apt-get update && apt-get install -y -q --no-install-recommends build-essential libpq-dev
-    - pip install venv
+    - pip install virtualenv
     - python -m venv venv
     - source venv/Script/activate
     - pip install -r requirements.txt
@@ -33,11 +39,6 @@ migrations:
     - python manage.py makemigrations
     - python manage.py migrate
     - echo "Setup completed"
-  cache:
-    untracked: true
-    paths:
-      - .cache/
-      - venv/
 
 test:
   stage: test
