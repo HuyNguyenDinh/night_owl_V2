@@ -1,5 +1,3 @@
-image: python:3.10
-
 variables:
   POSTGRES_DB: "night_owl"
   POSTGRES_USER: "postgres"
@@ -12,18 +10,19 @@ variables:
   DB_PASSWORD: postgres
   DB_PORT: 5432
   BROKER: redis
+default:
+  image: python:3.10
+  services:
+    - name: postgres
+      alias: postgres
+    - name: redis:latest
+      alias: redis
 
-services:
-  - name: postgres
-    alias: postgres
-  - name: redis:latest
-    alias: redis
-
-before_script:
-  - python -V
-  - apt-get update && apt-get install -y -q --no-install-recommends build-essential libpq-dev
-  - pip install -r requirements.txt
-  - echo "Setup completed"
+  before_script:
+    - python -V
+    - apt-get update && apt-get install -y -q --no-install-recommends build-essential libpq-dev
+    - pip install -r requirements.txt
+    - echo "Setup completed"
 
 build-job:
   stage: build
