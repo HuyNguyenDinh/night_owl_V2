@@ -18,13 +18,13 @@ variables:
   DB_PORT: 5432
   BROKER: redis
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache"
-  GIT_CLEAN_FLAGS: -x -f -e public/**
 
 cache:
   untracked: true
   paths:
     - .cache/
     - venv/
+    - .coverage
 
 migrations:
   stage: build
