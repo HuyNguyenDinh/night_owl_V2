@@ -16,7 +16,8 @@ variables:
 services:
   - name: postgres
     alias: postgres
-  - redis
+  - name: redis:latest
+    alias: redis
 
 build-job:
   stage: build
@@ -33,8 +34,8 @@ build-job:
 test-job1:
   stage: test
   script:
-    - coverage run --source="." manage.py test --parallel
-    - coverage json
+    - python -m coverage run --source="." manage.py test --parallel
+    - python -m coverage json
 
 deploy-staging:
   stage: deploy
