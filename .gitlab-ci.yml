@@ -18,12 +18,7 @@ variables:
   DB_PORT: 5432
   BROKER: redis
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache"
-
-cache:
-  untracked: true
-  paths:
-    - .cache/pip
-    - venv/
+  GIT_CLEAN_FLAGS: -x -f -e public/**
 
 migrations:
   stage: build
@@ -38,6 +33,11 @@ migrations:
     - python manage.py makemigrations
     - python manage.py migrate
     - echo "Setup completed"
+  cache:
+    untracked: true
+    paths:
+      - .cache/
+      - venv/
 
 test:
   stage: test
