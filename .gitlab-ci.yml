@@ -17,18 +17,22 @@ variables:
   DB_PASSWORD: postgres
   DB_PORT: 5432
   BROKER: redis
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache"
 
 cache:
   untracked: true
   paths:
     - .cache/pip
+    - venv/
 
 migrations:
   stage: build
   before_script:
     - python -V
     - apt-get update && apt-get install -y -q --no-install-recommends build-essential libpq-dev
+    - pip install venv
+    - python -m venv venv
+    - source venv/Script/activate
     - pip install -r requirements.txt
   script:
     - python manage.py makemigrations
@@ -37,9 +41,12 @@ migrations:
 
 test:
   stage: test
+  before_script:
+    - source venv/Script/activate
   script:
     - echo "Hello, $GITLAB_USER_LOGIN!"
-    - python manage.py test --parallel
+    - python -m coverage run --source="." manage.py test --parallel
+    - python -m coverage json
 
 deploy:
   stage: deploy
