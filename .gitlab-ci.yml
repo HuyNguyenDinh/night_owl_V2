@@ -19,13 +19,14 @@ services:
   - name: redis:latest
     alias: redis
 
+before_script:
+  - python -V
+  - apt-get update && apt-get install -y -q --no-install-recommends build-essential libpq-dev
+  - pip install -r requirements.txt
+  - echo "Setup completed"
+
 build-job:
   stage: build
-  before_script:
-    - python -V
-    - apt-get update && apt-get install -y -q --no-install-recommends build-essential libpq-dev
-    - pip install -r requirements.txt
-    - echo "Setup completed"
   script:
     - echo "Hello, $GITLAB_USER_LOGIN!"
     - python manage.py makemigrations
