@@ -24,6 +24,10 @@ exclude_lines =
     @(abc\.)?abstractmethod
 
 ignore_errors = True
+skip_covered = True
+show_missing = True
+skip_empty = True
 
-[html]
-directory = coverage_html_report
+[json]
+output = tests-report-coverage.json
+pretty_print = True

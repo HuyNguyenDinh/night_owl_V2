@@ -113,9 +113,9 @@ DATABASES = {
 # }
 
 broker = os.getenv("BROKER", "127.0.0.1")
-redis_a = os.getenv("REDIS_A", "127.0.0.1")
-redis_b = os.getenv("REDIS_B", "127.0.0.1")
-redis_c = os.getenv("REDIS_C", "127.0.0.1")
+# redis_a = os.getenv("REDIS_A", "127.0.0.1")
+# redis_b = os.getenv("REDIS_B", "127.0.0.1")
+# redis_c = os.getenv("REDIS_C", "127.0.0.1")
 
 CACHES = {
     'default': {
@@ -130,10 +130,13 @@ CHANNEL_LAYERS = {
         'CONFIG': {
             #"hosts": ["redis://:bNmXoUwvHJxUOiAnLo6cdQElFvdGzOzX@redis-11635.c292.ap-southeast-1-1.ec2.cloud.redislabs.com:11635/0"],
             #"hosts": [(redis_b, 6380), (redis_c, 6381), (redis_a, 6379)],
+            # "hosts": [
+            #     f'redis://{redis_c}:6379',
+            #     f'redis://{redis_b}:6379',
+            #     f'redis://{redis_a}:6379',
+            # ],
             "hosts": [
-                f'redis://{redis_c}:6379',
-                f'redis://{redis_b}:6379',
-                f'redis://{redis_a}:6379',
+                f'redis://{broker}:6379'
             ]
         },
     },

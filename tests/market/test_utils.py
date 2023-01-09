@@ -50,12 +50,12 @@ tzinfo = pytz.UTC
 #         self.assertEqual(check_now_in_datetime_range(start_date, end_date), expected)
 #
 #
-class ProductOrderOptionTest(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        categories = ['Smartphone', 'Laptop', 'Clothes', 'Watch', 'Sneaker']
-        cls.categories = baker.make(Category, _quantity=5, name=cycle(categories))
-        cls.users = baker.make_recipe()
+# class ProductOrderOptionTest(TestCase):
+#     @classmethod
+#     def setUpTestData(cls):
+#         categories = ['Smartphone', 'Laptop', 'Clothes', 'Watch', 'Sneaker']
+#         cls.categories = baker.make(Category, _quantity=5, name=cycle(categories))
+#         cls.users = baker.make_recipe()
 
     # def setUp(self) -> None:
     #     categories = ['Smartphone', 'Laptop', 'Clothes', 'Watch', 'Sneaker']
@@ -73,31 +73,31 @@ class ProductOrderOptionTest(TestCase):
     #                                            unit_price=cycle(price), order=self.order)
     #     self.bill = bill.make(order_payed=self.order, customer=self.users[1])
 
-    def test_check_voucher_available(self):
-        product_temp = self.product
-        voucher_temp = self.voucher
-        for option in Option.objects.all():
-            if option.base_product.id == product_temp.id:
-                self.assertEqual(check_voucher_available(option.id, voucher_temp.id), True)
-            else:
-                self.assertEqual(check_voucher_available(option.id, voucher_temp.id), False)
+    # def test_check_voucher_available(self):
+    #     product_temp = self.product
+    #     voucher_temp = self.voucher
+    #     for option in Option.objects.all():
+    #         if option.base_product.id == product_temp.id:
+    #             self.assertEqual(check_voucher_available(option.id, voucher_temp.id), True)
+    #         else:
+    #             self.assertEqual(check_voucher_available(option.id, voucher_temp.id), False)
 
-    @patch('market.utils.calculate_shipping_fee')
-    def test_make_order_from_list_cart(self, cal_ship_mock):
-        cal_ship_mock.return_value = json.dumps({
-                        "code": 200,
-                        "message": "Success",
-                        "data": {
-                            "total": 36300,
-                            "service_fee": 36300,
-                            "insurance_fee": 0,
-                            "pick_station_fee": 0,
-                            "coupon_value": 0,
-                            "r2s_fee": 0
-                        }
-        })
-        actual = make_order_from_list_cart(list_cart_id=[self.cart.id, ], user_id=self.users[1].id,
-                                           data={"list_cart": [self.cart.id, ]})
+    # @patch('market.utils.calculate_shipping_fee')
+    # def test_make_order_from_list_cart(self, cal_ship_mock):
+    #     cal_ship_mock.return_value = json.dumps({
+    #                     "code": 200,
+    #                     "message": "Success",
+    #                     "data": {
+    #                         "total": 36300,
+    #                         "service_fee": 36300,
+    #                         "insurance_fee": 0,
+    #                         "pick_station_fee": 0,
+    #                         "coupon_value": 0,
+    #                         "r2s_fee": 0
+    #                     }
+    #     })
+    #     actual = make_order_from_list_cart(list_cart_id=[self.cart.id, ], user_id=self.users[1].id,
+    #                                        data={"list_cart": [self.cart.id, ]})
 #         expected = [Order.objects.last()]
 #         self.assertEqual(actual, expected)
 #

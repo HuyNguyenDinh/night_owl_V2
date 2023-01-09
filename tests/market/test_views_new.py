@@ -48,6 +48,7 @@ class IAPITestCase(ITestCase):
 class IOrderViewSetTest(IAPITestCase):
     cart: CartDetail
     def create(self) -> None:
+        print(self.cart)
         self.client.force_authenticate(user=self.cart.customer)
         data = {
             "list_cart": [
@@ -62,10 +63,10 @@ class OrderViewSetTest(IOrderViewSetTest, APITestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.user = customer_has_address.bridge_extend().get_fixture()
+        cls.cart = add_to_cart.valid_cart_detail.get_fixture()
     def setUp(self):
         super().setUp()
         print('setting up')
-        self.cart = add_to_cart.valid_cart_detail()
 
     def tearDown(self) -> None:
         print('tear down')
@@ -79,17 +80,9 @@ class OrderViewSetTest(IOrderViewSetTest, APITestCase):
         print(User.objects.all())
         print("___end_create_____")
         self.create()
-        # sysout = sys.stdout
-        # sys.stdout = open(f'{self._testMethodName}.json', 'w')
-        # call_command('dumpdata', 'market')
-        # sys.stdout = sysout
     def test_stop(self) -> None:
         print(User.objects.all())
         print("___________")
-        # sysout = sys.stdout
-        # sys.stdout = open(f'{self._testMethodName}.json', 'w')
-        # call_command('dumpdata', 'market')
-        # sys.stdout = sysout
 # class IProductViewSetTest(IAPITestCase):
 #     def get(self) -> None:
 #         temp_option = add_options.valid_product_option_full
