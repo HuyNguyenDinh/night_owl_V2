@@ -5,6 +5,10 @@ services:
   - name: redis:latest
     alias: redis
 
+cache:
+  paths:
+    - .cache/pip
+
 variables:
   POSTGRES_DB: "night_owl"
   POSTGRES_USER: "postgres"
@@ -18,17 +22,21 @@ variables:
   DB_PORT: 5432
   BROKER: redis
 
-test-job1:
-  stage: test
+migrations:
+  stage: build
   before_script:
     - python -V
     - apt-get update && apt-get install -y -q --no-install-recommends build-essential libpq-dev
     - pip install -r requirements.txt
     - echo "Setup completed"
   script:
-    - echo "Hello, $GITLAB_USER_LOGIN!"
     - python manage.py makemigrations
     - python manage.py migrate
+
+test-job1:
+  stage: test
+  script:
+    - echo "Hello, $GITLAB_USER_LOGIN!"
     - python -m coverage run --source="." manage.py test --parallel
     - python -m coverage json
 
