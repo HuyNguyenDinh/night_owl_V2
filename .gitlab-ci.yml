@@ -4,8 +4,8 @@ variables:
   POSTGRES_DB: "night_owl"
   POSTGRES_USER: "postgres"
   POSTGRES_PASSWORD: "postgres"
+  POSTGRES_HOST_AUTH_METHOD: trust
   PGDATA: "/var/lib/postgresql/data"
-  POSTGRES_INITDB_ARGS: "--encoding: UTF8 --data-checksums"
   DB_HOST: postgres
   DB_NAME: night_owl
   DB_USER: postgres
@@ -14,13 +14,15 @@ variables:
   BROKER: redis
 
 services:
-  - postgres:latest
-  - redis:latest
+  - name: postgres
+    alias: postgres
+  - redis
 
 build-job:
   stage: build
   before_script:
     - python -V
+    - apt-get update && apt-get install -y -q --no-install-recommends build-essential libpq-dev
     - pip install -r requirements.txt
     - echo "Setup completed"
   script:
