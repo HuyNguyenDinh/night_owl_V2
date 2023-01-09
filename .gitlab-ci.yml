@@ -1,4 +1,4 @@
-image: python:3.10
+image: python:3.10-alpine3.17
 services:
   - name: postgres
     alias: postgres
