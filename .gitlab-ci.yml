@@ -5,10 +5,6 @@ services:
   - name: redis:latest
     alias: redis
 
-cache:
-  paths:
-    - .cache/pip
-
 variables:
   POSTGRES_DB: "night_owl"
   POSTGRES_USER: "postgres"
@@ -23,22 +19,27 @@ variables:
   BROKER: redis
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
-
-before_script:
-  - python -V
-  - apt-get update && apt-get install -y -q --no-install-recommends build-essential libpq-dev
-  - pip install -r requirements.txt
-  - python manage.py makemigrations
-  - python manage.py migrate
-  - echo "Setup completed"
-
+migrations:
+  stage: build
+  before_script:
+    - python -V
+    - apt-get update && apt-get install -y -q --no-install-recommends build-essential libpq-dev
+    - pip install -r requirements.txt
+  script:
+    - python manage.py makemigrations
+    - python manage.py migrate
+    - echo "Setup completed"
+  artifacts:
+    untracked: true
 
 test:
+  stage: test
   script:
     - echo "Hello, $GITLAB_USER_LOGIN!"
     - python manage.py test --parallel
 
 deploy:
+  stage: deploy
   script:
     - echo "Run staging"
     - python manage.py runserver 0.0.0.0:8089
