@@ -1,4 +1,4 @@
-image: python:3.10-alpine3.17
+image: python:3.10
 services:
   - name: postgres
     alias: postgres
@@ -21,26 +21,25 @@ variables:
   DB_PASSWORD: postgres
   DB_PORT: 5432
   BROKER: redis
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
-migrations:
-  stage: build
-  before_script:
-    - python -V
-    - apt-get update && apt-get install -y -q --no-install-recommends build-essential libpq-dev
-    - pip install -r requirements.txt
-    - echo "Setup completed"
-  script:
-    - python manage.py makemigrations
-    - python manage.py migrate
 
-test-job1:
-  stage: test
+before_script:
+  - python -V
+  - apt-get update && apt-get install -y -q --no-install-recommends build-essential libpq-dev
+  - pip install -r requirements.txt
+  - python manage.py makemigrations
+  - python manage.py migrate
+  - echo "Setup completed"
+
+
+test:
   script:
     - echo "Hello, $GITLAB_USER_LOGIN!"
     - python manage.py test --parallel
 
-deploy-staging:
-  stage: deploy
+deploy:
   script:
-    - echo "This job deploys something from the $CI_COMMIT_BRANCH branch."
-  environment: staging
+    - echo "Run staging"
+    - python manage.py runserver 0.0.0.0:8089
+    - echo "Run successful"
