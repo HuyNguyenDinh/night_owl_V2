@@ -42,5 +42,4 @@ deploy:
   stage: deploy
   script:
     - echo "Run staging"
-    - python manage.py runserver 0.0.0.0:8089
     - echo "Run successful"
