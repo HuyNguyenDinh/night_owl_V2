@@ -1,19 +1,9 @@
-default:
-  image: python:3.10
-  services:
-    - name: postgres
-      alias: postgres
-    - name: redis:latest
-      alias: redis
-
-  before_script:
-    - python -V
-    - apt-get update && apt-get install -y -q --no-install-recommends build-essential libpq-dev
-    - pip install -r requirements.txt
-    - echo "Setup completed"
-
-  script:
-    - echo "Hello World"
+image: python:3.10
+services:
+  - name: postgres
+    alias: postgres
+  - name: redis:latest
+    alias: redis
 
 variables:
   POSTGRES_DB: "night_owl"
@@ -28,16 +18,17 @@ variables:
   DB_PORT: 5432
   BROKER: redis
 
-build-job:
-  stage: build
+test-job1:
+  stage: test
+  before_script:
+    - python -V
+    - apt-get update && apt-get install -y -q --no-install-recommends build-essential libpq-dev
+    - pip install -r requirements.txt
+    - echo "Setup completed"
   script:
     - echo "Hello, $GITLAB_USER_LOGIN!"
     - python manage.py makemigrations
     - python manage.py migrate
-
-test-job1:
-  stage: test
-  script:
     - python -m coverage run --source="." manage.py test --parallel
     - python -m coverage json
 
