@@ -54,4 +54,3 @@ deploy:
     - echo "Run staging"
     - echo "Run successful"
   environment: staging
-  resource_group: staging
