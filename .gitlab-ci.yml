@@ -48,9 +48,10 @@ test:
     - echo "Hello, $GITLAB_USER_LOGIN!"
     - python -m coverage run --source="." manage.py test --parallel
     - python -m coverage json
-
 deploy:
   stage: deploy
   script:
     - echo "Run staging"
     - echo "Run successful"
+  environment: staging
+  resource_group: staging
