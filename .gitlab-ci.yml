@@ -109,7 +109,7 @@ test_job_trigger:
   stage: test
   needs: [build_job]
   rules:
-    - if: $CI_PIPELINE_SOURCE == "pipeline"
+    - if: $CI_PIPELINE_SOURCE == "trigger"
   script:
     - echo "Run trigger job"
 deploy_job:
