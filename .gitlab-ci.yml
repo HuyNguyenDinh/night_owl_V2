@@ -1,57 +1,116 @@
-image: python:3.10
-services:
-  - name: postgres
-    alias: postgres
-  - name: redis:latest
-    alias: redis
+#image: python:3.10
+#services:
+#  - name: postgres
+#    alias: postgres
+#  - name: redis:latest
+#    alias: redis
+#
+#variables:
+#  POSTGRES_DB: "night_owl"
+#  POSTGRES_USER: "postgres"
+#  POSTGRES_PASSWORD: "postgres"
+#  POSTGRES_HOST_AUTH_METHOD: trust
+#  PGDATA: "/var/lib/postgresql/data"
+#  DB_HOST: postgres
+#  DB_NAME: night_owl
+#  DB_USER: postgres
+#  DB_PASSWORD: postgres
+#  DB_PORT: 5432
+#  BROKER: redis
+#  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache"
+#
+#cache:
+#  untracked: true
+#  paths:
+#    - .cache/
+#    - venv/
+#    - .coverage
+#
+#migrations:
+#  stage: build
+#  before_script:
+#    - python -V
+#    - apt-get update && apt-get install -y -q --no-install-recommends build-essential libpq-dev
+#    - pip install virtualenv
+#    - python -m venv venv
+#    - source venv/bin/activate
+#    - pip install -r requirements.txt
+#  script:
+#    - python manage.py makemigrations
+#    - python manage.py migrate
+#    - echo "Setup completed"
+#
+#test:
+#  stage: test
+#  before_script:
+#    - source venv/bin/activate
+#  script:
+#    - echo "Hello, $GITLAB_USER_LOGIN!"
+#    - python -m coverage run --source="." manage.py test --parallel
+#    - python -m coverage json
+#deploy:
+#  stage: deploy
+#  script:
+#    - echo "Run staging"
+#    - echo "Hello World"
+#    - echo "Run successful"
+#  environment: staging
 
-variables:
-  POSTGRES_DB: "night_owl"
-  POSTGRES_USER: "postgres"
-  POSTGRES_PASSWORD: "postgres"
-  POSTGRES_HOST_AUTH_METHOD: trust
-  PGDATA: "/var/lib/postgresql/data"
-  DB_HOST: postgres
-  DB_NAME: night_owl
-  DB_USER: postgres
-  DB_PASSWORD: postgres
-  DB_PORT: 5432
-  BROKER: redis
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache"
+##################### ------------------------ ############################
 
-cache:
-  untracked: true
-  paths:
-    - .cache/
-    - venv/
-    - .coverage
-
-migrations:
+build_job:
   stage: build
-  before_script:
-    - python -V
-    - apt-get update && apt-get install -y -q --no-install-recommends build-essential libpq-dev
-    - pip install virtualenv
-    - python -m venv venv
-    - source venv/bin/activate
-    - pip install -r requirements.txt
   script:
-    - python manage.py makemigrations
-    - python manage.py migrate
-    - echo "Setup completed"
-
-test:
+    - echo "Building..."
+    - echo "Build success"
+test_job_api:
   stage: test
-  before_script:
-    - source venv/bin/activate
+  needs: [build_job]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "api"
   script:
-    - echo "Hello, $GITLAB_USER_LOGIN!"
-    - python -m coverage run --source="." manage.py test --parallel
-    - python -m coverage json
-deploy:
+    - echo "Run api job"
+test_job_push:
+  stage: test
+  needs: [build_job]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+  script:
+    - echo "Run push job"
+test_job_merge:
+  stage: test
+  needs:
+    - build_job
+  rules:
+    - if $CI_PIPELINE_SOURCE == "merge_request_event"
+  script:
+    - echo "Run merge job"
+test_job_manual:
+  stage: test
+  needs:
+    - build_job
+  rules:
+    - if $CI_PIPELINE_SOURCE == "merge_request_event"
+  script:
+    - echo "Run merge job"
+test_job_schedule:
+  stage: test
+  needs:
+    - build_job
+  rules:
+    - if $CI_PIPELINE_SOURCE == "schedule"
+  script:
+    - echo "Run schedule job"
+test_job_web:
+  stage: test
+  needs:
+    - build_job
+  rules:
+    - if $CI_PIPELINE_SOURCE == "web"
+  script:
+    - echo "Run web job"
+deploy_job:
   stage: deploy
   script:
-    - echo "Run staging"
-    - echo "Hello World"
-    - echo "Run successful"
-  environment: staging
+    - echo "Deploying..."
+    - echo "Deploy success"
