@@ -52,5 +52,6 @@ deploy:
   stage: deploy
   script:
     - echo "Run staging"
+    - echo "Hello World"
     - echo "Run successful"
   environment: staging
