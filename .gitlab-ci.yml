@@ -81,28 +81,28 @@ test_job_merge:
   stage: test
   needs: [build_job]
   rules:
-    - if $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "merge"
   script:
     - echo "Run merge job"
 test_job_manual:
   stage: test
   needs: [build_job]
   rules:
-    - if $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "manual"
   script:
-    - echo "Run merge job"
+    - echo "Run manual job"
 test_job_schedule:
   stage: test
   needs: [build_job]
   rules:
-    - if $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
   script:
     - echo "Run schedule job"
 test_job_web:
   stage: test
   needs: [build_job]
   rules:
-    - if $CI_PIPELINE_SOURCE == "web"
+    - if: $CI_PIPELINE_SOURCE == "web"
   script:
     - echo "Run web job"
 deploy_job:
