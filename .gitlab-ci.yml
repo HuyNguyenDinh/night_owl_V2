@@ -105,6 +105,13 @@ test_job_web:
     - if: $CI_PIPELINE_SOURCE == "web"
   script:
     - echo "Run web job"
+test_job_trigger:
+  stage: test
+  needs: [build_job]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "pipeline"
+  script:
+    - echo "Run trigger job"
 deploy_job:
   stage: deploy
   script:
