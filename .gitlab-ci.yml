@@ -20,11 +20,13 @@ variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache"
 
 cache:
+  key:
+    files:
+      - requirements.txt
   untracked: true
   paths:
     - .cache/
     - venv/
-    - .coverage
 
 migrations:
   stage: build
