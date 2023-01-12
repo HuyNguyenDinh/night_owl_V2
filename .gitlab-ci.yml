@@ -39,12 +39,6 @@ migrations:
     - python manage.py makemigrations
     - python manage.py migrate
     - echo "Setup completed"
-  artifacts:
-    name: static
-    untracked: true
-    paths:
-      - .cache/
-      - venv/
 
 test:
   stage: test
