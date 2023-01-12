@@ -51,7 +51,7 @@ class IProductRecipeModelTest(ITestCase):
     def create_general_product(self) -> None:
         self.assertRaise(ValidationError, general_product.make)
     def create_business_product(self) -> None:
-        temp_product = add_products.product_valid.get_fixture()
+        temp_product = add_products.product_valid.bridge_extend().get_fixture()
         self.assertEqual(temp_product, Product.objects.all())
     def create_negative_sold_amount_product(self) -> None:
         temp_product = general_product.extend(owner=business)
@@ -86,7 +86,7 @@ class ICartDetailRecipeModelTest(ITestCase):
     def create_general_cart(self) -> None:
         self.assertRaise(ValidationError, general_cart_detail.make)
     def create_valid_cart(self) -> None:
-        temp_cart = add_to_cart.valid_cart_detail.get_fixture()
+        temp_cart = add_to_cart.valid_cart_detail.bridge_extend().get_fixture()
         self.assertEqual(temp_cart, CartDetail.objects.all())
 
 class CartDetailRecipeModel(ICartDetailRecipeModelTest,TestCase):
