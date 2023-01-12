@@ -20,7 +20,6 @@ business_has_address = Bridge(
 
 class SellingFT(OnePiece):
     def prepare_fixtures(self):
-        print('fixture - 2')
         super().prepare_fixtures()
         self.fixtures['business_fixture'] = Fixture(
             _instance=business,
@@ -30,7 +29,6 @@ class SellingFT(OnePiece):
         )
 
     def prepare_bridges(self):
-        print('bridge - 2')
         super().prepare_bridges()
         self.bridges['business_has_address'] = Bridge(
             _previous=None,

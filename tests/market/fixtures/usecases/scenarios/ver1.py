@@ -204,10 +204,8 @@ class Piece:
         self.fixtures: Dict[str, Fixture] = {}
         self.bridges: Dict[str, Bridge] = {}
     def prepare_fixtures(self):
-        print('fixture - 1')
         pass
     def prepare_bridges(self):
-        print('bridge - 1')
         pass
     def get_bridge(self):
         pass

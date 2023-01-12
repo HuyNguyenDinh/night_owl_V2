@@ -2,7 +2,7 @@ import time
 from tests.market.fixtures.usecases.instance_results.buying import customer_has_address
 from tests.market.test_models_new import ITestCase
 from tests.market.fixtures.usecases.instance_results import *
-from rest_framework.test import APITestCase, APIClient
+from rest_framework.test import APITestCase, APIClient, APITransactionTestCase
 from rest_framework import status
 from market.models import *
 from django.core.management import call_command
@@ -48,7 +48,7 @@ class IAPITestCase(ITestCase):
 class IOrderViewSetTest(IAPITestCase):
     cart: CartDetail
     def create(self) -> None:
-        print(self.cart)
+        print(User.objects.all())
         self.client.force_authenticate(user=self.cart.customer)
         data = {
             "list_cart": [
@@ -59,30 +59,23 @@ class IOrderViewSetTest(IAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
 class OrderViewSetTest(IOrderViewSetTest, APITestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.user = customer_has_address.bridge_extend().get_fixture()
-        cls.cart = add_to_cart.valid_cart_detail.get_fixture()
     def setUp(self):
         super().setUp()
-        print('setting up')
+        self.user = customer_has_address.bridge_extend().get_fixture()
+        self.cart = add_to_cart.valid_cart_detail.bridge_extend().get_fixture()
 
     def tearDown(self) -> None:
-        print('tear down')
-        print(User.objects.all())
         sysout = sys.stdout
         sys.stdout = open(f'./fixtures/market/views/OrderViewSet/{self._testMethodName}.json', 'w')
         call_command('dumpdata', 'market', indent=2)
         sys.stdout = sysout
+        super().tearDown()
 
     def test_create(self) -> None:
-        print(User.objects.all())
-        print("___end_create_____")
         self.create()
     def test_stop(self) -> None:
-        print(User.objects.all())
-        print("___________")
+        pass
+
 # class IProductViewSetTest(IAPITestCase):
 #     def get(self) -> None:
 #         temp_option = add_options.valid_product_option_full

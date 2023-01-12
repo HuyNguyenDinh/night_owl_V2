@@ -49,7 +49,6 @@ products_not_percentage_voucher_valid = products_valid.bridge_extend(
 class AddProductFT(AddVoucherFT, SellingFT):
 
     def prepare_fixtures(self):
-        print('fixture - 3')
         super().prepare_fixtures()
         self.fixtures['product_fixture'] = Fixture(
             _instance=general_product
@@ -62,7 +61,6 @@ class AddProductFT(AddVoucherFT, SellingFT):
         )
 
     def prepare_bridges(self):
-        print('bridge - 3')
         super().prepare_bridges()
         self.bridges['product_valid'] = Bridge(
             _previous={

@@ -48,7 +48,7 @@ test:
     - source venv/bin/activate
   script:
     - echo "Hello, $GITLAB_USER_LOGIN!"
-    - python -m coverage run --source="." manage.py test --parallel
+    - python -m coverage run --source="." manage.py test -r --parallel
     - python -m coverage json
 deploy:
   stage: deploy

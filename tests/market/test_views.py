@@ -340,7 +340,6 @@ class TestFTBuying(APITestCase):
     def setUpTestData(cls):
         cls.data = buying.BuyingFT().prepare()
     def test_bridge(self):
-        print(User.objects.all())
         self.assertEqual(User.objects.all().count(), 1)
 
 class TestFTSelling(APITestCase):
@@ -348,7 +347,6 @@ class TestFTSelling(APITestCase):
     def setUpTestData(cls):
         cls.data = selling.SellingFT().prepare()
     def test_bridge(self):
-        print(User.objects.all())
         self.assertEqual(User.objects.all().count(), 1)
 
 class TestFTAddProduct(APITestCase):
@@ -357,6 +355,5 @@ class TestFTAddProduct(APITestCase):
         cls.data = add_products.AddProductFT().prepare()
 
     def test_bridge(self):
-        print(User.objects.all())
         self.assertEqual(User.objects.all().count(), 5)
         self.assertEqual(Product.objects.all().count(), 11)
