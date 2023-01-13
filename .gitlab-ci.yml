@@ -80,7 +80,7 @@ deploy:
     - source venv/bin/activate
   script:
     - echo "Run staging"
-    - python manange.py runserver -b 0.0.0.0 -p 80 night_owl_market.asgi:application --no
+    - python manange.py runserver -b 0.0.0.0 -p 80 night_owl_market.asgi:application
   environment: staging
 
 ##################### ------------------------ ############################
