@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent docker {
+        image 'python:3.10'
+    }
 
     stages {
         stage('Print python version') {
