@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     stages {
-        stage('Hello') {
+        stage('Print python version') {
             steps {
                 sh 'python -V'
             }
