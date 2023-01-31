@@ -1,4 +1,2 @@
 DROP DATABASE IF EXISTS night_owl;
 CREATE DATABASE night_owl;
-ALTER USER postgres WITH PASSWORD 'postgres';
-GRANT ALL PRIVILEGES ON DATABASE night_owl TO postgres;
