@@ -64,12 +64,12 @@ class OrderViewSetTest(IOrderViewSetTest, APITestCase):
         self.user = customer_has_address.bridge_extend().get_fixture()
         self.cart = add_to_cart.valid_cart_detail.bridge_extend().get_fixture()
 
-    def tearDown(self) -> None:
-        sysout = sys.stdout
-        sys.stdout = open(f'./fixtures/market/views/OrderViewSet/{self._testMethodName}.json', 'w')
-        call_command('dumpdata', 'market', indent=2)
-        sys.stdout = sysout
-        super().tearDown()
+    # def tearDown(self) -> None:
+    #     sysout = sys.stdout
+    #     sys.stdout = open(f'./fixtures/market/views/OrderViewSet/{self._testMethodName}.json', 'w')
+    #     call_command('dumpdata', 'market', indent=2)
+    #     sys.stdout = sysout
+    #     super().tearDown()
 
     def test_create(self) -> None:
         self.create()
