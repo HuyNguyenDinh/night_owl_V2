@@ -47,8 +47,6 @@ services:
 #      - REDIS_C=redis_c
     networks:
       - backend
-    ports:
-      - "8000:8000"
     volumes:
       - ../:/home/web/code
       - night_owl_static_volume:/home/web/code/staticfiles
