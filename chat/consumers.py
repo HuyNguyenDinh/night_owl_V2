@@ -9,41 +9,45 @@ from .tasks import *
 from market.models import *
 from market.tasks import *
 import asyncio
+from typing import Any
 
 
 class ChatConsumer(JsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
         self.user = None
-        self.room = None
+        self.rooms = []
 
     def connect(self):
         try:
             self.user = self.scope['user']
-            room_id = self.scope["url_route"]["kwargs"]["room_id"]
-            self.room = Room.objects.select_related().get(pk=room_id, user=self.user)
             self.accept()
-            async_to_sync(self.channel_layer.group_add)(
-                self.room.group_name,
-                self.channel_name
-            )
+            self.rooms = Room.objects.filter(user=self.user)
+            for room in self.rooms:
+                async_to_sync(self.channel_layer.group_add)(
+                    room.group_name,
+                    self.channel_name
+                )
         except:
             raise StopConsumer
 
-    def disconnect(self, code):
-        async_to_sync(self.channel_layer.group_discard)(
-            self.room.group_name,
-            self.channel_name
-        )
+    def disconnect(self, **kwargs):
+        for room in self.rooms:
+            async_to_sync(self.channel_layer.group_discard)(
+                room.group_name,
+                self.channel_name
+            )
         raise StopConsumer
 
     def receive_json(self, content, **kwargs):
         content = content.get('content')
-        message = Message.objects.create(creator=self.user, room=self.room, content=content)
-        self.room.refresh_from_db()
+        room_id = content.get('room_id')
+        room = Room.objects.get(id=room_id)
+        message = Message.objects.create(creator=self.user, room=room, content=content)
+        room.refresh_from_db()
         message_serialize = {**ChatRoomMessageSerialier(message).data}
         async_to_sync(self.channel_layer.group_send)(
-            self.room.group_name,
+            room.group_name,
             {
                 "type": "chat_message",
                 **message_serialize
@@ -58,7 +62,7 @@ class ChatAsyncConsumer(AsyncJsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
         self.user = None
-        self.chat_rooms = []
+        self.chat_rooms: Any = []
 
     async def connect(self):
         try:
@@ -90,14 +94,25 @@ class ChatAsyncConsumer(AsyncJsonWebsocketConsumer):
         await self.send(text_data=json.dumps(event, ensure_ascii=False))
 
     @sync_to_async
-    def get_room_serializer(self, room):
+    def room_serialize(self, room: Room):
         return RoomSerializer(room).data
 
-    @sync_to_async
-    def messaging(self, room_id: int, content: str) -> Dict[str, bool]:
-        import_message_to_db.delay(self.user.id, room_id, content)
+    async def messaging(self, room_id: int, content: str) -> Dict[str, bool]:
+        # import_message_to_db.delay(self.user.id, room_id, content)
+        await database_sync_to_async(Message.objects.create)(room_id=room_id, content=content, creator=self.user)
+        room = await database_sync_to_async(Room.objects.get)(id=room_id)
+        data = await self.room_serialize(room)
+        await self.send_message_to_group(room.group_name, data)
         return {"status": True}
 
+    async def send_message_to_group(self, group_name, data):
+        await self.channel_layer.group_send(
+            group_name,
+            {
+                "type": "chat_message",
+                **data
+            }
+        )
     async def import_user_client(self):
         await database_sync_to_async(Client.objects.filter(user=self.user).delete)()
         await database_sync_to_async(Client.objects.create)(user=self.user, channel_name=self.channel_name)
