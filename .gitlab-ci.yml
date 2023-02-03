@@ -71,6 +71,6 @@ django-tests:
   stage: test
   script:
     # The MYSQL user only gets permissions for MYSQL_DB, so Django can't create a test database.
-    - coverage run --source="." manage.py test --parallel --noinput
-    - coverage json
+    - python3 -m coverage run --source="." manage.py test --parallel --noinput
+    - python3 -m coverage json
 
