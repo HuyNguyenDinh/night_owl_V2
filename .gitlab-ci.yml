@@ -27,11 +27,7 @@ variables:
 cache:
   paths:
   - ~/.cache/pip/
-before_script:
-  - python -V                                   # Print out python version for debugging
-  # Uncomment next line if your Django app needs a JS runtime:
-  # - apt-get update -q && apt-get install nodejs -yqq
-  - pip install -r requirements.txt
+
 
 # This is a basic example for a gem or script which doesn't use
 # services such as redis or postgres
@@ -54,6 +50,7 @@ before_script:
 
 test:
   before_script:
+    - pip install -r requirements.txt
     - python manage.py makemigrations && python manage.py migrate
   script:
   - coverage run --source="." manage.py test --parallel --noinput
