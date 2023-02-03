@@ -52,10 +52,8 @@ before_script:
 #
 # and then adding `--settings app.settings.ci` (or similar) to the test command
 
-build:
-  script:
-  - python manage.py makemigrations && python manage.py migrate
-
 test:
+  before_script:
+    - python manage.py migrate
   script:
   - coverage run --source="." manage.py test --parallel --noinput
