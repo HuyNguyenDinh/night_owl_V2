@@ -1,177 +1,131 @@
-[
-{
-  "model": "market.user",
-  "pk": 22,
-  "fields": {
-    "password": "JyhlsfVRBbwVYNfnfFUySayNViCIEoOYbShYfgWmUhpcsJeDqQOnmvjgOksxUnqcmGGFsaKbjDdPmZnKZMZZKcvMioGAlUpndWetBAPGnFjadoimPqXpwCaKfMuVihlg",
-    "last_login": null,
-    "is_superuser": false,
-    "first_name": "",
-    "last_name": "",
-    "is_staff": false,
-    "is_active": true,
-    "date_joined": "2023-01-31T08:18:52.666Z",
-    "email": "vLAnDxfpQu@example.com",
-    "phone_number": "DssoxycVVNfdaNqzMWVKYeNTLUnuWKpYgFXoRzkQUpsEgvtPoy",
-    "avatar": "",
-    "email_verified": true,
-    "phone_verified": true,
-    "balance": "0.01",
-    "is_business": false,
-    "groups": [],
-    "user_permissions": []
-  }
-},
-{
-  "model": "market.user",
-  "pk": 23,
-  "fields": {
-    "password": "PfLfZzPoiedBALnczQprbMEsSCIazFwQBlgCDnagtPqTWeMxemrormrqfuuOUtsqbALbOcxpveYZBbROTnCUuYPsVOEeWzhGtrAGuLFsRSAjfKWJUKOaILXeVhsqIeoD",
-    "last_login": null,
-    "is_superuser": false,
-    "first_name": "",
-    "last_name": "",
-    "is_staff": false,
-    "is_active": true,
-    "date_joined": "2023-01-31T08:18:52.668Z",
-    "email": "zXFsqwNdru@example.com",
-    "phone_number": "ecTSZOHSXxLjWAkBorEWQfiXXFInGyvbLZEyypJhTLXqYHlpwa",
-    "avatar": "",
-    "email_verified": true,
-    "phone_verified": true,
-    "balance": "0.01",
-    "is_business": true,
-    "groups": [],
-    "user_permissions": []
-  }
-},
-{
-  "model": "market.user",
-  "pk": 24,
-  "fields": {
-    "password": "WaJiOLtOCEhdRzHsYCUFVfZUxOVaYoXaMEeWlkfxEGTDOojYdmdBStreuTxqZPvQMbArNsuTeVVlBHusGThKKVrWkEVwKUeUyMiCVAyAPSYiYXqLaVJsXXJsvbRTzDYw",
-    "last_login": null,
-    "is_superuser": false,
-    "first_name": "",
-    "last_name": "",
-    "is_staff": false,
-    "is_active": true,
-    "date_joined": "2023-01-31T08:18:52.671Z",
-    "email": "BfjgguAxtc@example.com",
-    "phone_number": "TaUFDJoUyDQuDBCKtqZaxzrGROAnOKRqLOHdhAdFWMYRUfvNXp",
-    "avatar": "",
-    "email_verified": true,
-    "phone_verified": true,
-    "balance": "0.01",
-    "is_business": false,
-    "groups": [],
-    "user_permissions": []
-  }
-},
-{
-  "model": "market.address",
-  "pk": 12,
-  "fields": {
-    "country": "Viet Nam",
-    "province_id": 204,
-    "district_id": 1536,
-    "ward_id": "480126",
-    "street": "67/13 Hoàng Minh Chánh",
-    "full_address": "67/13 Hoàng Minh Chánh, phường Hóa An, TP Biên Hòa, Đồng Nai",
-    "note": "abc",
-    "creator": 22
-  }
-},
-{
-  "model": "market.address",
-  "pk": 13,
-  "fields": {
-    "country": "Viet Nam",
-    "province_id": 202,
-    "district_id": 1449,
-    "ward_id": "20709",
-    "street": "Bùi Văn Ba",
-    "full_address": "Bùi Văn Ba, Phường Tân Thuận Đông, Quận 7, Hồ Chí Minh",
-    "note": "abc",
-    "creator": 23
-  }
-},
-{
-  "model": "market.address",
-  "pk": 14,
-  "fields": {
-    "country": "Viet Nam",
-    "province_id": 204,
-    "district_id": 1536,
-    "ward_id": "480126",
-    "street": "67/13 Hoàng Minh Chánh",
-    "full_address": "67/13 Hoàng Minh Chánh, phường Hóa An, TP Biên Hòa, Đồng Nai",
-    "note": "abc",
-    "creator": 24
-  }
-},
-{
-  "model": "market.product",
-  "pk": 15,
-  "fields": {
-    "name": "PNrxabNhTHNNjfrNeWHGlVGrCJKVSfJAMcbRcsFQjsLHbtaxRUUkeKrrwzutvtoOgHLkTEXDQDOazIovvPjhhDjtPieBBkjeJDGkStdSZjuLjLwpxOechuTHBCTNuzeUhnHWHuRhthBCRepbDrlupbOFAMgnFlarRLirlpgwKceXxVZesUsopGHnNbKOAOSaFKbAFEUhmUHxmhFmHPBpSTldQJjMSCCbMZeiqWsKeerJfOACesqHgvKduhwStgA",
-    "is_available": true,
-    "sold_amount": 0,
-    "picture": "",
-    "description": "abc",
-    "owner": 23,
-    "categories": []
-  }
-},
-{
-  "model": "market.order",
-  "pk": 1,
-  "fields": {
-    "order_date": "2023-01-31T08:18:52.706Z",
-    "can_destroy": true,
-    "completed_date": null,
-    "shipping_code": null,
-    "total_shipping_fee": "0.00",
-    "note": null,
-    "customer": 24,
-    "store": 23,
-    "voucher_apply": null,
-    "status": 0,
-    "payment_type": 0
-  }
-},
-{
-  "model": "market.option",
-  "pk": 3,
-  "fields": {
-    "unit": "WGBMLqyDaifyDQaGIGRWTtaAMfZJOUIrLCJGEjGMUVMwnKXpnxOpwqhWYmmeHqjwrYVCxbhBIsvCmrTHJFIzcluhgVljdUmRSDlYGiuHoBInyXuAtdNzciEBNiTwWyyBOlmhWLxsjGLZOwOewSKLeTHrcUfcKamjhJuQRtUOaQejKgaEusswxBTztYTAuCScKHynEXVsbbRUIJMcjYVXkGhdKFEkJCUuxjpTqVJLWprjmvEBndytGDdZiUHxpsd",
-    "unit_in_stock": 9223372036854775807,
-    "price": "85058481440087805.93",
-    "weight": 1,
-    "height": 1,
-    "width": 1,
-    "length": 1,
-    "base_product": 15
-  }
-},
-{
-  "model": "market.orderdetail",
-  "pk": 1,
-  "fields": {
-    "quantity": 54794895,
-    "unit_price": "85058481440087805.93",
-    "order": 1,
-    "product_option": 3,
-    "cart_id": 2
-  }
-},
-{
-  "model": "market.cartdetail",
-  "pk": 2,
-  "fields": {
-    "quantity": 54794895,
-    "customer": 24,
-    "product_option": 3
-  }
-}
-]
+version: '3.5'
+
+services:
+  db:
+    image: 'postgres:latest'
+    restart: always
+    # Optional: Map the container port to a host port to be able to connect with a local db client
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=night_owl
+    volumes:
+      - ./sql/psql-init:/docker-entrypoint-initdb.d
+      - night_owl_postgres_data:/var/lib/postgresql/data/
+    networks:
+      - backend
+  redis_a: &default_redis
+    image: redis:latest
+    networks:
+      - backend
+#  redis_b:
+#    <<: *default_redis
+#  redis_c:
+#    << : *default_redis
+  app_a: &default-app
+    build:
+      context: ../
+      dockerfile: docker/app/Dockerfile
+    container_name: app_A
+    restart: always
+    depends_on:
+      - db
+      - redis_a
+#      - redis_b
+#      - redis_c
+    env_file:
+      - .env
+    environment: &app_environ
+      - DB_HOST=db
+      - DB_NAME=night_owl
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_PORT=5432
+      - BROKER=redis_a
+      - REDIS_A=redis_a
+#      - REDIS_B=redis_b
+#      - REDIS_C=redis_c
+    networks:
+      - backend
+    ports:
+      - "8008:8008"
+    volumes:
+      - ../:/home/web/code
+      - night_owl_static_volume:/home/web/code/staticfiles
+#    command: bash -c "python manage.py makemigrations && python manage.py migrate"
+    command: bash -c "python manage.py migrate && python -m daphne -b 0.0.0.0 -p 8008 night_owl_market.asgi:application"
+#  app_b:
+#    <<: *default-app
+#    container_name: app_B
+#  app_c:
+#    <<: *default-app
+#    container_name: app_C
+  celery_worker_send_mail:
+    build:
+      context: ../
+      dockerfile: docker/app/Dockerfile
+    container_name: celery_worker_send_mail
+    volumes:
+      - ../:/home/web/code
+    depends_on:
+      - db
+      - redis_a
+      - app_a
+    env_file:
+      - .env
+    environment: *app_environ
+    networks:
+      - backend
+    command: celery -A night_owl_market worker --pool=threads -l INFO -Q send_email -n worker_mail --concurrency=16
+#  celery_worker_a: &default_worker
+#    build:
+#      context: ../
+#      dockerfile: docker/app/Dockerfile
+#    container_name: celery_worker_a
+#    volumes:
+#      - ../:/home/web/code
+#    depends_on:
+#      - db
+#      - redis_a
+#      - app_a
+#      - app_b
+#      - app_c
+#    env_file:
+#      - .env
+#    environment: *app_environ
+#    command: celery -A night_owl_market worker --pool=threads -l INFO -Q msg_to_db -n worker --concurrency=16
+#  celery_worker_b:
+#    <<: *default_worker
+#    container_name: celery_worker_b
+#    command: celery -A night_owl_market worker --pool=prefork -l INFO -Q msg_to_group -n worker_b --concurrency=16
+#  celery_worker_a1:
+#    <<: *default_worker
+#    container_name: celery_worker_a1
+#    command: celery -A night_owl_market worker --pool=threads -l INFO -Q msg_to_db -n worker_a1 --concurrency=16
+#  celery_worker_b1:
+#    <<: *default_worker
+#    container_name: celery_worker_b1
+#    command: celery -A night_owl_market worker --pool=prefork -l INFO -Q msg_to_group -n worker_b1 --concurrency=16
+#  haproxy:
+#    build:
+#      context: ..
+#      dockerfile: docker/haproxy/Dockerfile
+#    container_name: haproxy
+#    ports:
+#      - "80:80"
+#    environment:
+#      - APP_SCALE_A=app_a
+#      - APP_SCALE_B=app_b
+#      - APP_SCALE_C=app_c
+#    depends_on:
+#      - app_a
+#      - app_b
+#      - app_c
+#    volumes:
+#      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+volumes:
+  night_owl_postgres_data:
+  night_owl_static_volume:
+networks:
+  backend:
+    name: night-owl-be
