@@ -15,6 +15,7 @@ app.conf.update(
 )
 
 app.conf.task_routes = {
+    'market.tasks.send_email_task': {'queue': 'send_email'},
     'market.tasks.import_message_to_db': {'queue': 'msg_to_db'},
     'chat.tasks.create_message': {'queue': 'msg_to_group'}
 }
