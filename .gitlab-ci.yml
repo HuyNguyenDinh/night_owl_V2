@@ -53,13 +53,9 @@ before_script:
 # and then adding `--settings app.settings.ci` (or similar) to the test command
 
 build:
-  before_script:
-  - rm .bash_logout
   script:
   - python manage.py makemigrations && python manange.py migrate
 
 test:
-  before_script:
-  - rm .bash_logout
   script:
-  - coverage run --source="." manage.py test --parallel --noinput
+  - python -m coverage run --source="." manage.py test --parallel --noinput
