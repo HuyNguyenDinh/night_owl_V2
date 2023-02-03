@@ -56,7 +56,7 @@ build:
   - pwd
   - ls
   script:
-  - python manage.py makemigrations && python manange.py migrate
+  - python manage.py makemigrations && python manage.py migrate
 
 test:
   script:
