@@ -53,6 +53,9 @@ before_script:
 # and then adding `--settings app.settings.ci` (or similar) to the test command
 
 build:
+  before_script:
+  - pwd
+  - ls
   script:
   - python manage.py makemigrations && python manange.py migrate
 
