@@ -215,3 +215,14 @@ class OnePiece(Piece):
         self.prepare_fixtures()
         self.prepare_bridges()
         self.get_bridge()
+
+class Node(Piece):
+    def __init__(self, *args, **kwargs):
+        super(Node, self).__init__(*args, **kwargs)
+        self.current: Dict[str, Bridge] = {}
+
+class Chain(Node, OnePiece):
+    def prepare(self):
+        super().prepare()
+        for key, value in self.current.items():
+            self.bridges[key] = value.get_fixture()
