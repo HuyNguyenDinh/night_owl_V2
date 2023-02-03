@@ -9,10 +9,10 @@
 #      'default': {
 #         'ENGINE': 'django.db.backends.mysql',
 #         'NAME': os.environ.get('MYSQL_DATABASE'),
-#        	'USER':  os.environ.get('MYSQL_USER'),
-#        	'PASSWORD': os.environ.get('MYSQL_PASSWORD'),
-#       	'HOST': 'mysql',
-#     	  'PORT': '3306',
+       	# 'USER':  os.environ.get('MYSQL_USER'),
+       	# 'PASSWORD': os.environ.get('MYSQL_PASSWORD'),
+      	# 'HOST': 'mysql',
+    	  # 'PORT': '3306',
 #         'CONN_MAX_AGE':60,
 #      },
 #  }
@@ -58,17 +58,13 @@ default:
     paths:
       - ~/.cache/pip/
 
-
-migrations:
-  stage: build
-  script:
+django-tests:
+  stage: test
+  before_script:
     - pip install -r requirements.txt
     - python3 manage.py makemigrations
     # - python3 manage.py makemigrations myapp
     - python3 manage.py migrate
-
-django-tests:
-  stage: test
   script:
     # The MYSQL user only gets permissions for MYSQL_DB, so Django can't create a test database.
     - python3 -m coverage run --source="." manage.py test --parallel --noinput
