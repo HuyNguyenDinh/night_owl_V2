@@ -30,11 +30,6 @@ cache:
 
 # This is a basic example for a gem or script which doesn't use
 # services such as redis or postgres
-before_script:
-  - python -V                                   # Print out python version for debugging
-  # Uncomment next line if your Django app needs a JS runtime:
-  # - apt-get update -q && apt-get install nodejs -yqq
-  - pip install -r requirements.txt
 
 # To get Django tests to work you may need to create a settings file using
 # the following DATABASES:
@@ -54,6 +49,10 @@ before_script:
 
 build:
   before_script:
+  - python -V                                   # Print out python version for debugging
+  # Uncomment next line if your Django app needs a JS runtime:
+  # - apt-get update -q && apt-get install nodejs -yqq
+  - pip install -r requirements.txt
   - pwd
   - ls
   script:
