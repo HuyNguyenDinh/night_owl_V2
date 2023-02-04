@@ -65,7 +65,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+CORS_ALLOW_CREDENTIALS = True
+
 CORS_ORIGIN_ALLOW_ALL = True
+
+CORS_REPLACE_HTTPS_REFERER = True
 
 ROOT_URLCONF = 'night_owl_market.urls'
 
@@ -257,23 +261,8 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
-CSRF_TRUSTED_ORIGINS = [
-    'https://*.night-owl-market-ou.herokuapp.com',
-    'https://*.nguyendinhhuy.dev',
-    'https://nom.nguyendinhhuy.dev',
-    'https://*.nom.nguyendinhhuy.dev',
-    'http://*.nom.nguyendinhhuy.dev',
-    'http://*.nguyendinhhuy.dev',
-    'http://nom.nguyendinhhuy.dev'
-    'https://*.127.0.0.1',
-    'http://127.0.0.1',
-    'https://*.0.0.0.0',
-    'http://*',
-    'https://*',
-    'https://*.ondigitalocean.app'
-]
+CSRF_TRUSTED_ORIGINS = ['https://*.nguyendinhhuy.dev','https://*.127.0.0.1']
 CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
