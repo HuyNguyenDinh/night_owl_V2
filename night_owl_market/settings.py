@@ -261,6 +261,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.night-owl-market-ou.herokuapp.com',
     'https://*.nguyendinhhuy.dev',
     'https://nom.nguyendinhhuy.dev',
+    'https://*.nom.nguyendinhhuy.dev',
+    'http://*.nom.nguyendinhhuy.dev',
     'http://*.nguyendinhhuy.dev',
     'http://nom.nguyendinhhuy.dev'
     'https://*.127.0.0.1',
