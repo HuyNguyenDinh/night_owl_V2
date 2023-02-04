@@ -262,15 +262,16 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.nguyendinhhuy.dev',
     'https://nom.nguyendinhhuy.dev',
     'http://*.nguyendinhhuy.dev',
-    'https://nom.nguyendinhhuy.dev'
+    'http://nom.nguyendinhhuy.dev'
     'https://*.127.0.0.1',
+    'http://127.0.0.1',
     'https://*.0.0.0.0',
     'http://*',
     'https://*',
     'https://*.ondigitalocean.app'
 ]
-# CSRF_COOKIE_SECURE = True
-# SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
 CELERY_ROUTES = {
     'market.tasks.send_email_task': 'send_mail',
