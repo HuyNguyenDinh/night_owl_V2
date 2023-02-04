@@ -269,7 +269,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*',
     'https://*.ondigitalocean.app'
 ]
-CSRF_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
 # SESSION_COOKIE_SECURE = True
 
 CELERY_ROUTES = {
