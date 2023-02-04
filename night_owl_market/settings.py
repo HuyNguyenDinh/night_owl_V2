@@ -263,11 +263,17 @@ SIMPLE_JWT = {
 }
 CSRF_TRUSTED_ORIGINS = [
     'https://*.nguyendinhhuy.dev',
+    'http://*.nguyendinhhuy.dev',
     'https://nom.nguyendinhhuy.dev',
-    'https://*.127.0.0.1', 
-    'http://*.127.0.0.1']
+    'http://nom.nguyendinhhuy.dev'
+    'https://*.127.0.0.1:8008',
+    'https://*.127.0.0.1',
+    'https://127.0.0.1:8008',
+    'http://127.0.0.1:8008'
+    'http://*.127.0.0.1:8008',
+    'http://*.127.0.0.1'
+    ]
 CSRF_COOKIE_SECURE = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 CELERY_ROUTES = {
     'market.tasks.send_email_task': 'send_mail',
