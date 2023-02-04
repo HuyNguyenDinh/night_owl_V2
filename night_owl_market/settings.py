@@ -261,6 +261,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.night-owl-market-ou.herokuapp.com',
     'https://*.nguyendinhhuy.dev',
     'https://nom.nguyendinhhuy.dev',
+    'http://*.nguyendinhhuy.dev',
+    'https://nom.nguyendinhhuy.dev'
     'https://*.127.0.0.1',
     'https://*.0.0.0.0',
     'http://*',
@@ -268,7 +270,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.ondigitalocean.app'
 ]
 CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
+# SESSION_COOKIE_SECURE = True
 
 CELERY_ROUTES = {
     'market.tasks.send_email_task': 'send_mail',
