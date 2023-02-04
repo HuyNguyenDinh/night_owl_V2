@@ -259,6 +259,7 @@ SIMPLE_JWT = {
 }
 CSRF_TRUSTED_ORIGINS = [
     'https://*.night-owl-market-ou.herokuapp.com',
+    'https://*.nguyendinhhuy.dev',
     'https://*.127.0.0.1',
     'https://*.0.0.0.0',
     'http://*',
