@@ -261,7 +261,11 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
-CSRF_TRUSTED_ORIGINS = ['https://*.nguyendinhhuy.dev','https://*.127.0.0.1', 'http://*.127.0.0.1']
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.nguyendinhhuy.dev',
+    'https://nom.nguyendinhhuy.dev',
+    'https://*.127.0.0.1', 
+    'http://*.127.0.0.1']
 CSRF_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
