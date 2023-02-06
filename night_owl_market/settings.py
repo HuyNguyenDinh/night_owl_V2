@@ -268,11 +268,19 @@ CSRF_TRUSTED_ORIGINS = [
     'http://nom.nguyendinhhuy.dev'
     'https://*.127.0.0.1:8008',
     'https://*.127.0.0.1',
+<<<<<<< HEAD
     'https://127.0.0.1:8008',
     'http://127.0.0.1:8008'
     'http://*.127.0.0.1:8008',
     'http://*.127.0.0.1'
     ]
+=======
+    'https://*.0.0.0.0',
+    'http://*',
+    'https://*',
+    'https://*.ondigitalocean.app'
+]
+>>>>>>> origin/master
 CSRF_COOKIE_SECURE = True
 
 CELERY_ROUTES = {

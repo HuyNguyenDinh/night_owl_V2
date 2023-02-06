@@ -3,6 +3,7 @@ from tests.market.fixtures.usecases.instance_results.add_options import *
 from tests.market.fixtures.usecases.instance_results.buying import *
 from market.baker_recipes import *
 from market.models import *
+from tests.market.fixtures.usecases.scenarios.ver2 import Chain
 
 cart_detail_fixture = Fixture(
     _instance=CartDetail.recipe()
@@ -71,3 +72,42 @@ class AddToCartFT(AddOptionFT, BuyingFT):
     def get_bridge(self):
         self.bridges.get('valid_cart_detail').get_fixture()
         self.bridges.get('valid_cart_details').get_fixture()
+
+class AddToCartChain(Chain):
+    def prepare_previous(self):
+        self.previous.append(AddOptionChain())
+        self.previous.append(BuyingChain())
+
+    @classmethod
+    def new_option(cls):
+        temp = AddOptionChain().extend()
+        temp.prepare()
+        return temp.get_bridge_by_name('valid_product_option_full').bridge_extend().get_fixture()
+
+    def prepare_fixtures(self):
+        self.fixtures['cart_detail_fixture'] = Fixture(
+            _instance=CartDetail.recipe()
+        )
+
+        self.fixtures['cart_detail_fixtures'] = self.get_fixture_by_name('cart_detail_fixture').fixture_extend(
+            _recipe_params={
+                '_quantity': 5,
+                'product_option': self.new_option()
+            }
+        )
+
+    def prepare_bridges(self):
+        self.bridges['valid_cart_detail'] = Bridge(
+            _previous={
+                'product_option': self.get_bridge_by_name('valid_product_option_full'),
+                'customer': self.get_bridge_by_name('customer_has_address')
+            },
+            _current=self.get_fixture_by_name('cart_detail_fixture')
+        )
+
+        self.bridges['valid_cart_details'] = Bridge(
+            _previous={
+                'customer': self.get_bridge_by_name('customer_has_address')
+            },
+            _current=self.get_fixture_by_name('cart_detail_fixtures')
+        )
