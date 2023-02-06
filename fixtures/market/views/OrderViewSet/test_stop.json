@@ -114,7 +114,7 @@
   "model": "market.product",
   "pk": 16,
   "fields": {
-    "name":"jKFVOrxOJEmAsJsVDmaFOmkiTDuZpqOOOZuxnpLvkQGOIVCGKCiqLFHYbeqnCOwYFBFZUkZITKWASRffLyQaHteKysURKHytFYUlJxypmyIjYRMpAXfHhUkHqGfUHvgyFPZGhklLOnGpTcauXfwsyxCxukprQQfltBtZzThXxczjOcCfVrvZxYlQVyQMdjykcuCNiIFvoxwyVlobpYtcAmvaLHDGRiYQyRCEwbxadvUZLUtlWOryUbUuJwFLXOo",
+    "name": "jKFVOrxOJEmAsJsVDmaFOmkiTDuZpqOOOZuxnpLvkQGOIVCGKCiqLFHYbeqnCOwYFBFZUkZITKWASRffLyQaHteKysURKHytFYUlJxypmyIjYRMpAXfHhUkHqGfUHvgyFPZGhklLOnGpTcauXfwsyxCxukprQQfltBtZzThXxczjOcCfVrvZxYlQVyQMdjykcuCNiIFvoxwyVlobpYtcAmvaLHDGRiYQyRCEwbxadvUZLUtlWOryUbUuJwFLXOo",
     "is_available": true,
     "sold_amount": 0,
     "picture": "",
