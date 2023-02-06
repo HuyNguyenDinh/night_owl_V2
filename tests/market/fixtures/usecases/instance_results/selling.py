@@ -5,6 +5,7 @@ from model_bakery.recipe import Recipe
 from market.models import *
 from typing import List
 from tests.market.fixtures.usecases.scenarios.ver1 import *
+from tests.market.fixtures.usecases.scenarios.ver2 import Chain
 
 business_fixture = Fixture(
     _instance=business,
@@ -37,3 +38,18 @@ class SellingFT(OnePiece):
 
     def get_bridge(self):
         self.bridges['business_has_address'].get_fixture()
+
+class SellingChain(Chain):
+    def prepare_fixtures(self):
+        self.fixtures['business_fixture'] = Fixture(
+            _instance=business,
+            _reverse_relationship_recipe={
+                'address': ('creator', q7_address)
+            }
+        )
+
+    def prepare_bridges(self):
+        self.bridges['business_has_address'] = Bridge(
+            _previous=None,
+            _current=self.get_fixture_by_name('business_fixture')
+        )

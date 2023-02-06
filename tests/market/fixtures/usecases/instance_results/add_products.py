@@ -1,6 +1,6 @@
-from tests.market.fixtures.usecases.instance_results.selling import business_has_address
 from tests.market.fixtures.entities.products import *
 from tests.market.fixtures.usecases.scenarios.ver1 import *
+from tests.market.fixtures.usecases.scenarios.ver2 import Chain
 from tests.market.fixtures.usecases.instance_results.add_voucher import *
 from tests.market.fixtures.usecases.instance_results.selling import *
 
@@ -100,3 +100,53 @@ class AddProductFT(AddVoucherFT, SellingFT):
         self.bridges.get('products_valid').get_fixture()
         self.bridges.get('products_percentage_voucher_valid').get_fixture()
         self.bridges.get('products_not_percentage_voucher_valid').get_fixture()
+
+class AddProductChain(Chain):
+    def prepare_fixtures(self):
+        self.fixtures['product_fixture'] = Fixture(
+            _instance=general_product
+        )
+
+        self.fixtures['products_fixture'] = self.get_fixture_by_name('product_fixture').fixture_extend(
+            _recipe_params={
+                '_quantity': 3
+            }
+        )
+
+    def prepare_bridges(self):
+        self.bridges['product_valid'] = Bridge(
+            _previous={
+                'owner': self.get_bridge_by_name('business_has_address')
+            },
+            _current=self.get_fixture_by_name('product_fixture')
+        )
+
+        self.bridges['product_percentage_valid'] = self.get_bridge_by_name('product_valid').bridge_extend(
+            _previous={
+                'owner': self.get_bridge_by_name('business_has_address'),
+                'voucher_set': self.get_bridge_by_name('percentage_vouchers_bridge')
+            }
+        )
+
+        self.bridges['products_valid'] = self.get_bridge_by_name('product_valid').bridge_extend(
+            _current=products_fixture
+        )
+
+        self.bridges['products_percentage_voucher_valid'] = self.get_bridge_by_name('products_valid').bridge_extend(
+            _previous={
+                'owner': self.get_bridge_by_name('business_has_address'),
+                'voucher_set': self.get_bridge_by_name('percentage_vouchers_bridge')
+            }
+        )
+
+        self.bridges['products_not_percentage_voucher_valid'] = self.get_bridge_by_name('products_valid').bridge_extend(
+            _previous={
+                'owner': self.get_bridge_by_name('business_has_address'),
+                'voucher_set': self.get_bridge_by_name('not_percentage_vouchers_bridge')
+            }
+        )
+
+    def prepare_previous(self):
+        self.previous.append(AddVoucherChain())
+        self.previous.append(SellingChain())
+
