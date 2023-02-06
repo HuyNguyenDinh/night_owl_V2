@@ -41,7 +41,7 @@ variables:
   DB_PORT: 5432
   BROKER: redis
   REDIS_A: redis
-
+  
 default:
   image: python:3.10
   #
@@ -69,4 +69,5 @@ django-tests:
     # The MYSQL user only gets permissions for MYSQL_DB, so Django can't create a test database.
     - python3 -m coverage run --source="." manage.py test --parallel --noinput
     - python3 -m coverage json
+
 
