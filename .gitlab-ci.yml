@@ -1,19 +1,14 @@
-# This file is a template, and might need editing before it works on your project.
-# Official framework image. Look for the different tagged releases at:
-# https://hub.docker.com/r/library/python
-image: python:3.10
-
-# Pick zero or more services to be used on all builds.
-# Only needed when using a docker container to run your tests in.
-# Check out: http://docs.gitlab.com/ce/ci/docker/using_docker_images.html#what-is-a-service
-services:
-  - redis:latest
-  - postgres:latest
+# This example is for testing Django with MySQL.
+#
+# The test CI/CD variables MYSQL_DB, MYSQL_USER and MYSQL_PASS can be set in the project settings at:
+#     Settings --> CI/CD --> Variables
+#
 
 variables:
+  # DJANGO_CONFIG: "test"
+  POSTGRES_DB: night_owl
   POSTGRES_USER: postgres
   POSTGRES_PASSWORD: postgres
-  POSTGRES_DB: night_owl
   DB_HOST: postgres
   DB_NAME: night_owl
   DB_USER: postgres
@@ -21,6 +16,22 @@ variables:
   DB_PORT: 5432
   BROKER: redis
   REDIS_A: redis
+  
+default:
+  image: python:3.10
+  #
+  # Pick zero or more services to be used on all builds.
+  # Only needed when using a docker container to run your tests in.
+  # Check out: https://docs.gitlab.com/ee/ci/services/index.html
+  services:
+    - postgres:latest
+    - redis:latest
+  #
+  # This folder is cached between builds
+  # http://docs.gitlab.com/ee/ci/yaml/README.html#cache
+  cache:
+    paths:
+      - ~/.cache/pip/
 
 # This folder is cached between builds
 # http://docs.gitlab.com/ce/ci/yaml/README.html#cache

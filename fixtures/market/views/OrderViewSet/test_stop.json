@@ -114,7 +114,11 @@
   "model": "market.product",
   "pk": 16,
   "fields": {
+<<<<<<< HEAD
+    "name": "jKFVOrxOJEmAsJsVDmaFOmkiTDuZpqOOOZuxnpLvkQGOIVCGKCiqLFHYbeqnCOwYFBFZUkZITKWASRffLyQaHteKysURKHytFYUlJxypmyIjYRMpAXfHhUkHqGfUHvgyFPZGhklLOnGpTcauXfwsyxCxukprQQfltBtZzThXxczjOcCfVrvZxYlQVyQMdjykcuCNiIFvoxwyVlobpYtcAmvaLHDGRiYQyRCEwbxadvUZLUtlWOryUbUuJwFLXOo",
+=======
     "name":"jKFVOrxOJEmAsJsVDmaFOmkiTDuZpqOOOZuxnpLvkQGOIVCGKCiqLFHYbeqnCOwYFBFZUkZITKWASRffLyQaHteKysURKHytFYUlJxypmyIjYRMpAXfHhUkHqGfUHvgyFPZGhklLOnGpTcauXfwsyxCxukprQQfltBtZzThXxczjOcCfVrvZxYlQVyQMdjykcuCNiIFvoxwyVlobpYtcAmvaLHDGRiYQyRCEwbxadvUZLUtlWOryUbUuJwFLXOo",
+>>>>>>> origin/huy
     "is_available": true,
     "sold_amount": 0,
     "picture": "",

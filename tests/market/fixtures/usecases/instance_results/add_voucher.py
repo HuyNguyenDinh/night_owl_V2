@@ -1,5 +1,6 @@
 from tests.market.fixtures.entities.vouchers import *
 from tests.market.fixtures.usecases.scenarios.ver1 import *
+from tests.market.fixtures.usecases.scenarios.ver2 import Chain
 from model_bakery.recipe import seq
 import random, string
 
@@ -94,3 +95,51 @@ class AddVoucherFT(OnePiece):
         self.bridges.get('percentage_vouchers_bridge').get_fixture()
         self.bridges.get('not_percentage_voucher_bridge').get_fixture()
         self.bridges.get('not_percentage_vouchers_bridge').get_fixture()
+
+class AddVoucherChain(Chain):
+    @classmethod
+    def random_code(cls, n: int = 24) -> str:
+        return ''.join(random.choices(string.ascii_letters, k=n))
+    def prepare_fixtures(self):
+        self.fixtures['percentage_voucher_fixture'] = Fixture(
+            _instance=percentage_voucher,
+            _recipe_params={
+                'code': self.random_code,
+            }
+        )
+        self.fixtures['percentage_vouchers_fixture'] = self.get_fixture_by_name('percentage_voucher_fixture').fixture_extend(
+            _recipe_params={
+                'code': self.random_code,
+                '_quantity': 3
+            }
+        )
+        self.fixtures['not_percentage_voucher_fixture'] = self.get_fixture_by_name('percentage_voucher_fixture').fixture_extend(
+            _instance=not_percentage_voucher
+        )
+
+        self.fixtures['not_percentage_voucher_fixtures'] = self.get_fixture_by_name('not_percentage_voucher_fixture').fixture_extend(
+            _recipe_params={
+                'code': self.random_code,
+                '_quantity': 3
+            }
+        )
+
+    def prepare_bridges(self):
+        self.bridges['percentage_voucher_bridge'] = Bridge(
+            _previous=None,
+            _current=self.get_fixture_by_name('percentage_voucher_fixture')
+        )
+
+        self.bridges['percentage_vouchers_bridge'] = Bridge(
+            _previous=None,
+            _current=self.get_fixture_by_name('percentage_vouchers_fixture')
+        )
+
+        self.bridges['not_percentage_voucher_bridge']= Bridge(
+            _previous=None,
+            _current=self.get_fixture_by_name('not_percentage_voucher_fixture')
+        )
+        self.bridges['not_percentage_vouchers_bridge'] = Bridge(
+            _previous=None,
+            _current=self.get_fixture_by_name('not_percentage_voucher_fixtures')
+        )
