@@ -3,31 +3,6 @@
 # The test CI/CD variables MYSQL_DB, MYSQL_USER and MYSQL_PASS can be set in the project settings at:
 #     Settings --> CI/CD --> Variables
 #
-# The Django settings in settings.py, used in tests, might look similar to:
-#
-#  DATABASES = {
-#      'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': os.environ.get('MYSQL_DATABASE'),
-       	# 'USER':  os.environ.get('MYSQL_USER'),
-       	# 'PASSWORD': os.environ.get('MYSQL_PASSWORD'),
-      	# 'HOST': 'mysql',
-    	  # 'PORT': '3306',
-#         'CONN_MAX_AGE':60,
-#      },
-#  }
-#
-# It is possible to use '--settings' to specify a custom settings file on the command line below or use an environment
-# variable to trigger an include on the bottom of your settings.py:
-#   if os.environ.get('DJANGO_CONFIG')=='test':
-#       from .settings_test import *
-#
-# It is also possible to hardcode the database name and credentials in the settings.py file and in the .gitlab-ci.yml file.
-#
-# The mysql service needs some variables too. See https://hub.docker.com/_/mysql for possible mysql env variables
-# Note that when using a service in GitLab CI/CD that needs environment variables to run, only variables defined in
-# .gitlab-ci.yml are passed to the service and variables defined in the GitLab UI are not.
-# https://gitlab.com/gitlab-org/gitlab/-/issues/30178
 
 variables:
   # DJANGO_CONFIG: "test"
@@ -58,16 +33,35 @@ default:
     paths:
       - ~/.cache/pip/
 
-django-tests:
-  stage: test
+# This folder is cached between builds
+# http://docs.gitlab.com/ce/ci/yaml/README.html#cache
+cache:
+  paths:
+  - ~/.cache/pip/
+
+
+# This is a basic example for a gem or script which doesn't use
+# services such as redis or postgres
+
+# To get Django tests to work you may need to create a settings file using
+# the following DATABASES:
+# 
+# DATABASES = {
+#     'default': {
+#        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#        'NAME': 'ci',
+#        'USER': 'postgres',
+#        'PASSWORD': 'postgres',
+#        'HOST': 'postgres',
+#        'PORT': '5432',
+#    },
+# }
+#
+# and then adding `--settings app.settings.ci` (or similar) to the test command
+
+test:
   before_script:
     - pip install -r requirements.txt
-    - python3 manage.py makemigrations
-    # - python3 manage.py makemigrations myapp
-    - python3 manage.py migrate
+    - python manage.py makemigrations && python manage.py migrate
   script:
-    # The MYSQL user only gets permissions for MYSQL_DB, so Django can't create a test database.
-    - python3 -m coverage run --source="." manage.py test --parallel --noinput
-    - python3 -m coverage json
-
-
+  - coverage run --source="." manage.py test --parallel --noinput
