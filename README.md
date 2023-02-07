@@ -2,4 +2,4 @@
 # night_owl
 Backend for night owl market
 I deploy api to heroku. Check at: https://www.nguyendinhhuy.dev/market/
-E
+Just make the change from https://gitlab.com/HuyTur/night_owl_V2 for Synchronous merge
