@@ -1,6 +1,7 @@
 from tests.market.fixtures.usecases.scenarios.ver1 import Fixture, Bridge
 from typing import List, Dict
 
+
 class Chain:
     def __init__(self,
                  fixtures: Dict[str, Fixture] | None = None,
@@ -61,6 +62,7 @@ class Chain:
         temp_bridges: Dict[str, Bridge] = {}
         self.prepare_previous()
         for previous in self.previous:
+            previous.prepare()
             temp_pre.append(previous.extend())
         self.prepare_fixtures()
         for key, fixture in self.fixtures.items():
@@ -82,4 +84,4 @@ class Chain:
     def make(self):
         self.prepare()
         for _, node in self.bridges.items():
-            node.get_fixture()
+            node.bridge_extend().get_fixture()

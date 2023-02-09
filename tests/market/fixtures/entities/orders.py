@@ -18,14 +18,15 @@ from typing import List
 #         **kwargs
 #     ).order
 
+
 def order_instance(_order_recipe: Recipe,
                    _customer: User,
                    _store: User,
                    **kwargs) -> Order | List[Order]:
     return _order_recipe.make(customer=_customer, store=_store, **kwargs)
 
-uncheckout_order = general_order.extend(status=0)
 
+uncheckout_order = general_order.extend(status=0)
 checkout_order_cod = general_order.extend(status=1)
 checkout_order_momo = checkout_order_cod.extend(payment_type=1)
 checkout_order_point = checkout_order_momo.extend(payment_type=2)

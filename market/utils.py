@@ -136,31 +136,31 @@ def create_shipping_order(order_id: int) -> str:
         }
         items.append(item)
     data = {
-            "payment_type_id": 1,
-            "note": "Night Owl Market",
-            "required_note": "KHONGCHOXEMHANG",
-            "return_phone": seller.phone_number,
-            "return_address": seller.address.full_address,
-            "return_district_id": seller.address.district_id,
-            "return_ward_code": str(seller.address.ward_id),
-            "client_order_code": str(order.id),
-            "to_name": customer.last_name + " " + customer.first_name,
-            "to_phone": customer.phone_number,
-            "to_address": customer.address.full_address,
-            "to_ward_code": str(customer.address.ward_id),
-            "to_district_id": customer.address.district_id,
-            "cod_amount": int(value),
-            "content": order.note,
-            "weight": max_lwh.get('total_weight'),
-            "length": max_lwh.get('max_length'),
-            "width": max_lwh.get('max_width'),
-            "height": max_lwh.get('max_height'),
-            "insurance_value": int(value),
-            "service_id": service_id,
-            "service_type_id": service_type_id,
-            "coupon": None,
-            "items": items
-        }
+        "payment_type_id": 1,
+        "note": "Night Owl Market",
+        "required_note": "KHONGCHOXEMHANG",
+        "return_phone": seller.phone_number,
+        "return_address": seller.address.full_address,
+        "return_district_id": seller.address.district_id,
+        "return_ward_code": str(seller.address.ward_id),
+        "client_order_code": str(order.id),
+        "to_name": customer.last_name + " " + customer.first_name,
+        "to_phone": customer.phone_number,
+        "to_address": customer.address.full_address,
+        "to_ward_code": str(customer.address.ward_id),
+        "to_district_id": customer.address.district_id,
+        "cod_amount": int(value),
+        "content": order.note,
+        "weight": max_lwh.get('total_weight'),
+        "length": max_lwh.get('max_length'),
+        "width": max_lwh.get('max_width'),
+        "height": max_lwh.get('max_height'),
+        "insurance_value": int(value),
+        "service_id": service_id,
+        "service_type_id": service_type_id,
+        "coupon": None,
+        "items": items
+    }
     r = json.dumps(data)
     loaded_r = json.loads(r)
     header = {
@@ -270,7 +270,6 @@ def checkout_order(order_id: int, voucher_code: str = None, payment_type: int = 
             # update status
             order.status = status
             order.save()
-
     except:
         return None
     else:
@@ -329,16 +328,17 @@ def calculate_shipping_fee(order_id: int) -> str:
 # Create shipping code that match with order
 def update_shipping_code(order_id: int) -> bool:
     try:
+        order = Order.objects.get(pk=order_id)
+        shipping_order = json.loads(create_shipping_order(order_id=order.id))
+        if shipping_order.get('code') == 200:
+            data = shipping_order.get('data')
+            order.shipping_code = data.get('order_code')
+            order.total_shipping_fee = data.get('total_fee')
+            order.completed_date = shipping_order.get('expected_delivery_time')
+        else:
+            raise Exception
         with transaction.atomic():
             order = Order.objects.select_for_update().get(pk=order_id)
-            shipping_order = json.loads(create_shipping_order(order_id=order.id))
-            if shipping_order.get('code') == 200:
-                data = shipping_order.get('data')
-                order.shipping_code = data.get('order_code')
-                order.total_shipping_fee = data.get('total_fee')
-                order.completed_date = shipping_order.get('expected_delivery_time')
-            else:
-                raise Exception
             order.can_destroy = False
             order.status = 2
             order.save()
@@ -368,6 +368,7 @@ def make_order_from_list_cart(list_cart_id: list[int], user_id: int, data: dict[
                                                             unit_price=c.product_option.price, order=order, cart_id=c))
                     if len(order_detail_set) > 0:
                         OrderDetail.objects.bulk_create(order_detail_set)
+                    ################# Need to move out transaction ##########
                     shipping_data = json.loads(calculate_shipping_fee(order_id=order.id))
                     if shipping_data.get('code') == 200:
                         shipping_fee = shipping_data.get('data').get('total')
@@ -377,6 +378,35 @@ def make_order_from_list_cart(list_cart_id: list[int], user_id: int, data: dict[
                     result.append(order)
     return result
 
+@transaction.atomic
+def make_order_from_list_cart_new(list_cart_id: list[int], user_id: int, data: dict[str, [list[int]]]) -> list[Order]:
+    carts = CartDetail.objects.select_related().filter(customer=user_id).filter(id__in=list_cart_id)
+    user = User.objects.get(pk=user_id)
+    result = []
+    if carts:
+        stores = carts.values_list('product_option__base_product__owner_id', flat=True).distinct().exclude(id=user_id)
+        for store in stores:
+            cart_order = carts.filter(product_option__base_product__owner=store)
+            if cart_order:
+                serializer = OrderSerializer(data=data)
+                if serializer.is_valid(raise_exception=True):
+                    order = serializer.save(store_id=store, customer=user)
+                    order.save()
+                    order_detail_set = []
+                    for c in cart_order:
+                        order_detail_set.append(OrderDetail(quantity=c.quantity, product_option=c.product_option,
+                                                            unit_price=c.product_option.price, order=order, cart_id=c))
+                    if len(order_detail_set) > 0:
+                        OrderDetail.objects.bulk_create(order_detail_set)
+                    ################# Need to move out transaction ##########
+                    shipping_data = json.loads(calculate_shipping_fee(order_id=order.id))
+                    if shipping_data.get('code') == 200:
+                        shipping_fee = shipping_data.get('data').get('total')
+                        order.total_shipping_fee = shipping_fee
+                        order.save()
+                        order.refresh_from_db()
+                    result.append(order)
+    return result
 
 def send_email(reciever: str, subject: str, content: str) -> None:
     to = [reciever]

@@ -9,8 +9,10 @@ cart_detail_fixture = Fixture(
     _instance=CartDetail.recipe()
 )
 
+
 def new_option():
     return valid_product_option_full.bridge_extend().get_fixture()
+
 
 cart_detail_fixtures = Fixture(
     _instance=general_cart_detail,
@@ -34,6 +36,7 @@ valid_cart_details = Bridge(
     },
     _current=cart_detail_fixtures
 )
+
 
 class AddToCartFT(AddOptionFT, BuyingFT):
     def prepare_fixtures(self):
@@ -73,6 +76,7 @@ class AddToCartFT(AddOptionFT, BuyingFT):
         self.bridges.get('valid_cart_detail').get_fixture()
         self.bridges.get('valid_cart_details').get_fixture()
 
+
 class AddToCartChain(Chain):
     def prepare_previous(self):
         self.previous.append(AddOptionChain())
@@ -80,8 +84,8 @@ class AddToCartChain(Chain):
 
     @classmethod
     def new_option(cls):
-        temp = AddOptionChain().extend()
-        temp.prepare()
+        temp = AddOptionChain()
+        temp.make()
         return temp.get_bridge_by_name('valid_product_option_full').bridge_extend().get_fixture()
 
     def prepare_fixtures(self):
@@ -92,7 +96,7 @@ class AddToCartChain(Chain):
         self.fixtures['cart_detail_fixtures'] = self.get_fixture_by_name('cart_detail_fixture').fixture_extend(
             _recipe_params={
                 '_quantity': 5,
-                'product_option': self.new_option()
+                'product_option': self.new_option
             }
         )
 

@@ -22,8 +22,8 @@ services:
 #    <<: *default_redis
 #  redis_c:
 #    << : *default_redis
-  app_a: &default-app
-    build:
+  app_a: &default_app
+    build: &app-build
       context: ../
       dockerfile: docker/app/Dockerfile
     container_name: app_A
@@ -60,10 +60,8 @@ services:
 #  app_c:
 #    <<: *default-app
 #    container_name: app_C
-  celery_worker_send_mail:
-    build:
-      context: ../
-      dockerfile: docker/app/Dockerfile
+  celery_worker_send_mail: &default-worker
+    build: *app-build
     container_name: celery_worker_send_mail
     volumes:
       - ../:/home/web/code
@@ -77,7 +75,10 @@ services:
     networks:
       - backend
     command: celery -A night_owl_market worker --pool=threads -l INFO -Q send_email -n worker_mail --concurrency=16
-#  celery_worker_a: &default_worker
+  celery_worker_create_order:
+    <<: *default-worker
+    container_name: celery_worker_create_order
+    command: celery -A night_owl_market worker --pool=threads -l INFO -Q create_order -n worker_order --concurrency=16
 #    build:
 #      context: ../
 #      dockerfile: docker/app/Dockerfile

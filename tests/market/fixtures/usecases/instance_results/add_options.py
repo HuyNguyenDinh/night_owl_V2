@@ -80,6 +80,7 @@ class AddOptionFT(AddProductFT):
         self.bridges.get('multi_valid_product_options_full').get_fixture()
         self.bridges.get('multi_valid_product_voucher_options_full').get_fixture()
 
+
 class AddOptionChain(Chain):
     def prepare_fixtures(self):
         self.fixtures['option_empty_fixture'] = Fixture(_instance=product_option_empty)
