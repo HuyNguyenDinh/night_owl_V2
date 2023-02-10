@@ -4,6 +4,7 @@ from django.db.models import Model
 
 M = TypeVar("M", bound=Model)
 
+
 class Fixture:
     def __init__(self,
                  _instance: Recipe,
@@ -198,6 +199,7 @@ class Bridge:
         if not self._isMake:
             self._make_fixtures(**kwargs)
         return self._current.make_instance()
+
 
 class Piece:
     def __init__(self, *args, **kwargs):
