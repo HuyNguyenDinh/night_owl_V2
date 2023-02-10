@@ -13,8 +13,8 @@ db_payment = client.payment
 db_code = client.code
 
 
-def randStr(chars=string.ascii_uppercase + string.digits, N=4):
-    return ''.join(random.choice(chars) for _ in range(N))
+def randStr(chars=string.ascii_uppercase + string.digits, n=4):
+    return ''.join(random.choice(chars) for _ in range(n))
 
 
 def import_signature(order_ids):
@@ -46,7 +46,7 @@ def get_instance_from_signature_and_request_id(**kwargs):
 def add_verified_code(user_id, email):
     verified_code_collection = db_code.verified
     time_expired = datetime.datetime.now() + datetime.timedelta(minutes=15)
-    code = randStr(N=4)
+    code = randStr(n=4)
     user_code = verified_code_collection.find_one({"user_id": user_id})
     if user_code:
         verified_code_collection.find_one_and_update(user_code, {"$set": {"code": code, "time_expired": time_expired, "email": email}})
@@ -66,7 +66,7 @@ def check_verified_code(user_id, code, email):
 def add_reset_code(user_id):
     reset_code_collection = db_code.reset
     time_expired = datetime.datetime.now() + datetime.timedelta(minutes=15)
-    code = randStr(N=4)
+    code = randStr(n=4)
     user_code = reset_code_collection.find_one({"user_id": user_id})
     if user_code:
         reset_code_collection.find_one_and_update(user_code, {"$set": {"code": code, "time_expired": time_expired}})

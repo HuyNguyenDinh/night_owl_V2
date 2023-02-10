@@ -1,17 +1,21 @@
 import decimal
+
+import django
 from django.utils import timezone
 from psycopg2 import DatabaseError
-import django
+
 django.setup()
-from market.models import *
-from django.db.models import Sum, F, Max, Count, Q
-from django.db import transaction
-import requests
 import json
-from market.serializers import *
-from threading import Thread
-from night_owl_market import settings
+
+import requests
 from django.core.mail import send_mail
+from django.db import transaction
+from django.db.models import Count, F, Max, Q, Sum
+
+from market.models import *
+from market.serializers import *
+from night_owl_market import settings
+
 
 # Check voucher available at now
 def check_now_in_datetime_range(start_date, end_date) -> bool:
@@ -24,22 +28,28 @@ def check_voucher_available(option_id: int, voucher_id: int) -> bool:
     voucher = Voucher.objects.get(pk=voucher_id)
     option = Option.objects.get(pk=option_id)
     if option and voucher:
-        if option.base_product.id in list(set(voucher.products.values_list('id', flat=True))):
+        if option.base_product.id in list(
+            set(voucher.products.values_list("id", flat=True))
+        ):
             return check_now_in_datetime_range(voucher.start_date, voucher.end_date)
     return False
 
 
 # Get order detail id match the voucher
-def check_discount_in_order(order_details: list[OrderDetail], voucher_id: int) -> [int, None]:
+def check_discount_in_order(
+    order_details: list[OrderDetail], voucher_id: int
+) -> [int, None]:
     for odd in order_details:
         if check_voucher_available(odd.product_option.id, voucher_id):
             return odd.id
     return None
 
 
-def calculate_order_value_with_voucher(voucher: Voucher, value: decimal.Decimal) -> decimal.Decimal:
+def calculate_order_value_with_voucher(
+    voucher: Voucher, value: decimal.Decimal
+) -> decimal.Decimal:
     if voucher.is_percentage:
-        return value * (100-voucher.discount) / 100
+        return value * (100 - voucher.discount) / 100
     return value - voucher.discount
 
 
@@ -47,14 +57,26 @@ def calculate_value(order_id: int, voucher_id: int = None) -> decimal.Decimal:
     order = Order.objects.get(pk=order_id)
     value = 0
     if order:
-        value = order.orderdetail_set.aggregate(total_price=Sum(F('quantity') * F('unit_price')))['total_price']
+        value = order.orderdetail_set.aggregate(
+            total_price=Sum(F("quantity") * F("unit_price"))
+        )["total_price"]
         if voucher_id:
             voucher = Voucher.objects.get(pk=voucher_id)
             if voucher:
-                odd_exclude = order.orderdetail_set.filter(Q(product_option__base_product__voucher__id=voucher_id) &
-                                                           Q(product_option__base_product__voucher__start_date__lte=timezone.now()) &
-                                                           (Q(product_option__base_product__voucher__end_date__gt=timezone.now()) |
-                                                            Q(product_option__base_product__voucher__end_date__isnull=True)))
+                odd_exclude = order.orderdetail_set.filter(
+                    Q(product_option__base_product__voucher__id=voucher_id)
+                    & Q(
+                        product_option__base_product__voucher__start_date__lte=timezone.now()
+                    )
+                    & (
+                        Q(
+                            product_option__base_product__voucher__end_date__gt=timezone.now()
+                        )
+                        | Q(
+                            product_option__base_product__voucher__end_date__isnull=True
+                        )
+                    )
+                )
                 if odd_exclude.exists():
                     value = calculate_order_value_with_voucher(voucher, value)
         value = value + order.total_shipping_fee
@@ -70,7 +92,7 @@ def decrease_option_unit_instock(orderdetail_id: int) -> Option:
     option.full_clean()
     option.save()
     product = Product.objects.get(pk=option.base_product.id)
-    product.sold_amount = F('sold_amount') + odd.quantity
+    product.sold_amount = F("sold_amount") + odd.quantity
     product.save()
     option.refresh_from_db()
     return option
@@ -80,10 +102,11 @@ def decrease_option_unit_instock(orderdetail_id: int) -> Option:
 def calculate_max_lwh(order_id: int) -> dict[str, int]:
     order = Order.objects.get(pk=order_id)
     max_lwh = order.orderdetail_set.all().aggregate(
-        max_width=Max('product_option__width'),
-        max_height=Max('product_option__height'), 
-        max_length=Max('product_option__length'),
-        total_weight=Sum(F('product_option__weight')))
+        max_width=Max("product_option__width"),
+        max_height=Max("product_option__height"),
+        max_length=Max("product_option__length"),
+        total_weight=Sum(F("product_option__weight")),
+    )
     return max_lwh
 
 
@@ -93,17 +116,17 @@ def get_shipping_service(order_id: int) -> str:
     seller = order.store
     customer = order.customer
     header = {
-        'Content-Type': 'application/json',
-        'token': '8ae8d191-18b9-11ed-b136-06951b6b7f89'
+        "Content-Type": "application/json",
+        "token": "8ae8d191-18b9-11ed-b136-06951b6b7f89",
     }
     data = {
         "shop_id": 117552,
         "from_district": seller.address.district_id,
-        "to_district": customer.address.district_id
+        "to_district": customer.address.district_id,
     }
     r = json.dumps(data)
     loaded_r = json.loads(r)
-    url = 'https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/available-services'
+    url = "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/available-services"
     x = requests.post(url=url, json=loaded_r, headers=header)
     return x.text
 
@@ -119,10 +142,10 @@ def create_shipping_order(order_id: int) -> str:
         value = order.bill.value
     service_type_id = 2
     services = json.loads(get_shipping_service(order.id))
-    if services.get('code') == 200:
-        service_data = services.get('data')
-        service_type_id = service_data[0].get('service_type_id')
-        service_id = service_data[0].get('service_id')
+    if services.get("code") == 200:
+        service_data = services.get("data")
+        service_type_id = service_data[0].get("service_type_id")
+        service_id = service_data[0].get("service_id")
     items = []
     for i in order.orderdetail_set.all():
         item = {
@@ -132,7 +155,7 @@ def create_shipping_order(order_id: int) -> str:
             "price": int(i.unit_price),
             "length": i.product_option.length,
             "width": i.product_option.length,
-            "height": i.product_option.height
+            "height": i.product_option.height,
         }
         items.append(item)
     data = {
@@ -151,24 +174,24 @@ def create_shipping_order(order_id: int) -> str:
         "to_district_id": customer.address.district_id,
         "cod_amount": int(value),
         "content": order.note,
-        "weight": max_lwh.get('total_weight'),
-        "length": max_lwh.get('max_length'),
-        "width": max_lwh.get('max_width'),
-        "height": max_lwh.get('max_height'),
+        "weight": max_lwh.get("total_weight"),
+        "length": max_lwh.get("max_length"),
+        "width": max_lwh.get("max_width"),
+        "height": max_lwh.get("max_height"),
         "insurance_value": int(value),
         "service_id": service_id,
         "service_type_id": service_type_id,
         "coupon": None,
-        "items": items
+        "items": items,
     }
     r = json.dumps(data)
     loaded_r = json.loads(r)
     header = {
-        'Content-Type': 'application/json',
-        'ShopId': '117552',
-        'Token': '8ae8d191-18b9-11ed-b136-06951b6b7f89'
+        "Content-Type": "application/json",
+        "ShopId": "117552",
+        "Token": "8ae8d191-18b9-11ed-b136-06951b6b7f89",
     }
-    url = 'https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/create'
+    url = "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/create"
 
     x = requests.post(url=url, json=loaded_r, headers=header)
     return x.text
@@ -237,7 +260,9 @@ def receive_order(order_id: int) -> bool:
         return True
 
 
-def checkout_order(order_id: int, voucher_code: str = None, payment_type: int = 0, raw_status: int = 1) -> [Order, None]:
+def checkout_order(
+    order_id: int, voucher_code: str = None, payment_type: int = 0, raw_status: int = 1
+) -> [Order, None]:
     try:
         value = 0
         payed = False
@@ -251,7 +276,10 @@ def checkout_order(order_id: int, voucher_code: str = None, payment_type: int = 
                 voucher = Voucher.objects.filter(code=voucher_code)
             if voucher is not None and voucher.exists():
                 value = calculate_value(order_id=order.id, voucher_id=voucher[0].id)
-                if check_discount_in_order(order.orderdetail_set.all(), voucher[0].id) is not None:
+                if (
+                    check_discount_in_order(order.orderdetail_set.all(), voucher[0].id)
+                    is not None
+                ):
                     order.voucher_apply = voucher[0]
             else:
                 value = calculate_value(order_id=order.id)
@@ -261,8 +289,9 @@ def checkout_order(order_id: int, voucher_code: str = None, payment_type: int = 
                     raise DatabaseError
             if payment_type in [1, 2]:
                 payed = True
-            order.bill = Bill.objects.create(value=value, order_payed=order, customer=order.customer,
-                                             payed=payed)
+            order.bill = Bill.objects.create(
+                value=value, order_payed=order, customer=order.customer, payed=payed
+            )
 
             if payment_type != 1:
                 for i in order.orderdetail_set.all():
@@ -306,20 +335,20 @@ def calculate_shipping_fee(order_id: int) -> str:
         "service_type_id": 2,
         "to_district_id": customer.address.district_id,
         "to_ward_code": customer.address.ward_id,
-        "height": max_lwh['max_height'],
-        "length": max_lwh['max_length'],
-        "weight": max_lwh['total_weight'],
-        "width": max_lwh['max_width'],
+        "height": max_lwh["max_height"],
+        "length": max_lwh["max_length"],
+        "weight": max_lwh["total_weight"],
+        "width": max_lwh["max_width"],
         "insurance_value": int(calculate_value(order_id=order.id)),
-        "coupon": None
+        "coupon": None,
     }
     r = json.dumps(data)
     loaded_r = json.loads(r)
-    url = 'https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee'
+    url = "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee"
     headers = {
-        'Content-Type': 'application/json',
-        'ShopId': '117552',
-        'Token': '8ae8d191-18b9-11ed-b136-06951b6b7f89'
+        "Content-Type": "application/json",
+        "ShopId": "117552",
+        "Token": "8ae8d191-18b9-11ed-b136-06951b6b7f89",
     }
     x = requests.post(url=url, json=loaded_r, headers=headers)
     return x.text
@@ -330,11 +359,11 @@ def update_shipping_code(order_id: int) -> bool:
     try:
         order = Order.objects.get(pk=order_id)
         shipping_order = json.loads(create_shipping_order(order_id=order.id))
-        if shipping_order.get('code') == 200:
-            data = shipping_order.get('data')
-            order.shipping_code = data.get('order_code')
-            order.total_shipping_fee = data.get('total_fee')
-            order.completed_date = shipping_order.get('expected_delivery_time')
+        if shipping_order.get("code") == 200:
+            data = shipping_order.get("data")
+            order.shipping_code = data.get("order_code")
+            order.total_shipping_fee = data.get("total_fee")
+            order.completed_date = shipping_order.get("expected_delivery_time")
         else:
             raise Exception
         with transaction.atomic():
@@ -349,12 +378,20 @@ def update_shipping_code(order_id: int) -> bool:
 
 
 @transaction.atomic
-def make_order_from_list_cart(list_cart_id: list[int], user_id: int, data: dict[str, [list[int]]]) -> list[Order]:
-    carts = CartDetail.objects.select_related().filter(customer__id=user_id, id__in=list_cart_id)
+def make_order_from_list_cart(
+    list_cart_id: list[int], user_id: int, data: dict[str, [list[int]]]
+) -> list[Order]:
+    carts = CartDetail.objects.select_related().filter(
+        customer__id=user_id, id__in=list_cart_id
+    )
     user = User.objects.get(pk=user_id)
     result = []
     if carts:
-        stores = User.objects.filter(product__option__cartdetail__in=carts).distinct().exclude(id=user_id)
+        stores = (
+            User.objects.filter(product__option__cartdetail__in=carts)
+            .distinct()
+            .exclude(id=user_id)
+        )
         for store in stores:
             cart_order = carts.filter(product_option__base_product__owner=store)
             if cart_order:
@@ -364,27 +401,47 @@ def make_order_from_list_cart(list_cart_id: list[int], user_id: int, data: dict[
                     order.save()
                     order_detail_set = []
                     for c in cart_order:
-                        order_detail_set.append(OrderDetail(quantity=c.quantity, product_option=c.product_option,
-                                                            unit_price=c.product_option.price, order=order, cart_id=c))
+                        order_detail_set.append(
+                            OrderDetail(
+                                quantity=c.quantity,
+                                product_option=c.product_option,
+                                unit_price=c.product_option.price,
+                                order=order,
+                                cart_id=c,
+                            )
+                        )
                     if len(order_detail_set) > 0:
                         OrderDetail.objects.bulk_create(order_detail_set)
                     ################# Need to move out transaction ##########
-                    shipping_data = json.loads(calculate_shipping_fee(order_id=order.id))
-                    if shipping_data.get('code') == 200:
-                        shipping_fee = shipping_data.get('data').get('total')
+                    shipping_data = json.loads(
+                        calculate_shipping_fee(order_id=order.id)
+                    )
+                    if shipping_data.get("code") == 200:
+                        shipping_fee = shipping_data.get("data").get("total")
                         order.total_shipping_fee = shipping_fee
                         order.save()
                         order.refresh_from_db()
                     result.append(order)
     return result
 
+
 @transaction.atomic
-def make_order_from_list_cart_new(list_cart_id: list[int], user_id: int, data: dict[str, [list[int]]]) -> list[Order]:
-    carts = CartDetail.objects.select_related().filter(customer=user_id).filter(id__in=list_cart_id)
+def make_order_from_list_cart_new(
+    list_cart_id: list[int], user_id: int, data: dict[str, [list[int]]]
+) -> list[Order]:
+    carts = (
+        CartDetail.objects.select_related()
+        .filter(customer=user_id)
+        .filter(id__in=list_cart_id)
+    )
     user = User.objects.get(pk=user_id)
     result = []
     if carts:
-        stores = carts.values_list('product_option__base_product__owner_id', flat=True).distinct().exclude(id=user_id)
+        stores = (
+            carts.values_list("product_option__base_product__owner_id", flat=True)
+            .distinct()
+            .exclude(id=user_id)
+        )
         for store in stores:
             cart_order = carts.filter(product_option__base_product__owner=store)
             if cart_order:
@@ -394,19 +451,29 @@ def make_order_from_list_cart_new(list_cart_id: list[int], user_id: int, data: d
                     order.save()
                     order_detail_set = []
                     for c in cart_order:
-                        order_detail_set.append(OrderDetail(quantity=c.quantity, product_option=c.product_option,
-                                                            unit_price=c.product_option.price, order=order, cart_id=c))
+                        order_detail_set.append(
+                            OrderDetail(
+                                quantity=c.quantity,
+                                product_option=c.product_option,
+                                unit_price=c.product_option.price,
+                                order=order,
+                                cart_id=c,
+                            )
+                        )
                     if len(order_detail_set) > 0:
                         OrderDetail.objects.bulk_create(order_detail_set)
                     ################# Need to move out transaction ##########
-                    shipping_data = json.loads(calculate_shipping_fee(order_id=order.id))
-                    if shipping_data.get('code') == 200:
-                        shipping_fee = shipping_data.get('data').get('total')
+                    shipping_data = json.loads(
+                        calculate_shipping_fee(order_id=order.id)
+                    )
+                    if shipping_data.get("code") == 200:
+                        shipping_fee = shipping_data.get("data").get("total")
                         order.total_shipping_fee = shipping_fee
                         order.save()
                         order.refresh_from_db()
                     result.append(order)
     return result
+
 
 def send_email(reciever: str, subject: str, content: str) -> None:
     to = [reciever]

@@ -111,7 +111,7 @@ class AddToCartChain(Chain):
 
         self.bridges['valid_cart_details'] = Bridge(
             _previous={
-                'customer': self.get_bridge_by_name('customer_has_address')
+                'customer': self.get_bridge_by_name('customer_has_address'),
             },
             _current=self.get_fixture_by_name('cart_detail_fixtures')
         )

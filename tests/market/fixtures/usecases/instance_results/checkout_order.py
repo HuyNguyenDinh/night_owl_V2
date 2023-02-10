@@ -20,6 +20,7 @@ from tests.market.fixtures.usecases.scenarios.ver2 import Chain
 class CheckoutOrderChain(Chain):
     def prepare_previous(self):
         self.previous.append(AddToCartChain())
+        self.previous.append(AddOptionChain())
 
     def prepare_fixtures(self):
         self.fixtures['uncheckout_order'] = Fixture(
@@ -36,6 +37,10 @@ class CheckoutOrderChain(Chain):
 
         self.fixtures['checkout_order_point'] = Fixture(
             _instance=Order.recipe(status=1, payment_type=2)
+        )
+
+        self.fixtures['order_detail'] = Fixture(
+            _instance=OrderDetail.recipe()
         )
 
     def prepare_bridges(self):
@@ -63,4 +68,26 @@ class CheckoutOrderChain(Chain):
             }
         )
 
-        self.bridges['']
+        self.bridges['checkout_order_cod_valid_odd'] = Bridge(
+            _current=self.get_fixture_by_name('order_detail'),
+            _previous={
+                'order': self.get_bridge_by_name('checkout_order_cod_valid'),
+                'product_option': self.get_bridge_by_name('valid_product_option_full')
+            }
+        )
+
+        self.bridges['checkout_order_momo_valid_odd'] = Bridge(
+            _current=self.get_fixture_by_name('order_detail'),
+            _previous={
+                'order': self.get_bridge_by_name('checkout_order_momo_valid'),
+                'product_option': self.get_bridge_by_name('valid_product_option_full')
+            }
+        )
+
+        self.bridges['checkout_order_point_valid'] = Bridge(
+            _current=self.get_fixture_by_name('order_detail'),
+            _previous={
+                'order': self.get_bridge_by_name('checkout_order_point_valid'),
+                'product_option': self.get_bridge_by_name('valid_product_option_full')
+            }
+        )

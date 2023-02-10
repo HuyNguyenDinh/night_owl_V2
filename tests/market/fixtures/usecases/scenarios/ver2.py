@@ -2,6 +2,40 @@ from tests.market.fixtures.usecases.scenarios.ver1 import Fixture, Bridge
 from typing import List, Dict
 
 
+class AutoCreatePropsObject(object):
+    def __getattr__(self, item):
+        setattr(self, item, 'N/A')
+
+
+class Node(object):
+    def __init__(self,
+                 fixtures: AutoCreatePropsObject = AutoCreatePropsObject(),
+                 bridges: AutoCreatePropsObject = AutoCreatePropsObject(),
+                 currents: list[Bridge] | None = None,
+                 *args, **kwargs):
+        self.fixtures = fixtures
+        self.bridges = bridges
+        self.currents: list[Bridge] | None = currents
+
+    def extend(self):
+        temp_fixtures = AutoCreatePropsObject()
+        temp_bridges = AutoCreatePropsObject()
+        temp_currents = []
+        for attr, value in self.fixtures.__dict__.items():
+            temp_fixtures.__setattr__(attr, value.fixture_extend())
+        for attr, value in self.bridges.__dict__.items():
+            temp_bridges.__setattr__(attr, value.bridge_extend())
+        for bridge in self.currents:
+            temp_currents.append(bridge.bridge_extend())
+        return Node(fixtures=temp_fixtures, bridges=temp_bridges, currents=temp_currents)
+
+    def make(self):
+        temp = []
+        for bridge in self.currents:
+            temp.append(bridge.bridge_extend().get_fixture())
+        return temp
+
+
 class Chain:
     def __init__(self,
                  fixtures: Dict[str, Fixture] | None = None,
@@ -16,8 +50,10 @@ class Chain:
 
     def prepare_fixtures(self):
         pass
+
     def prepare_bridges(self):
         pass
+
     def prepare_previous(self):
         pass
 

@@ -1,6 +1,6 @@
 from tests.market.fixtures.entities.products import *
 from tests.market.fixtures.usecases.scenarios.ver1 import *
-from tests.market.fixtures.usecases.scenarios.ver2 import Chain
+from tests.market.fixtures.usecases.scenarios.ver2 import Chain, Node
 from tests.market.fixtures.usecases.instance_results.add_voucher import *
 from tests.market.fixtures.usecases.instance_results.selling import *
 
@@ -45,6 +45,14 @@ products_not_percentage_voucher_valid = products_valid.bridge_extend(
         'vouchers': not_percentage_voucher_bridge
     }
 )
+
+
+class AddProductNode(SellingNode):
+    def __init__(self):
+        super(SellingNode, self).__init__()
+        self.fixtures.products_fixture = Fixture(
+            _instance=general_product
+        )
 
 class AddProductFT(AddVoucherFT, SellingFT):
 
@@ -100,6 +108,7 @@ class AddProductFT(AddVoucherFT, SellingFT):
         self.bridges.get('products_valid').get_fixture()
         self.bridges.get('products_percentage_voucher_valid').get_fixture()
         self.bridges.get('products_not_percentage_voucher_valid').get_fixture()
+
 
 class AddProductChain(Chain):
     def prepare_fixtures(self):
