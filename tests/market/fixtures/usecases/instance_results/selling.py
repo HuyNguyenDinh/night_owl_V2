@@ -17,6 +17,12 @@ class SellingNode(Node):
                 'address': ('creator', q7_address)
             }
         )
+        setattr(self.fixtures, 'business_fixture', Fixture(
+            _instance=business,
+            _reverse_relationship_recipe={
+                'address': ('creator', q7_address)
+            }
+        ))
         self.bridges.business_has_address = Bridge(
             _previous=None,
             _current=business_fixture

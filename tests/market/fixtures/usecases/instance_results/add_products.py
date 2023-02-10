@@ -54,6 +54,7 @@ class AddProductNode(SellingNode):
             _instance=general_product
         )
 
+
 class AddProductFT(AddVoucherFT, SellingFT):
 
     def prepare_fixtures(self):
