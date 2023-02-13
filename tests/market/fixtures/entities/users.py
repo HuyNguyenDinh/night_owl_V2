@@ -12,6 +12,7 @@ __all__ = [
 customer = general_user.extend(email_verified=True, phone_verified=True)
 business = general_user.extend(email_verified=True, phone_verified=True, is_business=True)
 
+
 def user_has_address_instance(_address_recipe: Recipe,
                               _customer_recipe: Recipe,
                               **kwargs) -> User:

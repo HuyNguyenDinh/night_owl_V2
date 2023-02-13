@@ -4,22 +4,7 @@ from model_bakery.recipe import Recipe
 from market.models import *
 from typing import List
 from tests.market.fixtures.usecases.scenarios.ver1 import *
-from tests.market.fixtures.usecases.scenarios.ver2 import Chain, Node
-
-
-class BuyingNode(Node):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.Fixtures.customer_fixture = Fixture(
-            _instance=customer,
-            _reverse_relationship_recipe={
-                'address': ('creator', bh_address)
-            }
-        )
-        self.Bridges.customer_has_address = Bridge(
-            _previous=None,
-            _current=customer_fixture
-        )
+from tests.market.fixtures.usecases.scenarios.ver2 import Chain
 
 
 buying_fixtures: Dict[str, Fixture] = {

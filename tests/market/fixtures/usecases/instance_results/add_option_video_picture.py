@@ -4,6 +4,7 @@ from tests.market.fixtures.entities.options import *
 from tests.market.fixtures.usecases.instance_results.add_options import *
 from tests.market.fixtures.entities.option_pictures import *
 
+
 class OptionPictureFT(AddOptionFT):
     def prepare_fixtures(self):
         super().prepare_fixtures()

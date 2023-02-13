@@ -2,7 +2,8 @@ from tests.market.fixtures.entities.vouchers import *
 from tests.market.fixtures.usecases.scenarios.ver1 import *
 from tests.market.fixtures.usecases.scenarios.ver2 import Chain, Node
 from model_bakery.recipe import seq
-import random, string
+import random
+import string
 
 
 def random_code(n: int = 24) -> str:
