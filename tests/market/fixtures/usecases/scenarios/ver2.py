@@ -1,6 +1,8 @@
 from tests.market.fixtures.usecases.scenarios.ver1 import Fixture, Bridge
 from typing import List, Dict
+from typing import Iterable, Union
 import itertools
+
 
 class AutoCreatePropsObject(object):
     def __getattr__(self, item):
@@ -123,9 +125,11 @@ class Chain:
             node.bridge_extend().get_fixture()
 
 
-class UseCase(object):
-    def __init__(self,
-                 fixtures: Dict,
-                 previous_bridges: Dict | None = None,
-                 *args, **kwargs):
-        pass
+def use_case(fixtures: Iterable[Fixture], previous_bridges: Union[Dict[str, Iterable], None] = None):
+    unpack_previous_bridges = []
+    for key, value in previous_bridges.items():
+        temp_for_loop = []
+        for i in value:
+            temp_for_loop.append((i, key))
+        unpack_previous_bridges.append(temp_for_loop)
+    # return ( for i in itertools.product(fixtures, *unpack_previous_bridges))
