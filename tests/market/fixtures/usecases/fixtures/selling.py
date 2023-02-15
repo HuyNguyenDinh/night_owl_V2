@@ -7,6 +7,7 @@ __all__ = [
 ]
 
 business_has_address_ft = Fixture(
+    _name="business_has_address",
     _instance=business,
     _reverse_relationship_recipe={
         'address': ('creator', q7_address)

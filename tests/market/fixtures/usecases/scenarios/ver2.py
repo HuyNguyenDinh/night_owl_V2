@@ -127,9 +127,20 @@ class Chain:
 
 def use_case(fixtures: Iterable[Fixture], previous_bridges: Union[Dict[str, Iterable], None] = None):
     unpack_previous_bridges = []
+    result = []
     for key, value in previous_bridges.items():
         temp_for_loop = []
         for i in value:
             temp_for_loop.append((i, key))
         unpack_previous_bridges.append(temp_for_loop)
-    # return ( for i in itertools.product(fixtures, *unpack_previous_bridges))
+    for i in itertools.product(fixtures, *unpack_previous_bridges):
+        temp_previous_bridges = {}
+        for j in i:
+            if isinstance(j, Fixture):
+                continue
+            temp_previous_bridges.update({j[1]: j[0]})
+        result.append(Bridge(
+            _previous=temp_previous_bridges,
+            _current=i[0]
+        ))
+    return result

@@ -16,6 +16,7 @@ def random_code(n: int = 24) -> str:
 
 
 percentage_voucher_ft = Fixture(
+    _name='percentage_voucher',
     _instance=percentage_voucher,
     _recipe_params={
         'code': random_code
@@ -26,16 +27,19 @@ percentage_vouchers_ft = percentage_voucher_ft.fixture_extend(
     _recipe_params={
         'code': seq('voucher'),
         '_quantity': 3
-    }
+    },
+    _name="percentage_vouchers"
 )
 
 not_percentage_voucher_ft = percentage_voucher_ft.fixture_extend(
-    _instance=not_percentage_voucher
+    _instance=not_percentage_voucher,
+    _name="not_percentage_voucher"
 )
 
 not_percentage_vouchers_ft = not_percentage_voucher_ft.fixture_extend(
     _recipe_params={
         'code': seq('voucher'),
         '_quantity': 3
-    }
+    },
+    _name="not_percentage_vouchers"
 )

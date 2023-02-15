@@ -8,9 +8,10 @@ __all__ = [
     "option_full_picture_fixture",
 ]
 
-option_empty_ft = Fixture(_instance=product_option_empty)
-option_full_ft = Fixture(_instance=product_option_full)
+option_empty_ft = Fixture(_instance=product_option_empty, _name="option_empty")
+option_full_ft = Fixture(_instance=product_option_full, _name="option_full")
 option_full_picture_fixture = Fixture(
+    _name="option_full_picture",
     _instance=product_option_full,
     _reverse_relationship_recipe={
         'picture': ('product_option', general_product_option_picture)
