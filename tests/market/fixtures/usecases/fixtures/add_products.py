@@ -7,10 +7,12 @@ __all__ = [
 ]
 
 product_ft = Fixture(
+    _name="product",
     _instance=Product.recipe()
 )
 
 products_ft = product_ft.fixture_extend(
+    _name="products",
     _recipe_params={
         '_quantity': 3
     }
