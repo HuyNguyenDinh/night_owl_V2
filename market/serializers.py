@@ -1,11 +1,10 @@
 from django.forms import ValidationError
 from rest_framework.serializers import ModelSerializer, ReadOnlyField, ListField, IntegerField, SerializerMethodField,\
     CharField, DictField, Serializer, EmailField
-
 from .models import *
 import cloudinary
 import cloudinary.uploader
-from django.db.models import Sum, F
+from django.db.models import Sum, F, Avg
 import decimal
 from drf_extra_fields.fields import Base64ImageField
 import uuid
@@ -23,6 +22,7 @@ class AddressSerializer(ModelSerializer):
 class UserSerializer(ModelSerializer):
     address = AddressSerializer(required=False, read_only=True)
     cart_quantity = SerializerMethodField(method_name="count_cart_quantity", read_only=True)
+
     class Meta:
         model = User
         fields = ['id', 'first_name', 'last_name', 'email', 'phone_number', 'is_staff', 'is_business', 'password', 'is_active',\
@@ -150,6 +150,7 @@ class OptionSerializer(ModelSerializer):
 class ListProductSerializer(ModelSerializer):
     min_price = ReadOnlyField()
     categories = CategorySerializer(many=True)
+    avg_rating = SerializerMethodField(method_name="average_rate")
 
     class Meta:
         model = Product
@@ -158,6 +159,9 @@ class ListProductSerializer(ModelSerializer):
             'owner': {'read_only': 'true'},
             'sold_amount': {'read_only': 'true'},
         }
+
+    def average_rate(self, obj):
+        return Rating.objects.filter(product=obj).aggregate(Avg('rate')).get("rate__avg")
 
 
 # Create product serializer
@@ -271,7 +275,7 @@ class ListOrderSerializer(ModelSerializer):
         try:
             bill = obj.bill
             return bill.value
-        except:
+        except Exception as e:
             order_details = OrderDetail.objects.filter(order=obj)
             return order_details.aggregate(total_price=Sum(F('quantity') * F('unit_price')))['total_price']
 
