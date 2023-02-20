@@ -27,12 +27,12 @@ products_valid = product_valid.bridge_extend(
     _current=add_products.products_ft
 )
 
-# product_percentage_voucher_valid = product_valid.bridge_extend(
-#     _previous={
-#         'owner': selling.business_has_address,
-#         'voucher_set': add_voucher.percentage_voucher
-#     }
-# )
+product_percentage_voucher_valid = product_valid.bridge_extend(
+    _previous={
+        'owner': selling.business_has_address,
+        'voucher_set': add_voucher.percentage_voucher
+    }
+)
 #
 # products_percentage_voucher_valid = products_valid.bridge_extend(
 #     _previous={
@@ -75,7 +75,7 @@ products_valid = product_valid.bridge_extend(
 #         'voucher_set': i[1]
 #     }) for i in itertools.product([product_valid, products_valid], add_voucher.__bridge__))
 
-__bridge__ = use_case(
+products_bridge = use_case(
     fixtures=[add_products.product_ft, add_products.products_ft],
     previous_bridges={
      'voucher_set': add_voucher.__bridge__,
