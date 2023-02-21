@@ -36,6 +36,9 @@ services:
     env_file:
       - .env
     environment: &app_environ
+      - CLOUD_NAME=dectbvmyx
+      - CLOUD_API_KEY=442698497359214
+      - CLOUD_API_SECRET=qlWVxi7gQVA9LjjoXmw0UiPzabg
       - DB_HOST=db
       - DB_NAME=night_owl
       - DB_USER=postgres
