@@ -226,10 +226,14 @@ class ProductRetrieveSerializer(ModelSerializer):
     option_set = OptionSerializer(many=True)
     owner = UserLessInformationSerializer(read_only=True)
     categories = CategorySerializer(many=True)
+    avg_rating = SerializerMethodField(method_name="average_rate")
 
     class Meta:
         model = Product
         fields = "__all__"
+
+    def average_rate(self, obj):
+        return Rating.objects.filter(product=obj).aggregate(Avg('rate')).get("rate__avg")
 
 
 # Get product id, name and picture
