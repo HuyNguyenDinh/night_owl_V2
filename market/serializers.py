@@ -362,7 +362,8 @@ class BillSerializer(ModelSerializer):
 
 # Show product option in cart detail
 class OptionInCartSerializer(ModelSerializer):
-    base_product = ProductSerializer(read_only=True)
+    # base_product = ProductSerializer(read_only=True)
+    base_product = ProductLessInformationSerializer(read_only=True)
 
     class Meta:
         model = Option
