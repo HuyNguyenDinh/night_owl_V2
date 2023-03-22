@@ -507,7 +507,7 @@ class CartDetailViewSet(
         if self.action in ["list", "retrieve", "update", "destroy"]:
             return CartSerializer
         elif self.action == "delete_multiple_carts":
-            return OrderSerializer
+            return ListCartIdSerializer
 
     @action(methods=["get"], detail=False, url_path="get-cart-groupby-owner")
     def get_cart_groupby_owner(self, request):
@@ -524,9 +524,9 @@ class CartDetailViewSet(
     
     @action(methods=["delete"], detail=False, url_path="multiple")
     def delete_multiple_carts(self, request):
-        data_ser = OrderSerializer(data=request.data)
+        data_ser = ListCartIdSerializer(data=request.data)
         if data_ser.is_valid(raise_exception=True):
-            CartDetail.objects.filter(pk__in=data_ser.data.get('list_cart')).delete()
+            CartDetail.objects.filter(pk__in=data_ser.data.get('list_cart', [])).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 

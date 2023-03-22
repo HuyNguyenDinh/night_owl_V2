@@ -383,6 +383,15 @@ class CartSerializer(ModelSerializer):
         }
 
 
+class ListCartIdSerializer(Serializer):
+    list_cart = ListField(required=True, min_length=1, child=IntegerField())
+
+    def create(self, validated_data):
+        pass
+
+    def update(self, validated_data):
+        pass
+
 class CartInStoreSerializer(ModelSerializer):
     carts = SerializerMethodField('get_carts_user', read_only=True)
     address = AddressSerializer(read_only=True)
