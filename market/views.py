@@ -502,6 +502,12 @@ class CartDetailViewSet(
 
     def get_queryset(self):
         return CartDetail.objects.filter(customer=self.request.user.id)
+    
+    def get_serializer_class(self):
+        if self.action in ["list", "retrieve", "update", "destroy"]:
+            return CartSerializer
+        elif self.action == "delete_multiple_carts":
+            return OrderSerializer
 
     @action(methods=["get"], detail=False, url_path="get-cart-groupby-owner")
     def get_cart_groupby_owner(self, request):
@@ -515,6 +521,15 @@ class CartDetailViewSet(
         if carts:
             return Response(carts.data, status=status.HTTP_200_OK)
         return Response({"message": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    @action(methods=["delete"], detail=False, url_path="multiple")
+    def delete_multiple_carts(self, request):
+        data_ser = OrderSerializer(data=request.data)
+        if data_ser.is_valid(raise_exception=True):
+            CartDetail.objects.filter(pk__in=data_ser.list_cart).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class ProductViewSet(viewsets.ModelViewSet):

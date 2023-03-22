@@ -95,7 +95,7 @@ class Address(models.Model):
     @classmethod
     def recipe(cls, **kwargs) -> Recipe:
         return Recipe(Address, **kwargs)
-
+    
 
 class Report(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
