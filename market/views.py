@@ -522,7 +522,7 @@ class CartDetailViewSet(
             return Response(carts.data, status=status.HTTP_200_OK)
         return Response({"message": "Not found"}, status=status.HTTP_404_NOT_FOUND)
     
-    @action(methods=["delete"], detail=False, url_path="multiple")
+    @action(methods=["post"], detail=False, url_path="delete-multiple")
     def delete_multiple_carts(self, request):
         data_ser = ListCartIdSerializer(data=request.data)
         if data_ser.is_valid(raise_exception=True):
