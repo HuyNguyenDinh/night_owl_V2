@@ -526,7 +526,7 @@ class CartDetailViewSet(
     def delete_multiple_carts(self, request):
         data_ser = OrderSerializer(data=request.data)
         if data_ser.is_valid(raise_exception=True):
-            CartDetail.objects.filter(pk__in=data_ser.data.list_cart).delete()
+            CartDetail.objects.filter(pk__in=data_ser.data.get('list_cart')).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
