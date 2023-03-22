@@ -116,7 +116,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIVi
                     user.set_password(new_password)
                     user.save()
                 else:
-                    raise ValidationError
+                    raise ValidationError("not correct password")
         except ValidationError:
             return Response(
                 {
