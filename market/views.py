@@ -504,10 +504,10 @@ class CartDetailViewSet(
         return CartDetail.objects.filter(customer=self.request.user.id)
     
     def get_serializer_class(self):
-        if self.action in ["list", "retrieve", "update", "destroy"]:
-            return CartSerializer
-        elif self.action == "delete_multiple_carts":
+        if self.action == "delete_multiple_carts":
             return ListCartIdSerializer
+        else:
+            return CartSerializer
 
     @action(methods=["get"], detail=False, url_path="get-cart-groupby-owner")
     def get_cart_groupby_owner(self, request):
