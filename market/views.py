@@ -1930,10 +1930,7 @@ class MomoPayedView(APIView):
                 if instance.get("type") == 0:
                     order_ids = instance.get("order_ids")
                     if not complete_checkout_orders_with_payment_gateway(order_ids):
-                        x = Thread(
-                            target=momo_refund, args=(transId, amount, requestId)
-                        )
-                        x.start()
+                        momo_refund_task.delay(transId, amount, requestId)
                 else:
                     increase_user_balance(instance.get("user_id"), amount)
         finally:

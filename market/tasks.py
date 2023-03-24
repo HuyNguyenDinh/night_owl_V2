@@ -5,12 +5,11 @@ from chat.models import *
 from chat.tasks import *
 from market.serializers import *
 from night_owl_market.celery import app
-import asyncio
-from typing import Any
-from market.utils import make_order_from_list_cart
 import json
 from market.utils import calculate_shipping_fee
 from django.db import transaction
+from market.momo import momo_refund
+
 
 @app.task()
 def send_email_task(reciever: str, subject: str, content: str) -> None:
@@ -18,6 +17,12 @@ def send_email_task(reciever: str, subject: str, content: str) -> None:
     send_subject = subject
     send_content = content
     return send_mail(send_subject, send_content, settings.EMAIL_HOST_USER, to, False)
+
+
+@app.task()
+def momo_refund_task(transId, amount, requestId):
+    momo_refund(trans_id=transId, amount=amount, request_id=requestId)
+    return {"status": True, "service": "Momo refund", "transId": transId, "amount": amount, "requestId": requestId}
 
 
 @app.task()

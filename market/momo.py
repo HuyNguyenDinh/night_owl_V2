@@ -28,7 +28,7 @@ def send_order(orders_id, redirect_url):
     endpoint = "https://test-payment.momo.vn/v2/gateway/api/create"
     orderInfo = "Night Owl order"
     redirectUrl = redirect_url
-    ipnUrl = "https://night-owl-market.herokuapp.com/market/momo-payed/" + secretLink + "/"
+    ipnUrl = "https://nom.nguyendinhhuy.dev/market/momo-payed/" + secretLink + "/"
     amount = str(int(order_amount))
     orderId = "Night_Owl:" + str(uuid.uuid4())
     requestId = str(uuid.uuid4())
@@ -78,7 +78,7 @@ def cashin_balance(user_id, raw_amount, redirect_url):
     endpoint = "https://test-payment.momo.vn/v2/gateway/api/create"
     orderInfo = "Night Owl cashin"
     redirectUrl = redirect_url
-    ipnUrl = "https://night-owl-market.herokuapp.com/market/momo-payed/" + secretLink + "/"
+    ipnUrl = "https://nom.nguyendinhhuy.dev/market/momo-payed/" + secretLink + "/"
     amount = str(raw_amount)
     orderId = "Night_Owl:" + str(uuid.uuid4())
     requestId = str(uuid.uuid4())
