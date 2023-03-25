@@ -1135,21 +1135,27 @@ class OptionViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAP
                     status=status.HTTP_400_BAD_REQUEST
                 )
             else:
-                cart_db = CartDetail.objects.create(**cart.validated_data, customer=request.user, product_option=option)
-                result = make_order_from_list_cart(
-                    list_cart_id=[cart_db.id], 
-                    user_id=request.user.id, 
-                    data={"list_cart": [cart_db.id]}
-                    )
-                if result:
+                try:
+                    cart_db = CartDetail.objects.create(**cart.validated_data, customer=request.user, product_option=option)
+                    result = make_order_from_list_cart(
+                        list_cart_id=[cart_db.id], 
+                        user_id=request.user.id, 
+                        data={"list_cart": [cart_db.id]}
+                        )
+                    if result:
+                        return Response(
+                            OrderSerializer(result, many=True).data,
+                            status=status.HTTP_201_CREATED,
+                        )
                     return Response(
-                        OrderSerializer(result, many=True).data,
-                        status=status.HTTP_201_CREATED,
+                        {"message": "wrong cart id, not found cart"},
+                        status=status.HTTP_404_NOT_FOUND,
                     )
-                return Response(
-                    {"message": "wrong cart id, not found cart"},
-                    status=status.HTTP_404_NOT_FOUND,
-                )
+                except:
+                    return Response(
+                        {"message": "cart for option already exist"},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
             
 
     def destroy(self, request, *args, **kwargs):
