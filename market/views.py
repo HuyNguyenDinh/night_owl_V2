@@ -1062,7 +1062,7 @@ class OptionViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAP
     serializer_class = OptionSerializer
 
     def get_permissions(self):
-        if self.action == "add_to_cart":
+        if self.action in ["add_to_cart", "buy_option"]:
             return [
                 permissions.IsAuthenticated(),
             ]
