@@ -1096,18 +1096,25 @@ class OptionViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAP
                     cart.save(customer=request.user, product_option=op)
                 except:
                     quantity = cart.validated_data.get("quantity")
-                    with transaction.atomic():
-                        cart_exist = CartDetail.objects.select_for_update().get(
+                    try:
+                        with transaction.atomic():
+                            cart_exist = CartDetail.objects.select_for_update().get(
+                                customer=request.user, product_option=op
+                            )
+                            if cart_exist.quantity + quantity > op.unit_in_stock:
+                                raise ValueError("out of stock")
+                            cart_exist.quantity = F("quantity") + quantity
+                            cart_exist.save()
+                        cart_exist = CartDetail.objects.get(
                             customer=request.user, product_option=op
                         )
-                        if cart_exist.quantity + quantity > op.unit_in_stock:
-                            raise ValueError("out of stock")
-                        cart_exist.quantity = F("quantity") + quantity
-                        cart_exist.save()
-                    cart_exist = CartDetail.objects.get(
-                        customer=request.user, product_option=op
-                    )
-                    return Response(CartSerializer(cart_exist).data)
+                    except Exception as e:
+                        return Response(
+                            {"message": str(e)},
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    else:
+                        return Response(CartSerializer(cart_exist).data)
                 else:
                     return Response(cart.data)
             return Response(
