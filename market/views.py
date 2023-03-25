@@ -1088,7 +1088,7 @@ class OptionViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAP
             if op.base_product.owner.id == request.user.id:
                 return Response(
                     {"message": "you are the product owner"},
-                    status=status.HTTP_406_NOT_ACCEPTABLE,
+                    status=status.HTTP_406_NOT_ACCEPTABLE
                 )
             cart = CartSerializer(data=request.data)
             if cart.is_valid(raise_exception=True):
@@ -1110,8 +1110,47 @@ class OptionViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAP
                     return Response(cart.data)
             return Response(
                 {"message": "cannot add product to your cart"},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_400_BAD_REQUEST
             )
+    
+    @action(methods=["POST"], detail=True, url_path="buy")
+    def buy_option(self, request, pk):
+        try:
+            option = Option.objects.get(pk=pk)
+        except Option.DoesNotExist:
+            return Response(
+                {"message": "option not found"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        else:
+            cart = CartSerializer(data=request.data)
+            if not cart.is_valid():
+                return Response(
+                    {"message": "data input not valid"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if cart.validated_data.get("quantity") > option.unit_in_stock:
+                return Response(
+                    {"message": "Unit in stock of option not enough"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            else:
+                cart_db = CartDetail.objects.create(**cart.validated_data)
+                result = make_order_from_list_cart(
+                    list_cart_id=[cart_db.id], 
+                    user_id=request.user.id, 
+                    data={"list_cart": [cart_db.id]}
+                    )
+                if result:
+                    return Response(
+                        OrderSerializer(result, many=True).data,
+                        status=status.HTTP_201_CREATED,
+                    )
+                return Response(
+                    {"message": "wrong cart id, not found cart"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+            
 
     def destroy(self, request, *args, **kwargs):
         option = self.get_object()
