@@ -284,6 +284,7 @@ CELERY_ROUTES = {
     'market.tasks.send_email_task': 'send_mail',
     'chat.tasks.create_message': 'messaging',
     'market.tasks.create_order_task': 'create_order',
+    'market.tasks.refund_order_task': 'refund_order',
     'market.task.call_api_shipping_fee_task': 'api_shipping_fee',
 }
 

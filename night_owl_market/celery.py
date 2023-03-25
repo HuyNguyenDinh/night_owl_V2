@@ -17,6 +17,7 @@ app.conf.update(
 app.conf.task_routes = {
     'market.tasks.send_email_task': {'queue': 'send_email'},
     'market.tasks.create_order_task': {'queue': 'create_order'},
+    'market.tasks.refund_order_task': {'queue': 'refund_order'},
     'market.tasks.import_message_to_db': {'queue': 'msg_to_db'},
     'chat.tasks.create_message': {'queue': 'msg_to_group'},
     'market.tasks.call_api_shipping_fee_task': {'queue': 'api_shipping_fee'}
