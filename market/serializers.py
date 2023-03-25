@@ -167,7 +167,7 @@ class ListProductSerializer(ModelSerializer):
 # Create product serializer
 class ProductSerializer(ModelSerializer):
     min_price = ReadOnlyField()
-    image = Base64ImageField(required=True, write_only=True)
+    image = Base64ImageField(required=False, write_only=True)
 
     class Meta:
         model = Product
@@ -175,13 +175,15 @@ class ProductSerializer(ModelSerializer):
         extra_kwargs = {
             'owner': {'read_only': 'true'},
             'sold_amount': {'read_only': 'true'},
-            'picture': {'read_only': 'true'},
+            'picture': {'required': 'false'},
             'image': {'write_only': 'true', 'required': 'true'}
         }
     
     def create(self, validated_data):
         category_set = validated_data.pop('categories')
-        pd_img = validated_data.pop('image')
+        pd_img = validated_data.pop('picture')
+        if validated_data.get("image"):
+            pd_img = validated_data.pop("image")
         pd = Product.objects.create(owner=self.context['request'].user, **validated_data, picture=pd_img)
         pd.categories.set(category_set)
         return pd
