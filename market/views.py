@@ -1100,6 +1100,8 @@ class OptionViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAP
                         cart_exist = CartDetail.objects.select_for_update().get(
                             customer=request.user, product_option=op
                         )
+                        if cart_exist.quantity + quantity > op.unit_in_stock:
+                            raise ValueError("out of stock")
                         cart_exist.quantity = F("quantity") + quantity
                         cart_exist.save()
                     cart_exist = CartDetail.objects.get(
