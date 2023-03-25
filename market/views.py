@@ -1135,7 +1135,7 @@ class OptionViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAP
                     status=status.HTTP_400_BAD_REQUEST
                 )
             else:
-                cart_db = CartDetail.objects.create(**cart.validated_data)
+                cart_db = CartDetail.objects.create(**cart.validated_data, customer=request.user, product_option=option)
                 result = make_order_from_list_cart(
                     list_cart_id=[cart_db.id], 
                     user_id=request.user.id, 
