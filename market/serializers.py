@@ -1,6 +1,16 @@
 from django.forms import ValidationError
-from rest_framework.serializers import ModelSerializer, ReadOnlyField, ListField, IntegerField, SerializerMethodField,\
-    CharField, DictField, Serializer, EmailField
+from rest_framework.serializers import (
+    ModelSerializer, 
+    ReadOnlyField,
+    ListField, 
+    IntegerField, 
+    SerializerMethodField,
+    CharField, 
+    DictField, 
+    Serializer, 
+    EmailField,
+    ImageField
+)
 from .models import *
 import cloudinary
 import cloudinary.uploader
@@ -88,7 +98,7 @@ class CategorySerializer(ModelSerializer):
 
 
 class OptionPictureSerializer(ModelSerializer):
-    option_image = Base64ImageField(write_only=True)
+    option_image = Base64ImageField(write_only=True, required=False)
 
     class Meta:
         model = Picture
@@ -100,7 +110,8 @@ class OptionPictureSerializer(ModelSerializer):
 
     def update(self, instance, validated_data):
         try:
-            instance.image = validated_data.pop('option_image')
+            if validated_data.get("option_image"):
+                instance.image = validated_data.pop('option_image')
             instance.save()
         except:
             pass
@@ -110,22 +121,30 @@ class OptionPictureSerializer(ModelSerializer):
 
 # Create multiple options
 class CreateOptionSerializer(ModelSerializer):
-    picture_set = OptionPictureSerializer(many=True, read_only=True)
-    uploaded_images = ListField(
+    picture_set = OptionPictureSerializer(many=True, required=False)
+    uploaded_pictures = ListField(
         child=Base64ImageField(allow_empty_file=False, required=True),
         write_only=True,
-        required=True
+        required=False
+    )
+    uploaded_images = ListField(
+        child=ImageField(required=False),
+        write_only=True,
+        required=False
     )
 
     class Meta:
         model = Option
-        fields = ["id", "unit", "unit_in_stock", "price", "weight", "height", "width", "length", "base_product", "picture_set", "uploaded_images"]
+        fields = ["id", "unit", "unit_in_stock", "price", "weight", "height", "width", "length", "base_product", "picture_set", "uploaded_images", "uploaded_pictures"]
         extra_kwargs = {
             'base_product': {'read_only': 'true'},
         }
     
     def create(self, validated_data):
-        uploaded_data = validated_data.pop('uploaded_images')
+        if validated_data.get("uploaded_pictures"):
+            uploaded_data = validated_data.pop("uploaded_pictures")
+        if validated_data.get('uploaded_images'):
+            uploaded_data = validated_data.pop('uploaded_images')
         option = Option.objects.create(**validated_data)
         new_product_image = []
         for uploaded_item in uploaded_data:

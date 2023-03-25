@@ -1072,7 +1072,7 @@ class OptionViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAP
         ]
 
     def get_serializer_class(self):
-        if self.action == "add_to_cart":
+        if self.action in ["add_to_cart", "buy_option"]:
             return CartSerializer
         return OptionSerializer
 
