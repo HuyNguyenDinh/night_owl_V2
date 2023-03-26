@@ -1031,7 +1031,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(viewsets.ViewSet, generics.ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    pagination_class = CategoryPagination
+    pagination_class = LargePagination
     permission_classes = [
         permissions.AllowAny,
     ]
