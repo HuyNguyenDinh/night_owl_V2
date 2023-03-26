@@ -209,7 +209,8 @@ class ProductSerializer(ModelSerializer):
 
     def update(self, instance, validated_data):
         try:
-            instance.picture = validated_data.pop('image')
+            if validated_data.get("image"):
+                instance.picture = validated_data.pop('image')
             instance.save()
         except:
             pass
