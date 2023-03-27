@@ -141,6 +141,7 @@ class CreateOptionSerializer(ModelSerializer):
         }
     
     def create(self, validated_data):
+        uploaded_data = []
         if validated_data.get("uploaded_pictures"):
             uploaded_data = validated_data.pop("uploaded_pictures")
         if validated_data.get('uploaded_images'):
