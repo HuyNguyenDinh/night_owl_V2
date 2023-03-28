@@ -19,3 +19,6 @@ class CommentPagination(PageNumberPagination):
 
 class OrderPagination(PageNumberPagination):
     page_size = 5
+
+class LargePagination(PageNumberPagination):
+    page_size = 100

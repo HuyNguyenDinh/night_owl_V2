@@ -36,6 +36,9 @@ services:
     env_file:
       - .env
     environment: &app_environ
+      - CLOUD_NAME=dectbvmyx
+      - CLOUD_API_KEY=442698497359214
+      - CLOUD_API_SECRET=qlWVxi7gQVA9LjjoXmw0UiPzabg
       - DB_HOST=db
       - DB_NAME=night_owl
       - DB_USER=postgres
@@ -79,51 +82,10 @@ services:
     <<: *default-worker
     container_name: celery_worker_create_order
     command: celery -A night_owl_market worker --pool=threads -l INFO -Q create_order -n worker_order --concurrency=16
-#    build:
-#      context: ../
-#      dockerfile: docker/app/Dockerfile
-#    container_name: celery_worker_a
-#    volumes:
-#      - ../:/home/web/code
-#    depends_on:
-#      - db
-#      - redis_a
-#      - app_a
-#      - app_b
-#      - app_c
-#    env_file:
-#      - .env
-#    environment: *app_environ
-#    command: celery -A night_owl_market worker --pool=threads -l INFO -Q msg_to_db -n worker --concurrency=16
-#  celery_worker_b:
-#    <<: *default_worker
-#    container_name: celery_worker_b
-#    command: celery -A night_owl_market worker --pool=prefork -l INFO -Q msg_to_group -n worker_b --concurrency=16
-#  celery_worker_a1:
-#    <<: *default_worker
-#    container_name: celery_worker_a1
-#    command: celery -A night_owl_market worker --pool=threads -l INFO -Q msg_to_db -n worker_a1 --concurrency=16
-#  celery_worker_b1:
-#    <<: *default_worker
-#    container_name: celery_worker_b1
-#    command: celery -A night_owl_market worker --pool=prefork -l INFO -Q msg_to_group -n worker_b1 --concurrency=16
-#  haproxy:
-#    build:
-#      context: ..
-#      dockerfile: docker/haproxy/Dockerfile
-#    container_name: haproxy
-#    ports:
-#      - "80:80"
-#    environment:
-#      - APP_SCALE_A=app_a
-#      - APP_SCALE_B=app_b
-#      - APP_SCALE_C=app_c
-#    depends_on:
-#      - app_a
-#      - app_b
-#      - app_c
-#    volumes:
-#      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+  celery_worker_refund_order:
+    <<: *default-worker
+    container_name: celery_worker_refund_order
+    command: celery -A night_owl_market worker --pool=threads -l INFO -Q refund_order -n worker_refund_order --concurrency=16
 volumes:
   night_owl_postgres_data:
   night_owl_static_volume:

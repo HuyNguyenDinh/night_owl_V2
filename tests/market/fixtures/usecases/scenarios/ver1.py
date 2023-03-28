@@ -11,7 +11,8 @@ class Fixture:
                  _relationship_recipe: Union[Dict[str, Recipe], None] = None,
                  _relationship: Union[Dict[str, M | List[M]], None] = None,
                  _reverse_relationship_recipe: Union[Dict[str, Tuple[str, Recipe]], None] = None,
-                 _recipe_params: Union[Dict[str, Any], None] = None):
+                 _recipe_params: Union[Dict[str, Any], None] = None,
+                 _name: str = ""):
         """
             _relationship_recipe: {
                 relationship_field: Recipe of Model,
@@ -47,7 +48,15 @@ class Fixture:
             for key, rev_rela_recipe in _reverse_relationship_recipe.items():
                 self.reverse_relationship_recipe[key] = (rev_rela_recipe[0], rev_rela_recipe[1].extend())
         self.recipe_params = _recipe_params
+        self._name = _name
         self.isInstance = False
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    def __str__(self) -> str:
+        return self._name
 
     def _prepare(self, **kwargs):
         """
@@ -105,7 +114,8 @@ class Fixture:
                        _relationship_recipe: Union[Dict[str, Recipe], None] = None,
                        _relationship: Union[Dict[str, M | List[M]], None] = None,
                        _reverse_relationship_recipe: Union[Dict[str, Tuple[str, Recipe]], None] = None,
-                       _recipe_params: Union[Dict[str, Any], None] = None) -> 'Fixture':
+                       _recipe_params: Union[Dict[str, Any], None] = None,
+                       _name: str = "") -> 'Fixture':
         if self.isInstance:
             raise ValueError
         attribute = {
@@ -113,7 +123,8 @@ class Fixture:
             '_relationship_recipe': _relationship_recipe,
             '_relationship': _relationship,
             '_reverse_relationship_recipe': _reverse_relationship_recipe,
-            '_recipe_params': _recipe_params
+            '_recipe_params': _recipe_params,
+            '_name': _name
         }
         for key, value in attribute.items():
             if value:
@@ -158,11 +169,25 @@ class Bridge:
             _current: The Fixture make from recipe which can include relationship
         """
         self._previous = {}
+        self._name = ""
         if _previous:
             for key, bridge in _previous.items():
                 self._previous[key] = bridge.bridge_extend()
+                if bridge._name:
+                    if self._name:
+                        self._name = "".join([self._name, "->", bridge._name])
+                    else:
+                        self._name = "".join([bridge._name])
         self._current = _current.fixture_extend()
+        if _current.name:
+            if self._name:
+                self._name = "".join([self._name, "->", _current.name])
+            else:
+                self._name = _current.name
         self._isMake = False
+
+    def __str__(self) -> str:
+        return self._name
 
     def _make_relate(self, **kwargs):
         temp_relate = {}
@@ -177,7 +202,8 @@ class Bridge:
 
     def bridge_extend(self,
                       _previous: Union[Dict[str, 'Bridge'], None] = None,
-                      _current: Union[Fixture, None] = None) -> 'Bridge':
+                      _current: Union[Fixture, None] = None,
+                      _name: Union[str, None] = None) -> 'Bridge':
         if self._isMake:
             raise ValueError
         if _previous:

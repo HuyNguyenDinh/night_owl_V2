@@ -1,11 +1,20 @@
 from django.forms import ValidationError
-from rest_framework.serializers import ModelSerializer, ReadOnlyField, ListField, IntegerField, SerializerMethodField,\
-    CharField, DictField, Serializer, EmailField
-
+from rest_framework.serializers import (
+    ModelSerializer, 
+    ReadOnlyField,
+    ListField, 
+    IntegerField, 
+    SerializerMethodField,
+    CharField, 
+    DictField, 
+    Serializer, 
+    EmailField,
+    ImageField
+)
 from .models import *
 import cloudinary
 import cloudinary.uploader
-from django.db.models import Sum, F
+from django.db.models import Sum, F, Avg
 import decimal
 from drf_extra_fields.fields import Base64ImageField
 import uuid
@@ -23,6 +32,7 @@ class AddressSerializer(ModelSerializer):
 class UserSerializer(ModelSerializer):
     address = AddressSerializer(required=False, read_only=True)
     cart_quantity = SerializerMethodField(method_name="count_cart_quantity", read_only=True)
+
     class Meta:
         model = User
         fields = ['id', 'first_name', 'last_name', 'email', 'phone_number', 'is_staff', 'is_business', 'password', 'is_active',\
@@ -88,7 +98,7 @@ class CategorySerializer(ModelSerializer):
 
 
 class OptionPictureSerializer(ModelSerializer):
-    option_image = Base64ImageField(write_only=True)
+    option_image = Base64ImageField(write_only=True, required=False)
 
     class Meta:
         model = Picture
@@ -100,7 +110,8 @@ class OptionPictureSerializer(ModelSerializer):
 
     def update(self, instance, validated_data):
         try:
-            instance.image = validated_data.pop('option_image')
+            if validated_data.get("option_image"):
+                instance.image = validated_data.pop('option_image')
             instance.save()
         except:
             pass
@@ -110,22 +121,31 @@ class OptionPictureSerializer(ModelSerializer):
 
 # Create multiple options
 class CreateOptionSerializer(ModelSerializer):
-    picture_set = OptionPictureSerializer(many=True, read_only=True)
-    uploaded_images = ListField(
+    picture_set = OptionPictureSerializer(many=True, required=False)
+    uploaded_pictures = ListField(
         child=Base64ImageField(allow_empty_file=False, required=True),
         write_only=True,
-        required=True
+        required=False
+    )
+    uploaded_images = ListField(
+        child=ImageField(required=False),
+        write_only=True,
+        required=False
     )
 
     class Meta:
         model = Option
-        fields = ["id", "unit", "unit_in_stock", "price", "weight", "height", "width", "length", "base_product", "picture_set", "uploaded_images"]
+        fields = ["id", "unit", "unit_in_stock", "price", "weight", "height", "width", "length", "base_product", "picture_set", "uploaded_images", "uploaded_pictures"]
         extra_kwargs = {
             'base_product': {'read_only': 'true'},
         }
     
     def create(self, validated_data):
-        uploaded_data = validated_data.pop('uploaded_images')
+        uploaded_data = []
+        if validated_data.get("uploaded_pictures"):
+            uploaded_data = validated_data.pop("uploaded_pictures")
+        if validated_data.get('uploaded_images'):
+            uploaded_data = validated_data.pop('uploaded_images')
         option = Option.objects.create(**validated_data)
         new_product_image = []
         for uploaded_item in uploaded_data:
@@ -150,6 +170,7 @@ class OptionSerializer(ModelSerializer):
 class ListProductSerializer(ModelSerializer):
     min_price = ReadOnlyField()
     categories = CategorySerializer(many=True)
+    avg_rating = SerializerMethodField(method_name="average_rate")
 
     class Meta:
         model = Product
@@ -159,11 +180,14 @@ class ListProductSerializer(ModelSerializer):
             'sold_amount': {'read_only': 'true'},
         }
 
+    def average_rate(self, obj):
+        return Rating.objects.filter(product=obj).aggregate(Avg('rate')).get("rate__avg")
+
 
 # Create product serializer
 class ProductSerializer(ModelSerializer):
     min_price = ReadOnlyField()
-    image = Base64ImageField(required=True, write_only=True)
+    image = Base64ImageField(required=False, write_only=True)
 
     class Meta:
         model = Product
@@ -171,20 +195,23 @@ class ProductSerializer(ModelSerializer):
         extra_kwargs = {
             'owner': {'read_only': 'true'},
             'sold_amount': {'read_only': 'true'},
-            'picture': {'read_only': 'true'},
+            'picture': {'required': 'false'},
             'image': {'write_only': 'true', 'required': 'true'}
         }
     
     def create(self, validated_data):
         category_set = validated_data.pop('categories')
-        pd_img = validated_data.pop('image')
+        pd_img = validated_data.pop('picture')
+        if validated_data.get("image"):
+            pd_img = validated_data.pop("image")
         pd = Product.objects.create(owner=self.context['request'].user, **validated_data, picture=pd_img)
         pd.categories.set(category_set)
         return pd
 
     def update(self, instance, validated_data):
         try:
-            instance.picture = validated_data.pop('image')
+            if validated_data.get("image"):
+                instance.picture = validated_data.pop('image')
             instance.save()
         except:
             pass
@@ -222,10 +249,14 @@ class ProductRetrieveSerializer(ModelSerializer):
     option_set = OptionSerializer(many=True)
     owner = UserLessInformationSerializer(read_only=True)
     categories = CategorySerializer(many=True)
+    avg_rating = SerializerMethodField(method_name="average_rate")
 
     class Meta:
         model = Product
         fields = "__all__"
+
+    def average_rate(self, obj):
+        return Rating.objects.filter(product=obj).aggregate(Avg('rate')).get("rate__avg")
 
 
 # Get product id, name and picture
@@ -271,7 +302,7 @@ class ListOrderSerializer(ModelSerializer):
         try:
             bill = obj.bill
             return bill.value
-        except:
+        except Exception as e:
             order_details = OrderDetail.objects.filter(order=obj)
             return order_details.aggregate(total_price=Sum(F('quantity') * F('unit_price')))['total_price']
 
@@ -364,7 +395,8 @@ class BillSerializer(ModelSerializer):
 
 # Show product option in cart detail
 class OptionInCartSerializer(ModelSerializer):
-    base_product = ProductSerializer(read_only=True)
+    # base_product = ProductSerializer(read_only=True)
+    base_product = ProductLessInformationSerializer(read_only=True)
 
     class Meta:
         model = Option
@@ -383,6 +415,15 @@ class CartSerializer(ModelSerializer):
             'customer': {'read_only': True},
         }
 
+
+class ListCartIdSerializer(Serializer):
+    list_cart = ListField(required=True, min_length=1, child=IntegerField())
+
+    def create(self, validated_data):
+        pass
+
+    def update(self, validated_data):
+        pass
 
 class CartInStoreSerializer(ModelSerializer):
     carts = SerializerMethodField('get_carts_user', read_only=True)

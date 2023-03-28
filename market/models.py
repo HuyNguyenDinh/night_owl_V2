@@ -95,7 +95,7 @@ class Address(models.Model):
     @classmethod
     def recipe(cls, **kwargs) -> Recipe:
         return Recipe(Address, **kwargs)
-
+    
 
 class Report(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
@@ -187,7 +187,7 @@ class Order(models.Model):
     store = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, related_name="store_order"
     )
-    voucher_apply = models.ForeignKey("Voucher", on_delete=models.SET_NULL, null=True)
+    voucher_apply = models.ForeignKey("Voucher", on_delete=models.SET_NULL, null=True, blank=True)
 
     STATUS_CHOICES = (
         (0, "UnCheckout"),

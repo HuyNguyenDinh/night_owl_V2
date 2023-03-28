@@ -1,4 +1,5 @@
 import decimal
+import typing
 
 import django
 from django.utils import timezone
@@ -38,7 +39,7 @@ def check_voucher_available(option_id: int, voucher_id: int) -> bool:
 # Get order detail id match the voucher
 def check_discount_in_order(
     order_details: list[OrderDetail], voucher_id: int
-) -> [int, None]:
+) -> typing.Union[int, None]:
     for odd in order_details:
         if check_voucher_available(odd.product_option.id, voucher_id):
             return odd.id
@@ -262,7 +263,7 @@ def receive_order(order_id: int) -> bool:
 
 def checkout_order(
     order_id: int, voucher_code: str = None, payment_type: int = 0, raw_status: int = 1
-) -> [Order, None]:
+) -> typing.Union[Order, None]:
     try:
         value = 0
         payed = False
@@ -379,7 +380,7 @@ def update_shipping_code(order_id: int) -> bool:
 
 @transaction.atomic
 def make_order_from_list_cart(
-    list_cart_id: list[int], user_id: int, data: dict[str, [list[int]]]
+    list_cart_id: list[int], user_id: int, data: typing.Dict[str, typing.List[int]]
 ) -> list[Order]:
     carts = CartDetail.objects.select_related().filter(
         customer__id=user_id, id__in=list_cart_id
@@ -427,7 +428,7 @@ def make_order_from_list_cart(
 
 @transaction.atomic
 def make_order_from_list_cart_new(
-    list_cart_id: list[int], user_id: int, data: dict[str, [list[int]]]
+    list_cart_id: list[int], user_id: int, data: dict[str, typing.List[int]]
 ) -> list[Order]:
     carts = (
         CartDetail.objects.select_related()

@@ -116,7 +116,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIVi
                     user.set_password(new_password)
                     user.save()
                 else:
-                    raise ValidationError
+                    raise ValidationError("not correct password")
         except ValidationError:
             return Response(
                 {
@@ -502,6 +502,12 @@ class CartDetailViewSet(
 
     def get_queryset(self):
         return CartDetail.objects.filter(customer=self.request.user.id)
+    
+    def get_serializer_class(self):
+        if self.action == "delete_multiple_carts":
+            return ListCartIdSerializer
+        else:
+            return CartSerializer
 
     @action(methods=["get"], detail=False, url_path="get-cart-groupby-owner")
     def get_cart_groupby_owner(self, request):
@@ -515,6 +521,15 @@ class CartDetailViewSet(
         if carts:
             return Response(carts.data, status=status.HTTP_200_OK)
         return Response({"message": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    @action(methods=["post"], detail=False, url_path="delete-multiple")
+    def delete_multiple_carts(self, request):
+        data_ser = ListCartIdSerializer(data=request.data)
+        if data_ser.is_valid(raise_exception=True):
+            CartDetail.objects.filter(pk__in=data_ser.data.get('list_cart', [])).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class ProductViewSet(viewsets.ModelViewSet):
@@ -1016,7 +1031,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(viewsets.ViewSet, generics.ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    pagination_class = CategoryPagination
+    pagination_class = LargePagination
     permission_classes = [
         permissions.AllowAny,
     ]
@@ -1047,7 +1062,7 @@ class OptionViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAP
     serializer_class = OptionSerializer
 
     def get_permissions(self):
-        if self.action == "add_to_cart":
+        if self.action in ["add_to_cart", "buy_option"]:
             return [
                 permissions.IsAuthenticated(),
             ]
@@ -1057,7 +1072,7 @@ class OptionViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAP
         ]
 
     def get_serializer_class(self):
-        if self.action == "add_to_cart":
+        if self.action in ["add_to_cart", "buy_option"]:
             return CartSerializer
         return OptionSerializer
 
@@ -1073,7 +1088,7 @@ class OptionViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAP
             if op.base_product.owner.id == request.user.id:
                 return Response(
                     {"message": "you are the product owner"},
-                    status=status.HTTP_406_NOT_ACCEPTABLE,
+                    status=status.HTTP_406_NOT_ACCEPTABLE
                 )
             cart = CartSerializer(data=request.data)
             if cart.is_valid(raise_exception=True):
@@ -1081,22 +1096,76 @@ class OptionViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAP
                     cart.save(customer=request.user, product_option=op)
                 except:
                     quantity = cart.validated_data.get("quantity")
-                    with transaction.atomic():
-                        cart_exist = CartDetail.objects.select_for_update().get(
+                    try:
+                        with transaction.atomic():
+                            cart_exist = CartDetail.objects.select_for_update().get(
+                                customer=request.user, product_option=op
+                            )
+                            if cart_exist.quantity + quantity > op.unit_in_stock:
+                                raise ValueError("out of stock")
+                            cart_exist.quantity = F("quantity") + quantity
+                            cart_exist.save()
+                        cart_exist = CartDetail.objects.get(
                             customer=request.user, product_option=op
                         )
-                        cart_exist.quantity = F("quantity") + quantity
-                        cart_exist.save()
-                    cart_exist = CartDetail.objects.get(
-                        customer=request.user, product_option=op
-                    )
-                    return Response(CartSerializer(cart_exist).data)
+                    except Exception as e:
+                        return Response(
+                            {"message": str(e)},
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    else:
+                        return Response(CartSerializer(cart_exist).data)
                 else:
                     return Response(cart.data)
             return Response(
                 {"message": "cannot add product to your cart"},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_400_BAD_REQUEST
             )
+    
+    @action(methods=["POST"], detail=True, url_path="buy")
+    def buy_option(self, request, pk):
+        try:
+            option = Option.objects.get(pk=pk)
+        except Option.DoesNotExist:
+            return Response(
+                {"message": "option not found"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        else:
+            cart = CartSerializer(data=request.data)
+            if not cart.is_valid():
+                return Response(
+                    {"message": "data input not valid"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if cart.validated_data.get("quantity") > option.unit_in_stock:
+                return Response(
+                    {"message": "Unit in stock of option not enough"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            else:
+                try:
+                    cart_db = CartDetail.objects.create(**cart.validated_data, customer=request.user, product_option=option)
+                    result = make_order_from_list_cart(
+                        list_cart_id=[cart_db.id], 
+                        user_id=request.user.id, 
+                        data={"list_cart": [cart_db.id]}
+                        )
+                    if result:
+                        return Response(
+                            OrderSerializer(result, many=True).data,
+                            status=status.HTTP_201_CREATED,
+                        )
+                    return Response(
+                        {"message": "wrong cart id, not found cart"},
+                        status=status.HTTP_404_NOT_FOUND,
+                    )
+                except:
+                    return Response(
+                        {"message": "cart for option already exist"},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
 
     def destroy(self, request, *args, **kwargs):
         option = self.get_object()
@@ -1923,10 +1992,7 @@ class MomoPayedView(APIView):
                 if instance.get("type") == 0:
                     order_ids = instance.get("order_ids")
                     if not complete_checkout_orders_with_payment_gateway(order_ids):
-                        x = Thread(
-                            target=momo_refund, args=(transId, amount, requestId)
-                        )
-                        x.start()
+                        momo_refund_task.delay(transId, amount, requestId)
                 else:
                     increase_user_balance(instance.get("user_id"), amount)
         finally:
