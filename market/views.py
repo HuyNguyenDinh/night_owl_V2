@@ -1155,6 +1155,8 @@ class OrderViewSet(
             return ListOrderSerializer
         elif self.action == "checkout":
             return CheckoutOrderSerializer
+        elif self.action == "get_multiple_order_voucher_available":
+            return VoucherAvailableMultipleOrderSerializer
         return OrderSerializer
 
     def get_queryset(self):
@@ -1484,6 +1486,12 @@ class OrderViewSet(
         return Response(
             {"message": "voucher not found"}, status=status.HTTP_404_NOT_FOUND
         )
+
+    @action(methods=["post"], detail=False, url_path="voucher_available_multiple")
+    def get_multiple_order_voucher_available(self, request):
+        data_ser = VoucherAvailableMultipleOrderSerializer(data=request.data)
+        orders = Order.objects.filter(pk__in=data_ser.data.get("list_order"))
+        list_product_id = orders.values_list()
 
 
 class OrderDetailViewSet(viewsets.ViewSet, generics.ListAPIView):

@@ -320,6 +320,16 @@ class VoucherSerializer(ModelSerializer):
         }
 
 
+class VoucherAvailableMultipleOrderSerializer(Serializer):
+    list_order = ListField(min_length=1, child=IntegerField(allow_null=False, required=True))
+
+    def create(self, validated_data):
+        pass
+
+    def update(self, instance, validated_data):
+        pass
+
+
 class CheckoutOrderSerializer(ModelSerializer):
     list_voucher = DictField(
         child=CharField(),
