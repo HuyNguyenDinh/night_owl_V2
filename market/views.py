@@ -1167,7 +1167,7 @@ class OptionViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAP
                         status=status.HTTP_400_BAD_REQUEST
                     )
 
-    @action(methods=["post"], detail=True, url_path="add_pictures")
+    @action(methods=["post"], detail=True, url_path="add-pictures")
     def add_option_pictures(self, request, pk):
         option = self.get_object()
         try:
@@ -1186,7 +1186,8 @@ class OptionViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAP
             data_ser = AddMultiplePictureToOption(data=request.data)
             if not data_ser.is_valid(raise_exception=True):
                 return Response(data=data_ser.errors, status=status.HTTP_400_BAD_REQUEST)
-            return Response(OptionSerializer(data_ser).data, status=status.HTTP_201_CREATED)
+            option = data_ser.create(validated_data=data_ser.validated_data)
+            return Response(OptionSerializer(option).data, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, *args, **kwargs):
         option = self.get_object()
