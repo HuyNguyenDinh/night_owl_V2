@@ -531,7 +531,6 @@ class CartDetailViewSet(
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class ProductViewSet(viewsets.ModelViewSet):
     parser_classes = [MultiPartParser, JSONParser]
     pagination_class = BasePagination
@@ -1074,6 +1073,8 @@ class OptionViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAP
     def get_serializer_class(self):
         if self.action in ["add_to_cart", "buy_option"]:
             return CartSerializer
+        elif self.action == "add_option_pictures":
+            return AddMultiplePictureToOption
         return OptionSerializer
 
     @action(methods=["post"], detail=True, url_path="add-to-cart")
@@ -1165,7 +1166,27 @@ class OptionViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAP
                         {"message": "cart for option already exist"},
                         status=status.HTTP_400_BAD_REQUEST
                     )
-            
+
+    @action(methods=["post"], detail=True, url_path="add_pictures")
+    def add_option_pictures(self, request, pk):
+        option = self.get_object()
+        try:
+            self.check_object_permissions(request, option)
+        except exceptions.PermissionDenied:
+            return Response(
+                {"message": "you do not have permission"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        except exceptions.NotAuthenticated:
+            return Response(
+                {"message": "you have to login before"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+        else:
+            data_ser = AddMultiplePictureToOption(data=request.data)
+            if not data_ser.is_valid(raise_exception=True):
+                return Response(data=data_ser.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(OptionSerializer(data_ser).data, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, *args, **kwargs):
         option = self.get_object()
@@ -1561,6 +1582,7 @@ class OrderViewSet(
         data_ser = VoucherAvailableMultipleOrderSerializer(data=request.data)
         orders = Order.objects.filter(pk__in=data_ser.data.get("list_order"))
         list_product_id = orders.values_list()
+        return Response()
 
 
 class OrderDetailViewSet(viewsets.ViewSet, generics.ListAPIView):

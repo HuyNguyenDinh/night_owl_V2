@@ -155,6 +155,25 @@ class CreateOptionSerializer(ModelSerializer):
         return option
 
 
+class AddMultiplePictureToOption(Serializer):
+    option = IntegerField()
+    images = ListField(child=ImageField(), required=True, min_length=1)
+
+    def create(self, validated_data):
+        new_option_pictures = []
+        product_option = Option.objects.get(pk=validated_data.pop("option"))
+        if product_option:
+            images = validated_data.pop("images")
+            for i in images:
+                new_option_pictures.append(Picture(product_option=product_option, image=i))
+            Picture.objects.bulk_create(new_option_pictures)
+        product_option.refresh_from_db()
+        return product_option
+
+    def update(self, instance, validated_data):
+        pass
+
+
 class OptionSerializer(ModelSerializer):
     picture_set = OptionPictureSerializer(many=True, required=False)
 
