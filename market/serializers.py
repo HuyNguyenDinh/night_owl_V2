@@ -165,7 +165,7 @@ class CreateOptionSerializer(ModelSerializer):
             new_product_image.append(Picture(product_option=instance, image=uploaded_item))
         if new_product_image:
             Picture.objects.bulk_create(new_product_image)
-        return super().update(**validated_data)
+        return super().update(instance=instance, validated_data=validated_data)
         
 
 
