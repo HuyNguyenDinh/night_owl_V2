@@ -1075,6 +1075,8 @@ class OptionViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAP
             return CartSerializer
         elif self.action == "add_option_pictures":
             return AddMultiplePictureToOption
+        elif self.action in ["update", "partial_update"]:
+            return CreateOptionSerializer
         return OptionSerializer
 
     @action(methods=["post"], detail=True, url_path="add-to-cart")

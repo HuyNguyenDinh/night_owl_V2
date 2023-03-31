@@ -153,6 +153,21 @@ class CreateOptionSerializer(ModelSerializer):
         if new_product_image:
             Picture.objects.bulk_create(new_product_image)
         return option
+    
+    def update(self, instance, validated_data):
+        uploaded_data = []
+        if validated_data.get("uploaded_pictures"):
+            uploaded_data = validated_data.pop("uploaded_pictures")
+        if validated_data.get('uploaded_images'):
+            uploaded_data = validated_data.pop('uploaded_images')
+        new_product_image = []
+        for uploaded_item in uploaded_data:
+            new_product_image.append(Picture(product_option=instance, image=uploaded_item))
+        if new_product_image:
+            Picture.objects.bulk_create(new_product_image)
+        instance.save(**validated_data)
+        return instance
+        
 
 
 class AddMultiplePictureToOption(Serializer):
