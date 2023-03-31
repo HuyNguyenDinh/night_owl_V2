@@ -1193,7 +1193,7 @@ class OptionViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAP
         return super().destroy(request, *args, **kwargs)
 
 
-class OptionPictureViewSet(viewsets.ViewSet, generics.UpdateAPIView):
+class OptionPictureViewSet(viewsets.ModelViewSet):
     queryset = Picture.objects.all()
     pagination_class = BasePagination
     permission_classes = [
