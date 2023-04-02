@@ -1293,6 +1293,19 @@ class OrderViewSet(
             {"message": "you must add array of your cart id"},
             status=status.HTTP_406_NOT_ACCEPTABLE,
         )
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        analytic_queryset = list(queryset.values("status").annotate(status_count=Count('status')))
+        try:
+            self.check_permissions()
+        except exceptions.PermissionDenied:
+            return Response({"message": "You do not have permission"}, status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            paginated_queryset = self.paginate_queryset(queryset)
+            serializer = self.get_serializer(paginated_queryset, many=True)
+            paginated_response = self.get_paginated_response(serializer.data)
+            return Response({**paginated_response, "analytic": analytic_queryset}, status=status.HTTP_200_OK)
 
     @action(methods=["get"], detail=False, url_path="cancel_uncheckout_order")
     def cancel_uncheckout_order(self, request):
