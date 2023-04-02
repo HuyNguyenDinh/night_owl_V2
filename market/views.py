@@ -1297,7 +1297,7 @@ class OrderViewSet(
         queryset = self.get_queryset()
         analytic_queryset = list(queryset.values("status").annotate(status_count=Count('status')))
         try:
-            self.check_permissions()
+            self.check_permissions(request)
         except exceptions.PermissionDenied:
             return Response({"message": "You do not have permission"}, status=status.HTTP_401_UNAUTHORIZED)
         else:
