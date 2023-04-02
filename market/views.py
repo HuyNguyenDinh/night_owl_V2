@@ -1293,10 +1293,10 @@ class OrderViewSet(
             status=status.HTTP_406_NOT_ACCEPTABLE,
         )
     
-    @action(methods=["get"], detail=False, url_path="count_order")
+    @action(methods=["get"], detail=False, url_path="count-order")
     def count_orders(self, request):
         try:
-            self.check_permission(request)
+            self.check_permissions(request)
         except exceptions.PermissionDenied:
             return Response({"message": "You do not have permission"})
         else:
