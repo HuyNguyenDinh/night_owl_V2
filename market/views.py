@@ -586,7 +586,7 @@ class ProductViewSet(viewsets.ModelViewSet):
             products = products.filter(categories=cate_id)
         return products
     def get_serializer_class(self):
-        if self.action in ["update", "partial_update", "retrieve"]:
+        if self.action in ["retrieve"]:
             return ProductRetrieveSerializer
         elif self.action == "add_comment":
             return CreateRatingSerializer
