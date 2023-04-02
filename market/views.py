@@ -585,9 +585,8 @@ class ProductViewSet(viewsets.ModelViewSet):
         if cate_id is not None:
             products = products.filter(categories=cate_id)
         return products
-
     def get_serializer_class(self):
-        if self.action == "retrieve":
+        if self.action in ["update", "partial_update", "retrieve"]:
             return ProductRetrieveSerializer
         elif self.action == "add_comment":
             return CreateRatingSerializer
