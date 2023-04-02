@@ -1293,18 +1293,22 @@ class OrderViewSet(
             status=status.HTTP_406_NOT_ACCEPTABLE,
         )
     
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        analytic_queryset = list(queryset.values("status").annotate(status_count=Count('status')))
+    @action(methods=["get"], detail=False, url_path="count_order")
+    def count_orders(self, request):
         try:
-            self.check_permissions(request)
+            self.check_permission(request)
         except exceptions.PermissionDenied:
-            return Response({"message": "You do not have permission"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"message": "You do not have permission"})
         else:
-            paginated_queryset = self.paginate_queryset(queryset)
-            serializer = self.get_serializer(paginated_queryset, many=True)
-            paginated_response = self.get_paginated_response(serializer.data)
-            return Response({**paginated_response, "analytic": analytic_queryset}, status=status.HTTP_200_OK)
+            queryset = self.get_queryset()
+            analytics_queryset = list(queryset.values("status").annotate(order_id_count=Count("id")))
+            return Response(
+                {
+                    "anlytics": analytics_queryset
+                }, 
+                status=status.HTTP_200_OK
+            )
+
 
     @action(methods=["get"], detail=False, url_path="cancel_uncheckout_order")
     def cancel_uncheckout_order(self, request):
