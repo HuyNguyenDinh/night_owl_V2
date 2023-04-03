@@ -1,6 +1,6 @@
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-from django.db.models import FloatField
+from django.db.models import FloatField, Sum, Count,OuterRef, Subquery
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import (exceptions, filters, generics, permissions, status,
                             viewsets)
@@ -1305,16 +1305,23 @@ class OrderViewSet(
             return Response({"message": "You do not have permission"})
         else:
             queryset = self.get_queryset()
-            analytics_queryset = list(
-                queryset.annotate(
-                    total_price=Sum(
-                        F('orderdetail__quantity') * F('orderdetail__unit_price'),
-                        output_field=FloatField()
-                    )
-                ).values("status").annotate(order_id_count=Count("id"), order_amount=Sum("total_price")))
+            child_total_price_subquery = OrderDetail.objects.annotate(
+                total_price=F('product_option__price') * F('quantity')
+            ).values('total_price', 'order_id')
+            child_total_price_sum_subquery = child_total_price_subquery.values(
+                'order_id'
+            ).annotate(
+                total_price_sum=Sum('total_price')
+            ).values('total_price', 'parent_id')
+            parents = queryset.annotate(
+                total_child_price=Subquery(
+                    child_total_price_sum_subquery.filter(order_id=OuterRef('id')).values('total_price'))
+            ).values('status').annotate(
+                total_child_price_sum=Sum('total_child_price')
+            )
             return Response(
                 {
-                    "anlytics": analytics_queryset
+                    "anlytics": parents
                 },
                 status=status.HTTP_200_OK
             )
