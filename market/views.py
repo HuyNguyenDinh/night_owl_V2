@@ -21,6 +21,7 @@ from .perms import *
 from .serializers import *
 from .tasks import *
 
+
 # Create your views here.
 
 
@@ -502,7 +503,7 @@ class CartDetailViewSet(
 
     def get_queryset(self):
         return CartDetail.objects.filter(customer=self.request.user.id)
-    
+
     def get_serializer_class(self):
         if self.action == "delete_multiple_carts":
             return ListCartIdSerializer
@@ -521,7 +522,7 @@ class CartDetailViewSet(
         if carts:
             return Response(carts.data, status=status.HTTP_200_OK)
         return Response({"message": "Not found"}, status=status.HTTP_404_NOT_FOUND)
-    
+
     @action(methods=["post"], detail=False, url_path="delete-multiple")
     def delete_multiple_carts(self, request):
         data_ser = ListCartIdSerializer(data=request.data)
@@ -585,6 +586,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         if cate_id is not None:
             products = products.filter(categories=cate_id)
         return products
+
     def get_serializer_class(self):
         if self.action in ["retrieve"]:
             return ProductRetrieveSerializer
@@ -1123,7 +1125,7 @@ class OptionViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAP
                 {"message": "cannot add product to your cart"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-    
+
     @action(methods=["POST"], detail=True, url_path="buy")
     def buy_option(self, request, pk):
         try:
@@ -1147,12 +1149,13 @@ class OptionViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAP
                 )
             else:
                 try:
-                    cart_db = CartDetail.objects.create(**cart.validated_data, customer=request.user, product_option=option)
+                    cart_db = CartDetail.objects.create(**cart.validated_data, customer=request.user,
+                                                        product_option=option)
                     result = make_order_from_list_cart(
-                        list_cart_id=[cart_db.id], 
-                        user_id=request.user.id, 
+                        list_cart_id=[cart_db.id],
+                        user_id=request.user.id,
                         data={"list_cart": [cart_db.id]}
-                        )
+                    )
                     if result:
                         return Response(
                             OrderSerializer(result, many=True).data,
@@ -1292,7 +1295,7 @@ class OrderViewSet(
             {"message": "you must add array of your cart id"},
             status=status.HTTP_406_NOT_ACCEPTABLE,
         )
-    
+
     @action(methods=["get"], detail=False, url_path="count-order")
     def count_orders(self, request):
         try:
@@ -1301,17 +1304,18 @@ class OrderViewSet(
             return Response({"message": "You do not have permission"})
         else:
             queryset = self.get_queryset()
-            analytics_queryset = list(queryset.values("status").annotate(
-                order_id_count=Count("id"),
-                total_price=Sum(F('quantity') * F('unit_price'))
-            ))
+            analytics_queryset = list(
+                queryset.annotate(
+                    total_price=Sum(
+                        F('orderdetail__quantity') * F('orderdetail__unit_price')
+                    )
+                ).values("status").annotate(order_id_count=Count("id"), order_amount=Sum("total_price")))
             return Response(
                 {
                     "anlytics": analytics_queryset
-                }, 
+                },
                 status=status.HTTP_200_OK
             )
-
 
     @action(methods=["get"], detail=False, url_path="cancel_uncheckout_order")
     def cancel_uncheckout_order(self, request):
@@ -1913,7 +1917,7 @@ class VoucherViewSet(viewsets.ModelViewSet):
             )
             # Check product owner in list product
             if list(products.values_list("id", flat=True)) == request.data.get(
-                "products"
+                    "products"
             ):
                 can_add = True
         if can_add:
@@ -2029,9 +2033,9 @@ class MomoPayedView(APIView):
             )
             momo_order = check_momo_order_status(order_id=orderId, request_id=requestId)
             if (
-                instance
-                and momo_order.get("amount") == amount == instance.get("amount")
-                and momo_order.get("resultCode") == resultCode == 0
+                    instance
+                    and momo_order.get("amount") == amount == instance.get("amount")
+                    and momo_order.get("resultCode") == resultCode == 0
             ):
                 if instance.get("type") == 0:
                     order_ids = instance.get("order_ids")
