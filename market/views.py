@@ -1315,7 +1315,7 @@ class OrderViewSet(
             ).values('total_price', 'parent_id')
             parents = queryset.annotate(
                 total_child_price=Subquery(
-                    child_total_price_sum_subquery.filter(order_id=OuterRef('id')).values('total_price'))
+                    child_total_price_sum_subquery.filter(order_id=OuterRef('id')).values('total_price_sum'))
             ).values('status').annotate(
                 total_child_price_sum=Sum('total_child_price')
             )
