@@ -1234,7 +1234,7 @@ class OrderViewSet(
 ):
     pagination_class = OrderPagination
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    filterset_fields = ["status", "id", "can_destroy", "completed_date", "order_date"]
+    filterset_fields = ["status", "payment_type", "can_destroy", "completed_date", "order_date"]
     ordering_fields = ["completed_date", "order_date", "bill__value"]
 
     def get_permissions(self):
