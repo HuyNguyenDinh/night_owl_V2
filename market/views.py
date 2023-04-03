@@ -1,5 +1,6 @@
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
+from django.db.models import FloatField
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import (exceptions, filters, generics, permissions, status,
                             viewsets)
@@ -1307,7 +1308,8 @@ class OrderViewSet(
             analytics_queryset = list(
                 queryset.annotate(
                     total_price=Sum(
-                        F('orderdetail__quantity') * F('orderdetail__unit_price')
+                        F('orderdetail__quantity') * F('orderdetail__unit_price'),
+                        output_field=FloatField()
                     )
                 ).values("status").annotate(order_id_count=Count("id"), order_amount=Sum("total_price")))
             return Response(
