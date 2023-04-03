@@ -1301,7 +1301,10 @@ class OrderViewSet(
             return Response({"message": "You do not have permission"})
         else:
             queryset = self.get_queryset()
-            analytics_queryset = list(queryset.values("status").annotate(order_id_count=Count("id")))
+            analytics_queryset = list(queryset.values("status").annotate(
+                order_id_count=Count("id"),
+                total_price=Sum(F('quantity') * F('unit_price'))
+            ))
             return Response(
                 {
                     "anlytics": analytics_queryset
