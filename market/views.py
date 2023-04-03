@@ -1318,7 +1318,7 @@ class OrderViewSet(
                     child_total_price_sum_subquery.filter(order_id=OuterRef('id')).values('total_price_sum'))
             ).values('status').annotate(
                 total_child_price_sum=Sum('total_child_price'),
-                order_amount=Count("order_id")
+                order_amount=Count("id")
             ).values("status", "total_child_price_sum", "order_amount")
             return Response(
                 {
