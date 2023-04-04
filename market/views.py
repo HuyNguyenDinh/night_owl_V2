@@ -1322,7 +1322,7 @@ class OrderViewSet(
             ).values("status", "total_child_price_sum", "order_amount")
             return Response(
                 {
-                    "anlytics": parents
+                    "analytics": parents
                 },
                 status=status.HTTP_200_OK
             )
