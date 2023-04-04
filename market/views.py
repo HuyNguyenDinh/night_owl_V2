@@ -1264,7 +1264,7 @@ class OrderViewSet(
             if state == "0":
                 orders = orders.filter(customer=self.request.user.id)
             elif state == "1":
-                orders = orders.filter(store=self.request.user.id)
+                orders = orders.exclude(status=0).filter(store=self.request.user.id)
         return orders
 
     def create(self, request, *args, **kwargs):
