@@ -1253,6 +1253,8 @@ class OrderViewSet(
             return CheckoutOrderSerializer
         elif self.action == "get_multiple_order_voucher_available":
             return VoucherAvailableMultipleOrderSerializer
+        elif self.action == "apply_voucher_order":
+            return ApplyVoucherOrder
         return OrderSerializer
 
     def get_queryset(self):
@@ -1327,7 +1329,7 @@ class OrderViewSet(
                 status=status.HTTP_200_OK
             )
 
-    @action(methods=["post"], detail=False, url_path="apply_voucher")
+    @action(methods=["post"], detail=False, url_path="apply-voucher")
     def apply_voucher_order(self, request):
         data_ser = ApplyVoucherOrder(data=request.data)
         if not data_ser.is_valid():
