@@ -1327,6 +1327,39 @@ class OrderViewSet(
                 status=status.HTTP_200_OK
             )
 
+    @action(methods=["post"], detail=False, url_path="apply_voucher")
+    def apply_voucher_order(self, request):
+        data_ser = ApplyVoucherOrder(data=request.data)
+        if not data_ser.is_valid():
+            message = {}
+            for key_error, error in data_ser.errors.items():
+                message.update({
+                    key_error: error
+                })
+                return Response(message, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        orders = Order.objects.filter(pk__in=data_ser.data.get("list_order"))
+        if not orders:
+            return Response({"message": "Not valid list order"}, status.HTTP_422_UNPROCESSABLE_ENTITY)
+        try:
+            voucher = Voucher.objects.get(code=data_ser.data.get("voucher"))
+        except Voucher.DoesNotExist:
+            return Response({"message": "Not valid voucher"})
+        else:
+            if voucher.creator:
+                try:
+                    order = orders.get(store=voucher.creator)
+                except Order.DoesNotExist:
+                    return Response({"message": "voucher not match any orders"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+                else:
+                    discount = calculate_value(order.id, voucher.id) - calculate_value(order.id)
+                    return Response({"discount": discount})
+            else:
+                discount = calculate_multiple_orders_value(
+                    list_order=orders.values_list("id", flat=True),
+                    voucher_id=voucher.id
+                )
+                return Response({"discount": discount})
+
     @action(methods=["get"], detail=False, url_path="cancel_uncheckout_order")
     def cancel_uncheckout_order(self, request):
         order = Order.objects.filter(customer=request.user.id, status=0)

@@ -54,6 +54,21 @@ def calculate_order_value_with_voucher(
     return value - voucher.discount
 
 
+def calculate_multiple_orders_value(list_order:  typing.List[int], voucher_id: int = None) -> decimal.Decimal:
+    orders = Order.objects.filter(pk__in=list_order)
+    value = 0
+    for order in orders:
+        value = value + order.orderdetail_set.aggregate(
+            total_price=Sum(F("quantity") * F("unit_price"))
+        )["total_price"]
+    voucher = Voucher.objects.get(pk=voucher_id)
+    if voucher.is_percentage:
+        value = value * (100 - voucher.discount) / 100
+    else:
+        value = value - voucher.discount
+    return value
+
+
 def calculate_value(order_id: int, voucher_id: int = None) -> decimal.Decimal:
     order = Order.objects.get(pk=order_id)
     value = 0

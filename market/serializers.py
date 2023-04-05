@@ -622,3 +622,14 @@ class ListReportSerializer(ModelSerializer):
             "status": {'read_only': 'true'},
             "created_date": {'read_only': 'true'}
         }
+
+
+class ApplyVoucherOrder(Serializer):
+    list_order = ListField(min_length=1, child=IntegerField())
+    voucher = CharField()
+
+    def create(self, validated_data):
+        pass
+
+    def update(self, instance, validated_data):
+        pass
