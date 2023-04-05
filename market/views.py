@@ -1353,7 +1353,7 @@ class OrderViewSet(
                 except Order.DoesNotExist:
                     return Response({"message": "voucher not match any orders"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
                 else:
-                    discount = calculate_value(order.id, voucher.id) - calculate_value(order.id)
+                    discount = calculate_value(order.id) - calculate_value(order.id, voucher.id)
                     return Response({"discount": discount})
             else:
                 discount = calculate_multiple_orders_value(
