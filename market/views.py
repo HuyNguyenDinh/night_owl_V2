@@ -1355,31 +1355,31 @@ class OrderViewSet(
         if not vouchers:
             return Response({"message": "No voucher match"})
         vouchers_applied = {}
-        nom_vouchers_id = vouchers.filter(creator__isnull=True).values_list("id", flat=True)
+        nom_vouchers = vouchers.filter(creator__isnull=True)
         orders_id = orders.values_list('id', flat=True)
-        for nom_voucher_id in nom_vouchers_id:
+        for nom_voucher in nom_vouchers:
             discount = calculate_multiple_orders_value(
                 list_order=orders_id,
-                voucher_id=nom_voucher_id
+                voucher_id=nom_voucher.id
             )
             if discount:
                 vouchers_applied.update({
-                    nom_voucher_id: discount
+                    nom_voucher.code: calculate_multiple_orders_value(list_order=orders_id) - discount
                 })
 
-        another_vouchers = vouchers.exclude(pk__in=nom_vouchers_id)
+        another_vouchers = vouchers.exclude(pk__in=nom_vouchers.values_list('id', flat=True))
         for order in orders:
             is_apply = False
             for voucher in another_vouchers:
                 if is_apply:
                     break
-                if voucher.id in vouchers_applied.keys():
+                if voucher.code in vouchers_applied.keys():
                     continue
                 discount = calculate_value(order.id) - calculate_value(order.id, voucher.id)
                 if discount:
                     is_apply = True
                     vouchers_applied.update({
-                        voucher.id: discount
+                        voucher.code: discount
                     })
         return Response(vouchers_applied)
             

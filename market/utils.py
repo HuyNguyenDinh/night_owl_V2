@@ -61,11 +61,12 @@ def calculate_multiple_orders_value(list_order:  typing.List[int], voucher_id: i
         value = value + order.orderdetail_set.aggregate(
             total_price=Sum(F("quantity") * F("unit_price"))
         )["total_price"]
-    voucher = Voucher.objects.get(pk=voucher_id)
-    if voucher.is_percentage:
-        value = value * (100 - voucher.discount) / 100
-    else:
-        value = value - voucher.discount
+    if voucher_id:
+        voucher = Voucher.objects.get(pk=voucher_id)
+        if voucher.is_percentage:
+            value = value * (100 - voucher.discount) / 100
+        else:
+            value = value - voucher.discount
     return value
 
 
