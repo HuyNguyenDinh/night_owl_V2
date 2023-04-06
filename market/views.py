@@ -1351,25 +1351,38 @@ class OrderViewSet(
         orders = Order.objects.filter(pk__in=data_ser.data.get("list_order"))
         if not orders:
             return Response({"message": "Not valid list order"}, status.HTTP_422_UNPROCESSABLE_ENTITY)
-        try:
-            voucher = Voucher.objects.get(code=data_ser.data.get("voucher"))
-        except Voucher.DoesNotExist:
-            return Response({"message": "Not valid voucher"})
-        else:
-            if voucher.creator:
-                try:
-                    order = orders.get(store=voucher.creator)
-                except Order.DoesNotExist:
-                    return Response({"message": "voucher not match any orders"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-                else:
-                    discount = calculate_value(order.id) - calculate_value(order.id, voucher.id)
-                    return Response({"discount": discount})
-            else:
-                discount = calculate_multiple_orders_value(
-                    list_order=orders.values_list("id", flat=True),
-                    voucher_id=voucher.id
-                )
-                return Response({"discount": discount})
+        vouchers = Voucher.objects.filter(code__in=data_ser.data.get("list_voucher"))
+        if not vouchers:
+            return Response({"message": "No voucher match"})
+        vouchers_applied = {}
+        nom_vouchers_id = vouchers.filter(creator__isnull=True).values_list("id", flat=True)
+        orders_id = orders.values_list('id', flat=True)
+        for nom_voucher_id in nom_vouchers_id:
+            discount = calculate_multiple_orders_value(
+                list_order=orders_id,
+                voucher_id=nom_voucher_id
+            )
+            if discount:
+                vouchers_applied.update({
+                    nom_voucher_id: discount
+                })
+
+        another_vouchers = vouchers.exclude(pk__in=nom_vouchers_id)
+        for order in orders:
+            is_apply = False
+            for voucher in another_vouchers:
+                if is_apply:
+                    break
+                if voucher.id in vouchers_applied.keys():
+                    continue
+                discount = calculate_value(order.id) - calculate_value(order.id, voucher.id)
+                if discount:
+                    is_apply = True
+                    vouchers_applied.update({
+                        voucher.id: discount
+                    })
+        return Response(vouchers_applied)
+            
 
     @action(methods=["get"], detail=False, url_path="cancel_uncheckout_order")
     def cancel_uncheckout_order(self, request):

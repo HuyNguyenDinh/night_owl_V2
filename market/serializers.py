@@ -626,7 +626,7 @@ class ListReportSerializer(ModelSerializer):
 
 class ApplyVoucherOrder(Serializer):
     list_order = ListField(min_length=1, child=IntegerField())
-    voucher = CharField()
+    list_voucher =  ListField(min_length=1, child=CharField())
 
     def create(self, validated_data):
         pass
