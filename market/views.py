@@ -542,7 +542,10 @@ class ProductViewSet(viewsets.ModelViewSet):
         filters.OrderingFilter,
         filters.SearchFilter,
     ]
-    filterset_fields = [{"sold_amount": ["lte", "lt", "gte", "gt"]}, "owner"]
+    filterset_fields = {
+        "sold_amount": ["gte", "lte", "gt", "lt"],
+        "owner": ["exact"]
+    }
     search_fields = ["name", "owner__first_name", "owner__last_name"]
     ordering_fields = ["sold_amount"]
 
@@ -1234,13 +1237,13 @@ class OrderViewSet(
 ):
     pagination_class = OrderPagination
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    filterset_fields = [
-        "status",
-        "payment_type",
-        "can_destroy",
-        {"completed_date": ["gte", "lte", "lt", "gt"]},
-        {"order_date": ["gte", "lte", "lt", "gt"]}
-    ]
+    filterset_fields = {
+        "status": ['exact'],
+        "payment_type": ['exact'],
+        "can_destroy": ['exact'],
+        "completed_date": ["gte", "lte", "gt", "lt"],
+        "order_date": ["gte", "lte", "gt", "lt"]
+    }
     ordering_fields = ["completed_date", "order_date", "bill__value"]
 
     def get_permissions(self):
