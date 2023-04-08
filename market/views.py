@@ -1411,7 +1411,7 @@ class OrderViewSet(
             try:
                 for o in orders:
                     m = None
-                    voucher_code_order = list_order.get(o.id, None)
+                    voucher_code_order = list_order.get(str(o.id), None)
                     # if voucher_code_order is not None:
                     #     voucher_code_order = voucher_code.get(str(o.id))
                     if voucher_code_order is not None:
