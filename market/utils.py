@@ -293,10 +293,7 @@ def checkout_order(
                 voucher = Voucher.objects.filter(code=voucher_code)
             if voucher is not None and voucher.exists():
                 value = calculate_value(order_id=order.id, voucher_id=voucher[0].id)
-                if (
-                    check_discount_in_order(order.orderdetail_set.all(), voucher[0].id)
-                    is not None
-                ):
+                if (check_discount_in_order(order.orderdetail_set.all(), voucher[0].id)) is not None:
                     order.voucher_apply = voucher[0]
             else:
                 value = calculate_value(order_id=order.id)

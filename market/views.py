@@ -1412,27 +1412,17 @@ class OrderViewSet(
                 for o in orders:
                     m = None
                     voucher_code_order = list_order.get(str(o.id), None)
-                    # if voucher_code_order is not None:
-                    #     voucher_code_order = voucher_code.get(str(o.id))
-                    if voucher_code_order is not None:
-                        if payment_type:
-                            m = checkout_order(
-                                order_id=o.id,
-                                voucher_code=voucher_code_order,
-                                payment_type=payment_type,
-                                raw_status=0,
-                            )
-                        else:
-                            m = checkout_order(
-                                order_id=o.id, voucher_code=voucher_code_order
-                            )
+                    if payment_type:
+                        m = checkout_order(
+                            order_id=o.id,
+                            voucher_code=voucher_code_order,
+                            payment_type=payment_type,
+                            raw_status=0,
+                        )
                     else:
-                        if payment_type:
-                            m = checkout_order(
-                                order_id=o.id, payment_type=payment_type, raw_status=0
-                            )
-                        else:
-                            m = checkout_order(order_id=o.id)
+                        m = checkout_order(
+                            order_id=o.id, voucher_code=voucher_code_order
+                        )
                     if m is None:
                         raise Order.DoesNotExist
                     result.append(m)
