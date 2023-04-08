@@ -1396,10 +1396,7 @@ class OrderViewSet(
 
     @action(methods=["post"], detail=False, url_path="checkout_order")
     def checkout(self, request):
-        data_ser = CheckoutOrderSerializer(data=request.data)
-        if not data_ser.is_valid():
-            return Response({"message": "Data input not valid"}, status=status.HTTP_400_BAD_REQUEST)
-        list_order = data_ser.data.get("list_order")
+        list_order = request.data.get("list_order")
         orders = Order.objects.filter(
             pk__in=list_order.keys(),
             customer=request.user.id, 
