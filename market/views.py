@@ -1396,20 +1396,27 @@ class OrderViewSet(
 
     @action(methods=["post"], detail=False, url_path="checkout_order")
     def checkout(self, request):
-        order = Order.objects.filter(
-            customer=request.user.id, status=0, bill__isnull=True
+        data_ser = CheckoutOrderSerializer(data=request.data)
+        if not data_ser.is_valid():
+            return Response({"message": "Data input not valid"}, status=status.HTTP_400_BAD_REQUEST)
+        list_order = data_ser.data.get("list_order")
+        orders = Order.objects.filter(
+            pk__in=list_order.keys(),
+            customer=request.user.id, 
+            status=0, 
+            bill__isnull=True
         )
-        if order:
-            voucher_code = request.data.get("list_voucher")
+        if orders:
+            # voucher_code = request.data.get("list_voucher")
             result = []
             success = False
             payment_type = request.data.get("payment_type")
             try:
-                for o in order:
+                for o in orders:
                     m = None
-                    voucher_code_order = None
-                    if voucher_code is not None:
-                        voucher_code_order = voucher_code.get(str(o.id))
+                    voucher_code_order = list_order.get(o.id, None)
+                    # if voucher_code_order is not None:
+                    #     voucher_code_order = voucher_code.get(str(o.id))
                     if voucher_code_order is not None:
                         if payment_type:
                             m = checkout_order(

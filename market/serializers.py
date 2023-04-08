@@ -395,10 +395,10 @@ class VoucherAvailableMultipleOrderSerializer(Serializer):
 
 
 class CheckoutOrderSerializer(ModelSerializer):
-    list_voucher = DictField(
+    list_order = DictField(
         child=CharField(),
         write_only=True,
-        required=False
+        required=True
     )
     payment_type = IntegerField(max_value=2, min_value=0, required=False)
 
