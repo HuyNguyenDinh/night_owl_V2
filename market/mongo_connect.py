@@ -8,7 +8,7 @@ import datetime
 import random
 import string
 
-client = pymongo.MongoClient("mongodb+srv://mongodb:0937461321Huy@nightowl.icksujp.mongodb.net/?retryWrites=true&w=majority", server_api=ServerApi('1'))
+client = pymongo.MongoClient("mongodb+srv://huy:0937461321Huy@nightowl.wnrttr4.mongodb.net/?retryWrites=true&w=majority", server_api=ServerApi('1'))
 db_payment = client.payment
 db_code = client.code
 
@@ -24,7 +24,7 @@ def import_signature(order_ids):
     amount = []
     for order in orders:
         amount.append(order.bill.value)
-    payment_result = send_order(orders_id=order_ids, redirect_url="https://night-owl-market-fe.vercel.app/payment")
+    payment_result = send_order(orders_id=order_ids, redirect_url="https://www.nguyendinhhuy.dev/dashboard/invoice/list/shopping?status=approving")
     order_info = momo_collection.find_one({"order_ids": order_ids})
     if order_info:
         return momo_collection.find_one_and_update(order_info, {"$set": payment_result}, return_document=ReturnDocument.AFTER)
