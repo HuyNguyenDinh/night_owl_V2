@@ -1435,7 +1435,17 @@ class OrderViewSet(
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             if success:
-                if not payment_type or payment_type != 1:
+                if payment_type and (payment_type == 1 or payment_type == "1"):
+                    list_id = [x.id for x in result]
+                    instance = import_signature(list_id)
+                    return Response(
+                        {
+                            "message": "Please pay with the link to complete checkout the order",
+                            "pay_url": instance.get("payUrl"),
+                        },
+                        status=status.HTTP_201_CREATED,
+                    )
+                else:
                     for i in result:
                         odds = i.orderdetail_set.values_list("cart_id__id", flat=True)
                         CartDetail.objects.filter(id__in=list(set(odds))).delete()
@@ -1452,16 +1462,6 @@ class OrderViewSet(
                         except:
                             pass
                         ########
-                else:
-                    list_id = [x.id for x in result]
-                    instance = import_signature(list_id)
-                    return Response(
-                        {
-                            "message": "Please pay with the link to complete checkout the order",
-                            "pay_url": instance.get("payUrl"),
-                        },
-                        status=status.HTTP_201_CREATED,
-                    )
 
                 return Response(
                     OrderSerializer(result, many=True).data,
