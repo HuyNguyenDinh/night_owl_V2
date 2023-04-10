@@ -1435,7 +1435,7 @@ class OrderViewSet(
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             if success:
-                if not payment_type or (payment_type and payment_type != 1):
+                if not payment_type or payment_type != 1:
                     for i in result:
                         odds = i.orderdetail_set.values_list("cart_id__id", flat=True)
                         CartDetail.objects.filter(id__in=list(set(odds))).delete()
@@ -1452,7 +1452,7 @@ class OrderViewSet(
                         except:
                             pass
                         ########
-                elif payment_type and payment_type == 1:
+                else:
                     list_id = [x.id for x in result]
                     instance = import_signature(list_id)
                     return Response(
