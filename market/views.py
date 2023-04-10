@@ -373,7 +373,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIVi
                                 "last_name": user_last_name,
                             }
                         ).data,
-                        status=status.HTTP_302_FOUND,
+                        status=status.HTTP_203_NON_AUTHORITATIVE_INFORMATION,
                     )
                 else:
                     refresh = RefreshToken.for_user(user)
