@@ -1273,7 +1273,7 @@ class OrderViewSet(
         state = self.request.query_params.get("state")
         if state:
             if state == "0":
-                orders = orders.filter(customer=self.request.user.id)
+                orders = orders.exclude(status=0).filter(customer=self.request.user.id)
             elif state == "1":
                 orders = orders.exclude(status=0).filter(store=self.request.user.id)
         return orders
