@@ -64,6 +64,8 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIVi
             return UserAvatarSerializer
         elif self.action == "get_user_id_with_email":
             return EmailSerializer
+        elif self.action == "get_reset_code_by_email":
+            return EmailSerializer
         elif self.action == "get_shop_vouchers_available":
             return VoucherSerializer
         return UserSerializer
@@ -153,6 +155,32 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIVi
             return Response(
                 {"message": "user not found"}, status=status.HTTP_404_NOT_FOUND
             )
+        else:
+            code = add_reset_code(user.id)
+            subject = "Xác nhận reset mật khẩu của {0} Night Owl ECommerce".format(
+                user.first_name
+            )
+            content = """Mã xác minh để reset mật khẩu Night Owl ECommerce của {0} là {1}""".format(
+                user.first_name, code
+            )
+            send_email_task.delay(user.email, subject, content)
+            return Response(
+                {"message": "reset code has been sent to your email"},
+                status=status.HTTP_200_OK,
+            )
+    
+    @action(methods=["post"], detail=False, url_path="get-reset-code-by-email")
+    def get_reset_code_by_email(self, request):
+        data_ser = EmailSerializer(data=request.data)
+        if not data_ser.is_valid():
+            return Response({
+                "message": data_ser.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+        email = data_ser.data.get("email")
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({"message": "Email not match any user"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             code = add_reset_code(user.id)
             subject = "Xác nhận reset mật khẩu của {0} Night Owl ECommerce".format(
