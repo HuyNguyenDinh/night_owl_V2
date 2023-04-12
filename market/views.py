@@ -510,6 +510,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIVi
             "get_user_id_with_email",
             "product_of_user",
             "get_token_by_user_id_and_reset_code",
+            "get_token_by_email_and_reset_code",
             "get_shop_vouchers_available",
             "get_reset_code_by_email",
         ]:
