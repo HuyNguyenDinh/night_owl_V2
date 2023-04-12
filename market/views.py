@@ -475,6 +475,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIVi
             "product_of_user",
             "get_token_by_user_id_and_reset_code",
             "get_shop_vouchers_available",
+            "get_reset_code_by_email",
         ]:
             return [
                 permissions.AllowAny(),
