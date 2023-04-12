@@ -176,7 +176,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIVi
             return Response({
                 "message": data_ser.errors
             }, status=status.HTTP_400_BAD_REQUEST)
-        email = data_ser.data.get("email")
+        email = data_ser.validated_data.get("email")
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
