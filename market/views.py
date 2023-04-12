@@ -180,7 +180,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIVi
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            return Response({"message": f'Email {0} not match any user'.format(email)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": f'Email {email} not match any user'}, status=status.HTTP_400_BAD_REQUEST)
         else:
             code = add_reset_code(user.id)
             subject = "Xác nhận reset mật khẩu của {0} Night Owl ECommerce".format(
