@@ -58,6 +58,8 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIVi
             return ChangePasswordSerializer
         elif self.action == "get_token_by_user_id_and_reset_code":
             return GetTokenWithUserIdAndCodeSerializer
+        elif self.action == "get_token_by_email_and_reset_code":
+            return GetTokenWithEmailAndCodeSerializer
         elif self.action == "create_single_chatroom":
             return RoomSerializer
         elif self.action == "change_avatar":
@@ -216,6 +218,40 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIVi
                 {"message": "verification code was not correct"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+    
+    @action(
+        methods=["post"], detail=False, url_path="get-token-by-email-and-reset-code"
+    )
+    def get_token_by_email_and_reset_code(self, request):
+        data_ser = GetTokenWithEmailAndCodeSerializer(data=request.data)
+        if not data_ser.is_valid():
+            return Response({
+                "message": "Data input not valid",
+                "errors": data_ser.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+        email = data_ser.validated_data.get("email")
+        code = data_ser.validated_data.get("code")
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({
+                "message": "Email not match any user"
+            }, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            if check_reset_code(user_id=user.id, code=code):
+                refresh = RefreshToken.for_user(user)
+                return Response(
+                    {
+                        "refresh": str(refresh),
+                        "access": str(refresh.access_token),
+                    },
+                    status=status.HTTP_200_OK,
+                )
+            else:
+                return Response(
+                    {"message": "verification code was not correct"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
     @action(methods=["post"], detail=False, url_path="reset-password")
     def reset_password(self, request):

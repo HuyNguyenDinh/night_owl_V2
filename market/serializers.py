@@ -572,6 +572,11 @@ class GetTokenWithUserIdAndCodeSerializer(Serializer):
     code = CharField(write_only=True, required=True)
 
 
+class GetTokenWithEmailAndCodeSerializer(Serializer):
+    email = CharField(write_only=True, required=True, allow_blank=False)
+    code = CharField(write_only=True, required=True, allow_blank=False)
+
+
 class ResetPasswordSerialier(Serializer):
     new_password = CharField(write_only=True, required=True)
     confirm_password = CharField(write_only=True, required=True)
