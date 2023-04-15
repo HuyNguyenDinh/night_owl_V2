@@ -266,13 +266,13 @@ class RatingSerializer(ModelSerializer):
 
 # Create rating
 class CreateRatingSerializer(ModelSerializer):
+    creator = UserLessInformationSerializer(read_only=True)
 
     class Meta:
         model = Rating
         fields = "__all__"
         extra_kwargs = {
             'id': {'read_only': 'true'},
-            'creator': {'read_only': 'true'},
             'product': {'read_only': 'true'},
         }
 

@@ -1382,14 +1382,15 @@ class OrderViewSet(
             return Response({"message": "You do not have permission"})
         else:
             queryset = self.get_queryset()
+
             child_total_price_subquery = OrderDetail.objects.annotate(
                 total_price=F('unit_price') * F('quantity')
             ).values('total_price', 'order_id')
+
             child_total_price_sum_subquery = child_total_price_subquery.values(
                 'order_id'
-            ).annotate(
-                total_price_sum=Sum('total_price')
-            ).values('total_price_sum', 'order_id')
+            ).annotate(total_price_sum=Sum('total_price')).values('total_price_sum', 'order_id')
+
             parents = queryset.annotate(
                 total_child_price=Subquery(
                     child_total_price_sum_subquery.filter(order_id=OuterRef('id')).values('total_price_sum'))
@@ -1397,6 +1398,7 @@ class OrderViewSet(
                 total_child_price_sum=Sum('total_child_price'),
                 order_amount=Count("id")
             ).values("status", "total_child_price_sum", "order_amount")
+            
             return Response(
                 {
                     "analytics": parents
