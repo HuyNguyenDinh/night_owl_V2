@@ -540,7 +540,8 @@ class RoomSerializer(ModelSerializer):
         room_avatar = ""
         if obj.room_type == 0:
             other_user = obj.user.exclude(pk=user_id).first()
-            room_avatar = other_user.avatar
+            if other_user.avatar:
+                room_avatar = other_user.avatar
         return room_avatar
 
     def create(self, validated_data):
