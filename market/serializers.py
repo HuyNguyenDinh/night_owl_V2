@@ -509,6 +509,7 @@ class RoomSerializer(ModelSerializer):
     user = UserLessInformationSerializer(many=True, read_only=True)
     last_message = SerializerMethodField(method_name='get_last_message', read_only=True)
     room_name = SerializerMethodField(method_name='get_room_name', read_only=True)
+    room_avatar = SerializerMethodField(method_name='get_room_avatar', read_only=True)
 
     class Meta:
         model = Room
@@ -533,6 +534,14 @@ class RoomSerializer(ModelSerializer):
             else:
                 room_name = room_name + user.first_name
         return room_name
+
+    def get_room_avatar(self, obj):
+        user_id = self.context.get('user')
+        room_avatar = ""
+        if obj.room_type == 0:
+            other_user = obj.user.exclude(pk=user_id).first()
+            room_avatar = other_user.avatar
+        return room_avatar
 
     def create(self, validated_data):
         user_ids = validated_data.pop('list_user_ids')
