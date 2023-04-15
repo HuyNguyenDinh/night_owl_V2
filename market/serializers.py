@@ -541,7 +541,7 @@ class RoomSerializer(ModelSerializer):
         if obj.room_type == 0:
             other_user = obj.user.exclude(pk=user_id).first()
             if other_user.avatar:
-                room_avatar = other_user.avatar
+                room_avatar = other_user.avatar.url
         return room_avatar
 
     def create(self, validated_data):
