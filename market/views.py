@@ -1398,7 +1398,7 @@ class OrderViewSet(
                 total_child_price_sum=Sum('total_child_price'),
                 order_amount=Count("id")
             ).values("status", "total_child_price_sum", "order_amount")
-            
+
             return Response(
                 {
                     "analytics": parents
@@ -1911,7 +1911,7 @@ class RoomViewSet(
 
     def get_queryset(self):
         rooms = (
-            Room.objects.filter(user__in=[self.request.user.id])
+            Room.objects.filter(user__in=[self.request.user.id], message__isnull=False)
             .annotate(latest=Max("message__created_date"))
             .order_by("-latest")
         )
