@@ -598,11 +598,15 @@ class ChangePasswordSerializer(Serializer):
     confirm_password = CharField(write_only=True, required=True)
 
 class ProductOfUserSerializer(ModelSerializer):
-    product_set = ListProductSerializer(many=True)
+    # product_set = ListProductSerializer(many=True)
 
     class Meta:
         model = User
         fields = ['id', 'first_name', 'last_name', 'phone_number', 'avatar', 'product_set']
+
+    def product_set(self, obj):
+        products = Product.objects.filter(owner=obj, option__isnull=False)
+        return ListProductSerializer(products, many=True).data
 
 class ReplySerializer(ModelSerializer):
     creator = UserLessInformationSerializer(read_only=True)
