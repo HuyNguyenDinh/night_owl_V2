@@ -603,7 +603,7 @@ class ProductOfUserSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'phone_number', 'avatar', 'product_set']
+        fields = ['id', 'first_name', 'last_name', 'phone_number', 'avatar', 'product_set', 'is_business']
 
     def get_product_set(self, obj):
         products = Product.objects.filter(owner=obj, option__isnull=False)
