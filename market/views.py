@@ -89,7 +89,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIVi
     @action(methods=["get"], detail=True, url_path="products")
     def product_of_user(self, request, pk):
         try:
-            user = User.objects.get(pk=pk, is_business=True)
+            user = User.objects.get(pk=pk)
         except User.DoesNotExist:
             return Response(
                 {"message": "user not found"}, status=status.HTTP_404_NOT_FOUND
