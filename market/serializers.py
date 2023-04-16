@@ -599,15 +599,15 @@ class ChangePasswordSerializer(Serializer):
 
 class ProductOfUserSerializer(ModelSerializer):
     # product_set = ListProductSerializer(many=True)
-    product_set = SerializerMethodField(method_name='product_set')
+    product_set = SerializerMethodField(method_name='get_product_set')
 
     class Meta:
         model = User
         fields = ['id', 'first_name', 'last_name', 'phone_number', 'avatar', 'product_set']
 
-    def product_set(self, obj):
+    def get_product_set(self, obj):
         products = Product.objects.filter(owner=obj, option__isnull=False)
-        return ListProductSerializer(products, many=True)
+        return ListProductSerializer(products, many=True).data
 
 class ReplySerializer(ModelSerializer):
     creator = UserLessInformationSerializer(read_only=True)
