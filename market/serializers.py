@@ -606,7 +606,7 @@ class ProductOfUserSerializer(ModelSerializer):
         fields = ['id', 'first_name', 'last_name', 'phone_number', 'avatar', 'product_set', 'is_business']
 
     def get_product_set(self, obj):
-        products = Product.objects.filter(owner=obj, option__isnull=False)
+        products = Product.objects.filter(owner=obj, option__isnull=False).distinct()
         return ListProductSerializer(products, many=True).data
 
 class ReplySerializer(ModelSerializer):

@@ -495,7 +495,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIVi
             Q(start_date__lte=timezone.now())
             & (Q(end_date__gt=timezone.now()) | Q(end_date__isnull=True))
             & Q(creator=pk)
-        )
+        ).distinct()
         page = paginator.paginate_queryset(queryset=queryset, request=request)
         if page:
             serializer = self.get_serializer(page, many=True)
