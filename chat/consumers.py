@@ -67,14 +67,12 @@ class ChatAsyncConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         try:
             self.user = self.scope['user']
-            print(self.user.id)
             self.chat_rooms = await database_sync_to_async(self.user.room_set.select_related().all)()
             await self.accept()
             await self.import_user_client()
             async for room in self.chat_rooms:
                 await self.channel_layer.group_add(room.group_name, self.channel_name)
             await self.channel_layer.group_add("broadcast", self.channel_name)
-            print(self.channel_name)
         except:
             raise StopConsumer
 

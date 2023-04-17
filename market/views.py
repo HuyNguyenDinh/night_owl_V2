@@ -1988,7 +1988,6 @@ class RoomViewSet(
             {"message": "you do not have permission"}, status=status.HTTP_403_FORBIDDEN
         )
 
-    @method_decorator(cache_page(60 * 60 * 2))
     @action(methods=["get"], detail=True, url_path="messages")
     def get_room_messages(self, request, pk):
         queryset = Message.objects.filter(room__pk=pk).order_by("-created_date")
