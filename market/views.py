@@ -1947,6 +1947,13 @@ class RoomViewSet(
             queryset, many=True, context={"user": request.user.id}
         )
         return Response(serializer.data)
+    
+    def retrieve(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(
+            queryset, context={"user": request.user.id}
+        )
+        return Response(serializer.data)
 
     @action(methods=["patch"], detail=True, url_path="add-member")
     def add_member_to_chatroom(self, request, pk):
