@@ -1912,7 +1912,7 @@ class RoomViewSet(
 
     def get_queryset(self):
         rooms = (
-            Room.objects.filter(user__in=[self.request.user.id], message__isnull=False)
+            Room.objects.filter(user__in=[self.request.user.id])
             .annotate(latest=Max("message__created_date"))
             .order_by("-latest")
         )
@@ -1940,7 +1940,7 @@ class RoomViewSet(
         )
 
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
+        queryset = self.filter_queryset(self.get_queryset()).filter(message__isnull=False)
         page = self.paginate_queryset(queryset=queryset)
         if page is not None:
             serializer = self.get_serializer(
