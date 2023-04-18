@@ -1922,6 +1922,11 @@ class RoomViewSet(
         if self.action in ["send_message_to_room", "get_room_messages"]:
             return ChatRoomMessageSerialier
         return RoomSerializer
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['user'] = self.request.user.id  # add user to context
+        return context
 
     def create(self, request, *args, **kwargs):
         serializer = RoomSerializer(
@@ -1945,13 +1950,6 @@ class RoomViewSet(
 
         serializer = self.get_serializer(
             queryset, many=True, context={"user": request.user.id}
-        )
-        return Response(serializer.data)
-    
-    def retrieve(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(
-            queryset, context={"user": request.user.id}
         )
         return Response(serializer.data)
 
