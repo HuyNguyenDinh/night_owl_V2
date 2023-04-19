@@ -93,7 +93,7 @@ class ChatAsyncConsumer(AsyncJsonWebsocketConsumer):
 
     @sync_to_async
     def room_serialize(self, room: Room):
-        return RoomSerializer(room).data
+        return RoomSerializer(room, context={'user': self.user.id}).data
 
     async def messaging(self, room_id: int, content: str) -> Dict[str, bool]:
         # import_message_to_db.delay(self.user.id, room_id, content)
