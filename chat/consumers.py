@@ -98,7 +98,7 @@ class ChatAsyncConsumer(AsyncJsonWebsocketConsumer):
     async def messaging(self, room_id: int, content: str) -> Dict[str, bool]:
         # import_message_to_db.delay(self.user.id, room_id, content)
         await database_sync_to_async(Message.objects.create)(room_id=room_id, content=content, creator=self.user)
-        room = await database_sync_to_async(Room.objects.get)(id=room_id)
+        room = await database_sync_to_async(Room.objects.select_related().get)(id=room_id)
         data = await self.room_serialize(room)
         await self.send_message_to_group(room.group_name, data)
         return {"status": True}
