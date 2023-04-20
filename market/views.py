@@ -1967,7 +1967,7 @@ class RoomViewSet(
             list_users = User.objects.filter(id__in=list_user_ids)
             if list_users:
                 room.user.add(*list_users)
-                return Response(RoomSerializer(room).data)
+                return Response(RoomSerializer(room, context={'user': request.user.id}).data)
             return Response(
                 {"message": "list user not exist"}, status=status.HTTP_400_BAD_REQUEST
             )

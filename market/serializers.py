@@ -510,6 +510,8 @@ class RoomSerializer(ModelSerializer):
     last_message = SerializerMethodField(method_name='get_last_message', read_only=True)
     room_name = SerializerMethodField(method_name='get_room_name', read_only=True)
     room_avatar = SerializerMethodField(method_name='get_room_avatar', read_only=True)
+    another_room_name = SerializerMethodField(method_name='get_another_room_name', read_only=True)
+    another_room_avatar = SerializerMethodField(method_name='get_another_room_avatar', read_only=True)
 
     class Meta:
         model = Room
@@ -540,6 +542,28 @@ class RoomSerializer(ModelSerializer):
         room_avatar = ""
         if obj.room_type == 0:
             other_user = obj.user.exclude(pk=user_id).first()
+            if other_user.avatar:
+                room_avatar = other_user.avatar.url
+        return room_avatar
+
+    def get_another_room_name(self, obj):
+        user_id = self.context.get('user')
+        if obj.room_type == 0:
+            other_user = obj.user.filter(pk=user_id).first()
+            return other_user.first_name + " " + other_user.last_name
+        room_name = ""
+        for user in obj.user.all():
+            if room_name != "":
+                room_name = room_name + ", " + user.first_name
+            else:
+                room_name = room_name + user.first_name
+        return room_name
+
+    def get_another_room_avatar(self, obj):
+        user_id = self.context.get('user')
+        room_avatar = ""
+        if obj.room_type == 0:
+            other_user = obj.user.filter(pk=user_id).first()
             if other_user.avatar:
                 room_avatar = other_user.avatar.url
         return room_avatar

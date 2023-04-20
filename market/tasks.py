@@ -30,7 +30,7 @@ def import_message_to_db(user_id: int, room_id: int, content: str):
     user = get_user_model().objects.get(pk=user_id)
     room = Room.objects.get(pk=room_id)
     message = Message.objects.create(creator=user, room=room, content=content)
-    room_serializer = RoomSerializer(room).data
+    room_serializer = RoomSerializer(room, context={'user': user_id}).data
     app.send_task('chat.tasks.create_message', args=(room_serializer, room.group_name))
     return {"status": True}
 
