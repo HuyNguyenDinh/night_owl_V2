@@ -366,8 +366,7 @@ class Rating(models.Model):
         constraints = [
             models.CheckConstraint(
                 name="rate_range_constraint", check=models.Q(rate__lte=5, rate__gte=1)
-            ),
-            models.UniqueConstraint
+            )
         ]
 
     def save(self, *args, **kwargs):
