@@ -1775,7 +1775,7 @@ class BillViewSet(viewsets.ViewSet, generics.ListAPIView):
     @action(methods=["get"], detail=False, url_path="get-years")
     def get_years(self, request):
         order = Order.objects.filter(store__id=request.user.id, status=3).order_by("-order_date")
-        list_year = order.values_list("order_date__year", flat=True).distinct()
+        list_year = list(set(order.values_list("order_date__year", flat=True))).sort(reverse=True)
         return Response({
             "years": list_year
         })
