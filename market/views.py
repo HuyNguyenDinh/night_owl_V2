@@ -746,7 +746,6 @@ class ProductViewSet(viewsets.ModelViewSet):
             )
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    @method_decorator(cache_page(60 * 60 * 2))
     @action(methods=["get"], detail=False, url_path="products-statistic-count-in-year")
     def products_statistic_in_year(self, request):
         try:
@@ -811,7 +810,6 @@ class ProductViewSet(viewsets.ModelViewSet):
                 {"message": "order details not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
-    @method_decorator(cache_page(60 * 60 * 2))
     @action(methods=["get"], detail=False, url_path="products-statistic-count-in-month")
     def monthly_statistic_products_count(self, request):
         try:
@@ -890,7 +888,6 @@ class ProductViewSet(viewsets.ModelViewSet):
                 {"message": "order details not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
-    @method_decorator(cache_page(60 * 60 * 2))
     @action(methods=["get"], detail=True, url_path="product-statistic-in-month")
     def product_statistic_in_month(self, request, pk):
         try:
@@ -979,7 +976,6 @@ class ProductViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
-    @method_decorator(cache_page(60 * 60 * 2))
     @action(methods=["get"], detail=True, url_path="product-statistic-in-year")
     def product_statistic_in_year(self, request, pk):
         try:
@@ -1771,7 +1767,6 @@ class BillViewSet(viewsets.ViewSet, generics.ListAPIView):
             ]
         return super().get_permissions()
 
-    @method_decorator(cache_page(60 * 60 * 24))
     @action(methods=["get"], detail=False, url_path="get-years")
     def get_years(self, request):
         order = Order.objects.filter(store__id=request.user.id, status=3).order_by("-order_date")
@@ -1781,8 +1776,6 @@ class BillViewSet(viewsets.ViewSet, generics.ListAPIView):
             "years": list_year
         })
 
-
-    @method_decorator(cache_page(60 * 60 * 2))
     @action(methods=["get"], detail=False, url_path="yearly-value-statistic")
     def yearly_statistic(self, request):
         try:
