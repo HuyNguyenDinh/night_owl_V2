@@ -1724,7 +1724,7 @@ class OrderViewSet(
         vouchers = Voucher.objects.filter(products__option__in=options).filter(
             Q(start_date__lte=timezone.now())
             & (Q(end_date__gt=timezone.now()) | Q(end_date__isnull=True))
-        )
+        ).distinct()
         if vouchers:
             return Response(
                 VoucherSerializer(vouchers, many=True).data, status=status.HTTP_200_OK
