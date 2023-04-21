@@ -756,7 +756,7 @@ class ProductViewSet(viewsets.ModelViewSet):
             )
         else:
             year = request.query_params.get("year")
-            order_details = OrderDetail.objects.filter(order__store=user, order__status=3).order_by("-order_date")
+            order_details = OrderDetail.objects.filter(order__store=user, order__status=3).order_by("-order__order_date")
             if year:
                 try:
                     year = int(year)
@@ -821,7 +821,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         else:
             month = request.query_params.get("month")
             year = request.query_params.get("year")
-            order_details = OrderDetail.objects.filter(order__store=user, order__status=3).order_by("-order_date")
+            order_details = OrderDetail.objects.filter(order__store=user, order__status=3).order_by("-order__order_date")
             if month:
                 try:
                     month = int(month)
