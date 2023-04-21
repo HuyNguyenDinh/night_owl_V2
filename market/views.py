@@ -757,7 +757,7 @@ class ProductViewSet(viewsets.ModelViewSet):
             )
         else:
             year = request.query_params.get("year")
-            order_details = OrderDetail.objects.filter(order__store=user)
+            order_details = OrderDetail.objects.filter(order__store=user, order__status=3).order_by("-order_date")
             if year:
                 try:
                     year = int(year)
@@ -823,7 +823,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         else:
             month = request.query_params.get("month")
             year = request.query_params.get("year")
-            order_details = OrderDetail.objects.filter(order__store=user)
+            order_details = OrderDetail.objects.filter(order__store=user, order__status=3).order_by("-order_date")
             if month:
                 try:
                     month = int(month)
@@ -1764,12 +1764,22 @@ class BillViewSet(viewsets.ViewSet, generics.ListAPIView):
 
     def get_permissions(self):
         if self.action in [
-            "monthly_statistic",
+            "monthly_statistic", "yearly_statistic", "get_years"
         ]:
             return [
                 BusinessPermission(),
             ]
         return super().get_permissions()
+
+    @method_decorator(cache_page(60 * 60 * 24))
+    @action(methods=["get"], detail=False, url_path="get-years")
+    def get_years(self, request):
+        order = Order.objects.filter(store__id=request.user.id, status=3).order_by("-order_date")
+        list_year = order.values_list("order_date__year", flat=True).distinct()
+        return Response({
+            "years": list_year
+        })
+
 
     @method_decorator(cache_page(60 * 60 * 2))
     @action(methods=["get"], detail=False, url_path="yearly-value-statistic")
@@ -1782,7 +1792,7 @@ class BillViewSet(viewsets.ViewSet, generics.ListAPIView):
             )
         else:
             year = request.query_params.get("year")
-            order = Order.objects.exclude(status=0).filter(store__id=user.id)
+            order = Order.objects.filter(store__id=user.id, status=3).order_by("-order_date")
             if year:
                 try:
                     year = int(year)
@@ -1792,7 +1802,7 @@ class BillViewSet(viewsets.ViewSet, generics.ListAPIView):
                         status=status.HTTP_400_BAD_REQUEST,
                     )
                 else:
-                    order = order.filter(order_date__year=year).select_related()
+                    order = order.filter(order_date__year=year).order_by("-order_date").select_related()
             else:
                 order = order.filter(
                     order_date__year=timezone.now().year
@@ -1842,7 +1852,7 @@ class BillViewSet(viewsets.ViewSet, generics.ListAPIView):
         else:
             month = request.query_params.get("month")
             year = request.query_params.get("year")
-            order = Order.objects.exclude(status=0).filter(store__id=user.id)
+            order = Order.objects.filter(store__id=user.id, status=3).order_by("-order_date")
             if year:
                 try:
                     year = int(year)
