@@ -376,13 +376,11 @@ class OrderSerializer(ModelSerializer):
 
 class VoucherSerializer(ModelSerializer):
     apply_products = SerializerMethodField(method_name="get_apply_products", read_only=True)
+    creator = UserLessInformationSerializer(read_only=True)
 
     class Meta:
         model = Voucher
         fields = "__all__"
-        extra_kwargs = {
-            'creator': {'read_only': 'true'}
-        }
 
     def get_apply_products(self, obj):
         products = Product.objects.filter(voucher=obj)
