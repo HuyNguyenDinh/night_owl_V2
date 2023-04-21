@@ -362,7 +362,7 @@ class Rating(models.Model):
         )
 
     class Meta:
-        unique_together = [["creator_id", "product_id"]]
+        unique_together = [["creator", "product"]]
         constraints = [
             models.CheckConstraint(
                 name="rate_range_constraint", check=models.Q(rate__lte=5, rate__gte=1)
