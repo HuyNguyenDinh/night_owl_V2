@@ -362,15 +362,18 @@ class Rating(models.Model):
         )
 
     class Meta:
+        unique_together = [["creator_id", "product_id"]]
         constraints = [
             models.CheckConstraint(
                 name="rate_range_constraint", check=models.Q(rate__lte=5, rate__gte=1)
-            )
+            ),
+            models.UniqueConstraint
         ]
 
     def save(self, *args, **kwargs):
         if not Order.objects.filter(
             customer=self.creator,
+            status=3,
             orderdetail__product_option__base_product=self.product,
         ).exists():
             raise ValidationError(message="Customer must buy product before rating")
