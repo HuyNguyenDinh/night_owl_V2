@@ -376,7 +376,7 @@ class Rating(models.Model):
             orderdetail__product_option__base_product=self.product,
         ).exists():
             raise ValidationError(message="Customer must buy product before rating")
-        if Rating.objects.filter(customer=self.creator, product=self.product).exists():
+        if Rating.objects.filter(creator=self.creator, product=self.product).exists():
             raise ValidationError(message="Customer just have 1 rating for each product")
         super().save(*args, **kwargs)
 
