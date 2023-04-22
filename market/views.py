@@ -2098,7 +2098,7 @@ class VoucherViewSet(viewsets.ModelViewSet):
     def get_available_vouchers(self, request):
         return super().list(request)
     
-    @action(method=["get"], detail=False, url_path="management-list")
+    @action(methods=["get"], detail=False, url_path="management-list")
     def get_list_voucher_management(self, request):
         queryset = Voucher.objects.filter(creator=request.user)
         return Response(VoucherListManagementSerializer(data=queryset, many=True).data)
