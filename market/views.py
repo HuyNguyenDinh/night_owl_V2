@@ -627,7 +627,7 @@ class ProductViewSet(viewsets.ModelViewSet):
             return [
                 permissions.AllowAny(),
             ]
-        elif self.action == "get_vouchers_available_of_product":
+        elif self.action in ["get_vouchers_available_of_product"]:
             return [
                 permissions.IsAuthenticated(),
             ]
@@ -670,6 +670,12 @@ class ProductViewSet(viewsets.ModelViewSet):
         elif self.action == "get_vouchers_available_of_product":
             return VoucherSerializer
         return ProductSerializer
+    
+    @action(methods=["get"], detail=False, url_path="full-products")
+    def get_full_products(self, request):
+        queryset = self.get_queryset()
+        queryset = queryset.filter(owner=request.user)
+        return Response(data=ProductLessInformationSerializer(queryset, many=True).data)
 
     @action(methods=["get"], detail=True, url_path="comments")
     def get_comments(self, request, pk):

@@ -295,9 +295,11 @@ class ProductRetrieveSerializer(ModelSerializer):
 
 # Get product id, name and picture
 class ProductLessInformationSerializer(ModelSerializer):
+    min_price = ReadOnlyField()
+    
     class Meta:
         model = Product
-        fields = ['id', 'name', 'picture']
+        fields = ['id', 'name', 'picture', 'min_price']
 
 
 class OptionInOrderDetailSerializer(ModelSerializer):
