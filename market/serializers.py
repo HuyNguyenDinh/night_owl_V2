@@ -207,7 +207,8 @@ class ListProductSerializer(ModelSerializer):
 
     class Meta:
         model = Product
-        fields = "__all__"
+        # fields = "__all__"
+        exclude = ["description"]
         extra_kwargs = {
             'owner': {'read_only': 'true'},
             'sold_amount': {'read_only': 'true'},
@@ -388,7 +389,7 @@ class VoucherSerializer(ModelSerializer):
     
 
 class VoucherListManagementSerializer(ModelSerializer):
-    
+
     class Meta:
         model = Voucher
         fields = "__all__"
