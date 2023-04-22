@@ -391,7 +391,7 @@ class VoucherSerializer(ModelSerializer):
     
     def create(self, validated_data):
         validated_data.pop("creator")
-        product_ids = validated_data.pop("products")
+        products = validated_data.pop("products")
         creator = User.objects.get(pk=self.context["user"])
         try:
             voucher = Voucher(**validated_data, creator=creator)
@@ -399,7 +399,6 @@ class VoucherSerializer(ModelSerializer):
         except Exception as e:
             raise ValueError(str(e))
         else:
-            products = Product.objects.filter(pk__in=product_ids)
             voucher.products.set(products)
             voucher.refresh_from_db()
             return voucher
