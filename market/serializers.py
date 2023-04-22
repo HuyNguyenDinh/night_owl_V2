@@ -390,6 +390,7 @@ class VoucherSerializer(ModelSerializer):
         return ListProductSerializer(products, many=True).data
     
     def create(self, validated_data):
+        validated_data.pop("creator")
         creator = User.objects.get(pk=self.context["user"])
         try:
             voucher = Voucher(**validated_data, creator=creator)
