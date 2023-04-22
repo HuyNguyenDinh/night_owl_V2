@@ -2057,6 +2057,11 @@ class VoucherViewSet(viewsets.ModelViewSet):
                 & (Q(end_date__gt=timezone.now()) | Q(end_date__isnull=True))
             )
         return Voucher.objects.all()
+    
+    def get_permissions(self):
+        if self.action == "get_list_voucher_management":
+            return permissions.IsAuthenticated()
+        return permissions.AllowAny()
 
     def create(self, request, *args, **kwargs):
         can_add = False
@@ -2092,6 +2097,11 @@ class VoucherViewSet(viewsets.ModelViewSet):
     @action(methods=["get"], detail=False, url_path="available")
     def get_available_vouchers(self, request):
         return super().list(request)
+    
+    @action(method=["get"], detail=False, url_path="management-list")
+    def get_list_voucher_management(self, request):
+        queryset = Voucher.objects.filter(creator=request.user)
+        return Response(VoucherListManagementSerializer(data=queryset, many=True).data)
 
     def get_permissions(self):
         if self.action in ["list", "retrieve", "get_available_vouchers"]:

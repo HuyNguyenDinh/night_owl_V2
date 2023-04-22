@@ -385,6 +385,13 @@ class VoucherSerializer(ModelSerializer):
     def get_apply_products(self, obj):
         products = Product.objects.filter(voucher=obj)
         return ListProductSerializer(products, many=True).data
+    
+
+class VoucherListManagementSerializer(ModelSerializer):
+    
+    class Meta:
+        model = Voucher
+        fields = "__all__"
 
 
 class VoucherAvailableMultipleOrderSerializer(Serializer):
