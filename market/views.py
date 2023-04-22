@@ -2035,6 +2035,20 @@ class VoucherViewSet(viewsets.ModelViewSet):
     queryset = Voucher.objects.all()
     serializer_class = VoucherSerializer
     pagination_class = BasePagination
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.OrderingFilter,
+        filters.SearchFilter,
+    ]
+    filterset_fields = {
+        "end_date": ["gte", "lte", "gt", "lt"],
+        "start_date": ["gte", "lte", "gt", "lt"],
+        "is_percentage": ["exact"],
+        "discount": ["gte", "lte", "gt", "lt"],
+        "creator": ["exact"],
+    }
+    search_fields = ["code"]
+    ordering_fields = ["start_date", "end_date", "discount"]
 
     def get_queryset(self):
         if self.action == "get_available_vouchers":
