@@ -387,6 +387,16 @@ class VoucherSerializer(ModelSerializer):
         products = Product.objects.filter(voucher=obj)
         return ListProductSerializer(products, many=True).data
     
+    def create(self, validated_data):
+        creator = User.objects.get(pk=self.context["user"])
+        try:
+            voucher = Voucher.objects.create(**validated_data, creator=creator)
+        except Exception as e:
+            raise ValueError(str(e))
+        else:
+            return voucher
+
+    
 
 class VoucherListManagementSerializer(ModelSerializer):
 

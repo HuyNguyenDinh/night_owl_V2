@@ -2058,6 +2058,12 @@ class VoucherViewSet(viewsets.ModelViewSet):
             )
         return Voucher.objects.all()
     
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        if self.request.user:
+            context['user'] = self.request.user.id  # add user to context
+        return context
+    
     def get_permissions(self):
         if self.action in ["list", "get_available_vouchers", "retrieve"]:
             return permissions.AllowAny()
