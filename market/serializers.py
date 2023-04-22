@@ -296,7 +296,7 @@ class ProductRetrieveSerializer(ModelSerializer):
 # Get product id, name and picture
 class ProductLessInformationSerializer(ModelSerializer):
     min_price = ReadOnlyField()
-    
+
     class Meta:
         model = Product
         fields = ['id', 'name', 'picture', 'min_price']
@@ -392,10 +392,12 @@ class VoucherSerializer(ModelSerializer):
     def create(self, validated_data):
         creator = User.objects.get(pk=self.context["user"])
         try:
-            voucher = Voucher.objects.create(**validated_data, creator=creator)
+            voucher = Voucher(**validated_data, creator=creator)
+            voucher.save()
         except Exception as e:
             raise ValueError(str(e))
         else:
+            voucher.refresh_from_db()
             return voucher
 
     
