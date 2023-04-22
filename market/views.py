@@ -2101,7 +2101,7 @@ class VoucherViewSet(viewsets.ModelViewSet):
     @action(methods=["get"], detail=False, url_path="management-list")
     def get_list_voucher_management(self, request):
         queryset = Voucher.objects.filter(creator=request.user)
-        return Response(VoucherListManagementSerializer(data=queryset, many=True).data)
+        return Response(VoucherListManagementSerializer(queryset, many=True).data)
 
     def get_permissions(self):
         if self.action in ["list", "retrieve", "get_available_vouchers"]:
