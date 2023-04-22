@@ -2059,9 +2059,11 @@ class VoucherViewSet(viewsets.ModelViewSet):
         return Voucher.objects.all()
     
     def get_permissions(self):
-        if self.action == "get_list_voucher_management":
+        if self.action in ["list", "get_available_vouchers", "retrieve"]:
+            return permissions.AllowAny()
+        elif self.action == "get_list_voucher_management":
             return permissions.IsAuthenticated()
-        return permissions.AllowAny()
+        return IsCreator()
 
     def create(self, request, *args, **kwargs):
         can_add = False
