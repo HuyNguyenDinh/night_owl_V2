@@ -378,13 +378,11 @@ def update_shipping_code(order_id: int) -> bool:
             order.shipping_code = data.get("order_code")
             order.total_shipping_fee = data.get("total_fee")
             order.completed_date = shipping_order.get("expected_delivery_time")
-        else:
-            raise Exception
-        with transaction.atomic():
-            order = Order.objects.select_for_update().get(pk=order_id)
             order.can_destroy = False
             order.status = 2
             order.save()
+        else:
+            raise Exception
     except:
         return False
     else:
