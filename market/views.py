@@ -2132,7 +2132,7 @@ class VoucherViewSet(viewsets.ModelViewSet):
         ]
 
 
-class ReportViewSet(viewsets.ViewSet, generics.ListCreateAPIView):
+class ReportViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveAPIView):
     queryset = Report.objects.all()
     serializer_class = ReportSerialier
     permission_classes = [permissions.IsAuthenticated, IsReporter]
@@ -2155,7 +2155,7 @@ class ReportViewSet(viewsets.ViewSet, generics.ListCreateAPIView):
         return reports
 
     def get_serializer_class(self):
-        if self.action == "add_reply_to_report":
+        if self.action in ["add_reply_to_report", "retrieve"]:
             return ReplySerializer
         elif self.action == "list":
             return ListReportSerializer

@@ -376,7 +376,7 @@ def update_shipping_code(order_id: int) -> bool:
         if shipping_order.get("code") == 200:
             data = shipping_order.get("data")
             order.shipping_code = data.get("order_code")
-            order.total_shipping_fee = data.get("total_fee")
+            # order.total_shipping_fee = data.get("total_fee")
             order.completed_date = shipping_order.get("expected_delivery_time")
             order.can_destroy = False
             order.status = 2
