@@ -2155,7 +2155,7 @@ class ReportViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retri
         return reports
 
     def get_serializer_class(self):
-        if self.action in ["add_reply_to_report", "retrieve"]:
+        if self.action == "add_reply_to_report":
             return ReplySerializer
         elif self.action == "list":
             return ListReportSerializer
