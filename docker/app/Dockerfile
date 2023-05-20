@@ -17,11 +17,12 @@ RUN apt-get update && apt-get install -y -q --no-install-recommends \
 USER web
 # Create a directory for the source code and use it as base path
 WORKDIR /home/web/code/
-RUN chmod -R 777 /home/web/code
 # Copy the python depencencies list for pip
 COPY --chown=web:web ./requirements.txt requirements.txt
+COPY --chown=web:web . .
 # Switch to the root user temporary, to grant execution permissions.
 USER root
+RUN chmod -R 777 /home/web/code
 # Install python packages at system level
 RUN python -m pip install --no-cache-dir -r requirements.txt
 # Copy entrypoint script which waits for the db to be ready
