@@ -6,7 +6,7 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.core.exceptions import ValidationError
 from ckeditor.fields import RichTextField
 from model_bakery.recipe import Recipe
-
+import cloudinary
 
 
 class CustomUserManager(BaseUserManager):
