@@ -42,19 +42,11 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 
-def get_default_avatar():
-    cloudinary.config(
-        cloud_name=settings.CLOUDINARY_STORAGE.get("CLOUD_NAME"),
-        api_key=settings.CLOUDINARY_STORAGE.get("API_KEY"),
-        api_secret=settings.CLOUDINARY_STORAGE.get("API_SECRET")
-    )
-    return cloudinary.utils.cloudinary_url('media/upload/default-avatar_oyl4xg.png')[0]
-
 class User(AbstractUser):
     username = None
     email = models.EmailField(null=False, blank=False, unique=True)
     phone_number = models.CharField(unique=True, blank=False, null=False, max_length=50)
-    avatar = models.ImageField(upload_to="upload/%Y/%m", null=True, blank=True, default=get_default_avatar)
+    avatar = models.ImageField(upload_to="upload/%Y/%m", null=True, blank=True, default="media/upload/default-avatar_oyl4xg.png")
     email_verified = models.BooleanField(default=False)
     phone_verified = models.BooleanField(default=True)
     balance = models.DecimalField(decimal_places=2, max_digits=20, default=0.01)
