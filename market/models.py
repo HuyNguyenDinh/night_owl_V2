@@ -42,15 +42,11 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 
-def get_default_avatar_url():
-    return "media/upload/default-avatar_oyl4xg.png"
-
-
 class User(AbstractUser):
     username = None
     email = models.EmailField(null=False, blank=False, unique=True)
     phone_number = models.CharField(unique=True, blank=False, null=False, max_length=50)
-    avatar = models.ImageField(upload_to="upload/%Y/%m", null=True, blank=True, default=get_default_avatar_url)
+    avatar = models.ImageField(upload_to="upload/%Y/%m", null=True, blank=True)
     email_verified = models.BooleanField(default=False)
     phone_verified = models.BooleanField(default=True)
     balance = models.DecimalField(decimal_places=2, max_digits=20, default=0.01)
