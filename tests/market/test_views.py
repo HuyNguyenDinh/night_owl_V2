@@ -15,7 +15,7 @@
 # import os
 # from abc import ABC, abstractmethod
 #
-# cloudinary_sameple_response = {
+# cloudinary_sample_response = {
 #     "asset_id": "b5e6d2b39ba3e0869d67141ba7dba6cf",
 #     "public_id": "eneivicys42bq5f2jpn2",
 #     "version": 1570979139,

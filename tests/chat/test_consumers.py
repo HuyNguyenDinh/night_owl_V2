@@ -12,6 +12,7 @@ from unittest.mock import patch
 import json
 from channels.layers import get_channel_layer
 
+
 class TestChatAsyncConsumer(APITestCase):
 
     @patch('night_owl_market.channels_middleware.get_user')
