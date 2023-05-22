@@ -8,7 +8,7 @@ from market.models import *
 from django.core.management import call_command
 import sys
 
-cloudinary_sameple_response = {
+cloudinary_sample_response = {
     "asset_id": "b5e6d2b39ba3e0869d67141ba7dba6cf",
     "public_id": "eneivicys42bq5f2jpn2",
     "version": 1570979139,
@@ -42,11 +42,14 @@ cloudinary_sameple_response = {
          "secure_url": "https://res.cloudinary.com/demo/image/upload/c_crop,g_north,h_200,w_260/v1570979139/eneivicys42bq5f2jpn2.jpg"}]
 }
 
+
 class IAPITestCase(ITestCase):
     client: APIClient
 
+
 class IOrderViewSetTest(IAPITestCase):
     cart: CartDetail
+
     def create(self) -> None:
         print(User.objects.all())
         self.client.force_authenticate(user=self.cart.customer)
@@ -55,8 +58,9 @@ class IOrderViewSetTest(IAPITestCase):
                 self.cart.id
             ]
         }
-        response = self.client.post(f"/market/orders/", data=data,format='json')
+        response = self.client.post(f"/market/orders/", data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
 
 class OrderViewSetTest(IOrderViewSetTest, APITestCase):
     def setUp(self):
@@ -73,6 +77,7 @@ class OrderViewSetTest(IOrderViewSetTest, APITestCase):
 
     def test_create(self) -> None:
         self.create()
+
     def test_stop(self) -> None:
         pass
 
