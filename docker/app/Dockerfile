@@ -19,7 +19,7 @@ USER web
 WORKDIR /home/web/code/
 # Copy the python depencencies list for pip
 COPY --chown=web:web ./requirements.txt requirements.txt
-COPY --chown=web:web . .
+COPY --chown=web:web . /home/web/code
 # Switch to the root user temporary, to grant execution permissions.
 USER root
 RUN chmod -R 777 /home/web/code
