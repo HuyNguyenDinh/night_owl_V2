@@ -53,6 +53,7 @@ services:
     ports:
       - "8008:8008"
     volumes:
+      - night_owl_market:/home/web/code
       - night_owl_static_volume:/home/web/code/staticfiles
 #    command: bash -c "python manage.py makemigrations && python manage.py migrate"
     command: bash -c "python manage.py makemigrations && python manage.py migrate && python -m daphne -b 0.0.0.0 -p 8008 night_owl_market.asgi:application"
@@ -88,6 +89,7 @@ services:
 volumes:
   night_owl_postgres_data:
   night_owl_static_volume:
+  night_owl_market:
 networks:
   backend:
     name: night-owl-be
