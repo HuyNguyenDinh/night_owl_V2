@@ -56,7 +56,7 @@ services:
       - night_owl_market:/home/web/code
       - night_owl_static_volume:/home/web/code/staticfiles
 #    command: bash -c "python manage.py makemigrations && python manage.py migrate"
-    command: bash -c "python manage.py makemigrations && python manage.py migrate && python -m daphne -b 0.0.0.0 -p 8008 night_owl_market.asgi:application"
+    command: bash -c "python -m daphne -b 0.0.0.0 -p 8008 night_owl_market.asgi:application"
 #  app_b:
 #    <<: *default-app
 #    container_name: app_B
