@@ -2137,6 +2137,17 @@ class ReportViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retri
     serializer_class = ReportSerialier
     permission_classes = [permissions.IsAuthenticated, IsReporter]
     pagination_class = BasePagination
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.OrderingFilter,
+        filters.SearchFilter,
+    ]
+    filterset_fields = {
+        "created_date": ["gte", "lte", "gt", "lt"],
+        "status": ["exact"]
+    }
+    search_fields = ["subject", "content"]
+    ordering_fields = ["created_date"]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
