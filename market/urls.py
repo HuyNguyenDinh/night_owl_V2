@@ -17,6 +17,7 @@ router.register("voucher", views.VoucherViewSet, basename="voucher")
 router.register("chatrooms", views.RoomViewSet, basename="chat-rooms")
 router.register("messages", views.MessageViewSet, basename="messages")
 router.register("reports", views.ReportViewSet, basename="reports")
+router.register("replies", views.ReplyViewSet, basename="replies")
 router.register("option-image", views.OptionPictureViewSet, basename="option-image")
 
 urlpatterns = [
