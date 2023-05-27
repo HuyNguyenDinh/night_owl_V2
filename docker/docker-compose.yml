@@ -18,10 +18,7 @@ services:
     image: redis:latest
     networks:
       - backend
-#  redis_b:
-#    <<: *default_redis
-#  redis_c:
-#    << : *default_redis
+
   app_a: &default_app
     build: &app-build
       context: ../
@@ -31,8 +28,6 @@ services:
     depends_on:
       - db
       - redis_a
-#      - redis_b
-#      - redis_c
     env_file:
       - .env
     environment: &app_environ
@@ -46,23 +41,16 @@ services:
       - DB_PORT=5432
       - BROKER=redis_a
       - REDIS_A=redis_a
-#      - REDIS_B=redis_b
-#      - REDIS_C=redis_c
     networks:
       - backend
     ports:
       - "8008:8008"
     volumes:
-      - night_owl_market:/home/web/code
+      - night_owl_market:/home/web/code/market/migrations
+      - night_owl_chat:/home/web/code/chat/migrations
       - night_owl_static_volume:/home/web/code/staticfiles
-#    command: bash -c "python manage.py makemigrations && python manage.py migrate"
     command: bash -c "python -m daphne -b 0.0.0.0 -p 8008 night_owl_market.asgi:application"
-#  app_b:
-#    <<: *default-app
-#    container_name: app_B
-#  app_c:
-#    <<: *default-app
-#    container_name: app_C
+  
   celery_worker_send_mail: &default-worker
     build: *app-build
     container_name: celery_worker_send_mail

@@ -2201,6 +2201,17 @@ class ReportViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retri
         return Response(
             {"message": "something wrong"}, status=status.HTTP_400_BAD_REQUEST
         )
+    
+
+class ReplyViewSet(viewsets.ModelViewSet):
+    query_set = Reply.objects.all()
+    serializer_class = ReplySerializer
+    permission_classes = [permissions.IsAuthenticated, IsCreator]
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['user'] = self.request.user  # add user to context
+        return context
 
 
 class MomoPayedView(APIView):

@@ -672,6 +672,11 @@ class ReplySerializer(ModelSerializer):
             "report": {'read_only': 'true'}
         }
 
+    def create(self, validated_data):
+        user = self.context['user']
+        reply = Reply.objects.create(**validated_data, creator=user)
+        return reply
+
 class ReportSerialier(ModelSerializer):
     reporter = UserLessInformationSerializer(read_only=True)
     reply_set = ReplySerializer(many=True, read_only=True)
