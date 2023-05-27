@@ -78,6 +78,7 @@ volumes:
   night_owl_postgres_data:
   night_owl_static_volume:
   night_owl_market:
+  night_owl_chat:
 networks:
   backend:
     name: night-owl-be
