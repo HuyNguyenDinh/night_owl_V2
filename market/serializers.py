@@ -689,6 +689,11 @@ class ReportSerialier(ModelSerializer):
             "created_date": {'read_only': 'true'}
         }
 
+    def create(self, validated_data):
+        user = self.context['user']
+        report = Report.objects.create(**validated_data, reporter=user)
+        return report
+
 class ListReportSerializer(ModelSerializer):
     reporter = UserLessInformationSerializer(read_only=True)
 

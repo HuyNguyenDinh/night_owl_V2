@@ -2171,6 +2171,11 @@ class ReportViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retri
         elif self.action == "list":
             return ListReportSerializer
         return ReportSerialier
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['user'] = self.request.user  # add user to context
+        return context
 
     @action(methods=["post"], detail=True, url_path="add-reply")
     def add_reply_to_report(self, request, pk):
