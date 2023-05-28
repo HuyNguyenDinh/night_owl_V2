@@ -668,8 +668,7 @@ class ReplySerializer(ModelSerializer):
         model = Reply
         fields = "__all__"
         extra_kwargs = {
-            "created_date": {'read_only': 'true'},
-            "report": {'read_only': 'true'}
+            "created_date": {'read_only': 'true'}
         }
 
     def create(self, validated_data):
@@ -688,7 +687,7 @@ class ReportSerialier(ModelSerializer):
             "status": {'read_only': 'true'},
             "created_date": {'read_only': 'true'}
         }
-        
+
 
 class ListReportSerializer(ModelSerializer):
     reporter = UserLessInformationSerializer(read_only=True)
