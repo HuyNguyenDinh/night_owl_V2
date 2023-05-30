@@ -617,10 +617,10 @@ class ProductViewSet(viewsets.ModelViewSet):
         "=name__icontains",
         "@name__icontains",
         "^name__icontains",
-        "=owner__first_name__icontains",
-        "@owner__first_name__icontains",
-        "=owner__last_name__icontains",
-        "@owner__last_name__icontains"
+        # "=owner__first_name__icontains",
+        # "@owner__first_name__icontains",
+        # "=owner__last_name__icontains",
+        # "@owner__last_name__icontains"
     ]
     ordering_fields = ["sold_amount"]
 
