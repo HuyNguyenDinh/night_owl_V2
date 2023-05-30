@@ -606,17 +606,14 @@ class ProductViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
     filter_backends = [
         DjangoFilterBackend,
-        filters.OrderingFilter,
-        filters.SearchFilter,
+        filters.OrderingFilter
     ]
     filterset_fields = {
         "sold_amount": ["gte", "lte", "gt", "lt"],
         "owner": ["exact"],
         "name": ["exact", "icontains", "contains"]
     }
-    search_fields = [
-        "@name"
-    ]
+
     ordering_fields = ["sold_amount"]
 
     def get_parsers(self):
@@ -656,9 +653,12 @@ class ProductViewSet(viewsets.ModelViewSet):
                 pass
             else:
                 products = products.filter(option__isnull=False).distinct()
-        cate_id = self.request.query_params.get("category_id")
-        if cate_id is not None:
+        cate_id = self.request.query_params.get("category_id", "")
+        search = self.request.query_params.get("search", "")
+        if cate_id:
             products = products.filter(categories=cate_id)
+        if search:
+            products = products.filter(name__unaccent__icontains=search)
         return products
 
     def get_serializer_class(self):
