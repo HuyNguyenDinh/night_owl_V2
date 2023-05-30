@@ -613,7 +613,15 @@ class ProductViewSet(viewsets.ModelViewSet):
         "sold_amount": ["gte", "lte", "gt", "lt"],
         "owner": ["exact"]
     }
-    search_fields = ["name", "owner__first_name", "owner__last_name"]
+    search_fields = [
+        "=name",
+        "@name",
+        "^name",
+        "=owner__first_name",
+        "@owner__first_name",
+        "=owner__last_name",
+        "@owner__last_name"
+    ]
     ordering_fields = ["sold_amount"]
 
     def get_parsers(self):
