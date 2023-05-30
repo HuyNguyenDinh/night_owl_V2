@@ -1525,7 +1525,7 @@ class OrderViewSet(
                         CartDetail.objects.filter(id__in=list(set(odds))).delete()
                         subject = "Bạn có 1 đơn hàng mới chờ xác nhận"
                         content = f"Đơn hàng {i.id} giá trị {i.bill.value}vnđ đang chờ bạn xác nhận để được vận chuyển"
-                        send_email_task.delay(i.customer.email, subject, content)
+                        send_email_task.delay(i.store.email, subject, content)
                         #### WebSocket ####
                         try:
                             channel = i.store.client
