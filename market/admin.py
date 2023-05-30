@@ -22,10 +22,6 @@ class OptionForm(forms.ModelForm):
         fields = "__all__"
 
 
-class UserAdmin(admin.ModelAdmin):
-    search_fields = ["id", "email", "phone_number"]
-
-
 class PictureInLine(admin.TabularInline):
     model = Picture
     pk_name = "product_option"
@@ -78,9 +74,17 @@ class ReportForm(forms.ModelForm):
         fields = "__all__"
 
 
+class ReplyInlineFormSet(forms.BaseInlineFormSet):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for form in self.forms:
+            form.fields['creator'].required = False  # Set the field as not required
+
+
 class ReplyInline(admin.TabularInline):
     model = Reply
     pk_name = "report"
+    formset = ReplyInlineFormSet
 
 
 class ReportAdmin(admin.ModelAdmin):
