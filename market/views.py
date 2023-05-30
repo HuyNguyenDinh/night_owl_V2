@@ -614,13 +614,13 @@ class ProductViewSet(viewsets.ModelViewSet):
         "owner": ["exact"]
     }
     search_fields = [
-        "=name",
-        "@name",
-        "^name",
-        "=owner__first_name",
-        "@owner__first_name",
-        "=owner__last_name",
-        "@owner__last_name"
+        "=name__icontains",
+        "@name__icontains",
+        "^name__icontains",
+        "=owner__first_name__icontains",
+        "@owner__first_name__icontains",
+        "=owner__last_name__icontains",
+        "@owner__last_name__icontains"
     ]
     ordering_fields = ["sold_amount"]
 
