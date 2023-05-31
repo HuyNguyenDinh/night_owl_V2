@@ -1319,7 +1319,9 @@ class OrderViewSet(
     ordering_fields = ["completed_date", "order_date", "bill__value"]
 
     def get_permissions(self):
-        if self.action in ["accept_order", "delete", "cancel_order"]:
+        if self.action == "cancel_order":
+            return [IsOrderRelate(), ]
+        elif self.action in ["accept_order", "delete", "cancel_order"]:
             return [
                 StoreOwnerPermission(),
             ]
@@ -1631,28 +1633,52 @@ class OrderViewSet(
             )
         else:
             if cancel_order(order.id):
-                subject = "Đơn hàng {0} của bạn đã bị hủy".format(order.id)
-                content = """Người bán đã hủy đơn hàng {0} của bạn, nếu bạn sử dụng phương thức thanh toán trực tuyến bạn vui lòng 
-                kiểm tra lại tài khoản đã thanh toán {1}vnđ xem đã được hệ thống hoàn tiền lại hay chưa.
-                Nếu chưa bạn vui lòng gửi report để được hỗ trợ sớm nhất.""".format(
-                    order.id, order.bill.value
-                )
-                #### WebSocket ####
-                try:
-                    channel = order.customer.client
-                    message = {
-                        "status": order.status,
-                        "order_id": order.id,
-                        "subject": subject,
-                        "content": content,
-                    }
-                    send_message_to_channel.delay(
-                        channel_name=channel.channel_name, message=message
+                if request.user == order.store:
+                    subject = "Đơn hàng {0} của bạn đã bị hủy".format(order.id)
+                    content = """Người bán đã hủy đơn hàng {0} của bạn, nếu bạn sử dụng phương thức thanh toán trực tuyến bạn vui lòng 
+                    kiểm tra lại tài khoản đã thanh toán {1}vnđ xem đã được hệ thống hoàn tiền lại hay chưa.
+                    Nếu chưa bạn vui lòng gửi report để được hỗ trợ sớm nhất.""".format(
+                        order.id, order.bill.value
                     )
-                except:
-                    pass
-                ########
-                send_email_task.delay(order.customer.email, subject, content)
+                    #### WebSocket ####
+                    try:
+                        channel = order.customer.client
+                        message = {
+                            "status": order.status,
+                            "order_id": order.id,
+                            "subject": subject,
+                            "content": content,
+                        }
+                        send_message_to_channel.delay(
+                            channel_name=channel.channel_name, message=message
+                        )
+                    except:
+                        pass
+                    ########
+                    send_email_task.delay(order.customer.email, subject, content)
+                else:
+                    subject = "Bạn đã hủy đơn hàng {0}".format(order.id)
+                    content = """Bạn đã hủy đơn hàng {0}, nếu bạn sử dụng phương thức thanh toán trực tuyến bạn vui lòng 
+                    kiểm tra lại tài khoản đã thanh toán {1}vnđ xem đã được hệ thống hoàn tiền lại hay chưa.
+                    Nếu chưa bạn vui lòng gửi report để được hỗ trợ sớm nhất.""".format(
+                        order.id, order.bill.value
+                    )
+                    #### WebSocket ####
+                    try:
+                        channel = order.store.client
+                        message = {
+                            "status": order.status,
+                            "order_id": order.id,
+                            "subject": subject,
+                            "content": content,
+                        }
+                        send_message_to_channel.delay(
+                            channel_name=channel.channel_name, message=message
+                        )
+                    except:
+                        pass
+                    ########
+                    send_email_task.delay(order.store.email, subject, content)
                 # y = Thread(target=send_sms, args=(order.customer.phone_number, content))
                 # y.start()
                 return Response(
