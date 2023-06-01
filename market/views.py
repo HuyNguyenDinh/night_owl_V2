@@ -611,7 +611,8 @@ class ProductViewSet(viewsets.ModelViewSet):
     filterset_fields = {
         "sold_amount": ["gte", "lte", "gt", "lt"],
         "owner": ["exact"],
-        "name": ["exact", "icontains", "contains"]
+        "name": ["exact", "icontains", "contains"],
+        "voucher": ["exact"]
     }
 
     ordering_fields = ["sold_amount"]
