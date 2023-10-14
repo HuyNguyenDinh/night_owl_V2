@@ -10,7 +10,7 @@ import pymongo
 from pymongo.server_api import ServerApi
 from datetime import datetime
 
-client = pymongo.MongoClient("mongodb+srv://mongodb:0937461321Huy@nightowl.icksujp.mongodb.net/?retryWrites=true&w=majority", server_api=ServerApi('1'))
+client = pymongo.MongoClient("mongodb+srv://mongodb:password@nightowl.icksujp.mongodb.net/?retryWrites=true&w=majority", server_api=ServerApi('1'))
 db_payment = client.payment
 
 # parameters send to MoMo get get payUrl
