@@ -8,7 +8,7 @@ import datetime
 import random
 import string
 
-client = pymongo.MongoClient("mongodb+srv://huy:0937461321Huy@nightowl.wnrttr4.mongodb.net/?retryWrites=true&w=majority", server_api=ServerApi('1'))
+client = pymongo.MongoClient("mongodb+srv://huy:password@nightowl.wnrttr4.mongodb.net/?retryWrites=true&w=majority", server_api=ServerApi('1'))
 db_payment = client.payment
 db_code = client.code
 
